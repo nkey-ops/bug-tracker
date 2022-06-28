@@ -1,7 +1,7 @@
 package com.bluesky.bugtraker.view.controller;
 
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.UserDto;
+import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
@@ -26,7 +26,7 @@ public class UserController {
     @GetMapping("/{id}")
     public EntityModel<UserResponseModel> getUser(@PathVariable String id) {
         UserResponseModel responseModel =
-                modelMapper.map(userService.getUser(id), UserResponseModel.class);
+                modelMapper.map(userService.getUserById(id), UserResponseModel.class);
 
         return  modelAssembler.toModel(responseModel);
     }

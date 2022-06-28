@@ -1,4 +1,4 @@
-package com.bluesky.bugtraker.shared;
+package com.bluesky.bugtraker.shared.dto;
 
 
 import lombok.Getter;
