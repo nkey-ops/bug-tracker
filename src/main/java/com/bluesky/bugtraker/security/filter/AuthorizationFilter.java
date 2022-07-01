@@ -1,6 +1,11 @@
 package com.bluesky.bugtraker.security.filter;
 
+import com.bluesky.bugtraker.exceptions.ErrorMessages;
+import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
+import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.security.SecurityConstants;
+import com.bluesky.bugtraker.security.UserPrincipal;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,12 +17,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
+    private final UserRepository userRepository;
+    public AuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
+        this.userRepository = userRepository;
     }
 
 
@@ -40,12 +46,15 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+    private UsernamePasswordAuthenticationToken
+                        getAuthentication(HttpServletRequest request) {
+
         String token = request.getHeader(SecurityConstants.HEADER_STRING);
 
         if (token == null) return null;
 
-        token = token.replaceFirst(SecurityConstants.TOKEN_PREFIX, "");
+        token = token.replaceFirst(
+                SecurityConstants.TOKEN_PREFIX, "");
 
         String user = Jwts.parser()
                 .setSigningKey(SecurityConstants.getTokenSecret())
@@ -56,7 +65,14 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
         if (user == null)
             return null;
-        else
-            return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+        else{
+            UserEntity userEntity = userRepository.findByEmail(user)
+                    .orElseThrow(() ->  new UserServiceException(ErrorMessages.NO_RECORD_FOUND, user));
+
+            UserPrincipal principal = new UserPrincipal(userEntity);
+
+            return new UsernamePasswordAuthenticationToken(
+                    user, null, principal.getAuthorities() );
+        }
     }
 }

@@ -10,6 +10,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class WebSecurity {
 
+    private CustomDsl customDsl;
+    public WebSecurity(CustomDsl customDsl) {
+        this.customDsl = customDsl;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -20,8 +25,9 @@ public class WebSecurity {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
+                .antMatchers(HttpMethod.DELETE, "/users/*").hasRole("ADMIN")
                 .anyRequest().authenticated()
-                .and().apply(CustomDsl.customDsl());
+                .and().apply(customDsl);
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

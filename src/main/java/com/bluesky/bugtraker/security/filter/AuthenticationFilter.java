@@ -2,6 +2,7 @@ package com.bluesky.bugtraker.security.filter;
 
 import com.bluesky.bugtraker.context.SpringApplicationContext;
 import com.bluesky.bugtraker.security.SecurityConstants;
+import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.impl.UserServiceImp;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.request.UserLoginRequestModel;
@@ -55,7 +56,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) {
 
-        String userName = ((User) authResult.getPrincipal()).getUsername();
+        String userName = ((UserPrincipal) authResult.getPrincipal()).getUsername();
 
         String token = Jwts.builder()
                 .setSubject(userName)
