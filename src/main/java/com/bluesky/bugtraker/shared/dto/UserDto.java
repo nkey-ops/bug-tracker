@@ -4,15 +4,20 @@ package com.bluesky.bugtraker.shared.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
-public class UserDto {
+public class UserDto implements Serializable {
+    private Long id;
     private String publicId;
     private String userName;
     private String email;
     private String password;
+
+    private Set<ProjectDto> userProjects;
 
 
     @Override

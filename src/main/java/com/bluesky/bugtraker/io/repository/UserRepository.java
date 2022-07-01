@@ -1,6 +1,7 @@
 package com.bluesky.bugtraker.io.repository;
 
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +17,5 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     boolean existsByPublicId(String id);
 
     void deleteByPublicId(String id);
+
 }

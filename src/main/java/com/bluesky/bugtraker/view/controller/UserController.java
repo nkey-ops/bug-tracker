@@ -5,9 +5,11 @@ import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +22,8 @@ public class UserController {
     public UserController(UserService userService, UserModelAssembler modelAssembler) {
         this.userService = userService;
         this.modelAssembler = modelAssembler;
+
+        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
 
@@ -61,11 +65,11 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable String id) {
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
 
         userService.deleteUser(id);
 
-        return "User has been successfully deleted";
+        return ResponseEntity.noContent().build();
     }
 }
 
