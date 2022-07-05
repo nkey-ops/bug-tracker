@@ -1,6 +1,6 @@
 package com.bluesky.bugtraker.io.entity;
 
-import com.bluesky.bugtraker.io.entity.authorizationEntity.RoleEntity;
+import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,6 @@ import javax.persistence.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -48,7 +47,6 @@ public class UserEntity implements Serializable {
     @OneToMany(fetch = FetchType.EAGER,
             mappedBy = "reportedBy",
             cascade = CascadeType.PERSIST)
-// TODO change maybe to LinkedList
     private Set<BugEntity> reportedBugs;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -67,7 +65,7 @@ public class UserEntity implements Serializable {
 
     @ManyToMany(fetch =  FetchType.EAGER)
     @JoinTable(name = "users_roles")
-    private List<RoleEntity> roles;
+    private Set<RoleEntity> roles;
 
     @Override
     public boolean equals(Object o) {

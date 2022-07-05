@@ -10,6 +10,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +30,7 @@ public class UserController {
     }
 
 
+    @PostAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #id == principal.id")
     @GetMapping("/{id}")
     public EntityModel<UserResponseModel> getUser(@PathVariable String id) {
         UserResponseModel responseModel =
@@ -64,6 +68,9 @@ public class UserController {
     }
 
 
+
+//    @Secured(value = {"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
+   @PreAuthorize("hasAnyRole('ADMIN, SUPER_ADMIN') or #id == principal.id")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
 

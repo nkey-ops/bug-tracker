@@ -4,6 +4,7 @@ package com.bluesky.bugtraker.shared.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
@@ -11,6 +12,8 @@ import java.util.Set;
 @Getter
 @Setter
 public class UserDto implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 2882079079986131255L;
     private Long id;
     private String publicId;
     private String userName;

@@ -1,7 +1,7 @@
-package com.bluesky.bugtraker.io.entity.authorizationEntity;
+package com.bluesky.bugtraker.io.entity.authorization;
 
 import com.bluesky.bugtraker.io.entity.UserEntity;
-import com.bluesky.bugtraker.io.entity.authorizationEntity.AuthorityEntity;
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,8 +26,9 @@ public class RoleEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 30, unique = true)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "name", nullable = false, length = 30, unique = true)
+    private Role role;
 
     @ManyToMany(mappedBy = "roles")
     private List<UserEntity> users =new ArrayList<>();
@@ -41,7 +42,7 @@ public class RoleEntity implements Serializable {
     public RoleEntity() {
     }
 
-    public RoleEntity(String name) {
-        this.name = name;
+    public RoleEntity(Role role) {
+        this.role = role;
     }
 }

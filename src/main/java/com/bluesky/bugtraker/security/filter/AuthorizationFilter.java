@@ -67,12 +67,14 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             return null;
         else{
             UserEntity userEntity = userRepository.findByEmail(user)
-                    .orElseThrow(() ->  new UserServiceException(ErrorMessages.NO_RECORD_FOUND, user));
+                    .orElseGet(null);
+
+            if(userEntity == null) return null;
 
             UserPrincipal principal = new UserPrincipal(userEntity);
 
             return new UsernamePasswordAuthenticationToken(
-                    user, null, principal.getAuthorities() );
+                            principal, null, principal.getAuthorities() );
         }
     }
 }

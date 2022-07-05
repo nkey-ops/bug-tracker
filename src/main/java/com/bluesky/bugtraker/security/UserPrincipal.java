@@ -1,37 +1,37 @@
 package com.bluesky.bugtraker.security;
 
-import com.bluesky.bugtraker.io.entity.authorizationEntity.RoleEntity;
+import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class UserPrincipal implements UserDetails {
     @Serial
     private static final long serialVersionUID = 8772880620156304062L;
     private final UserEntity userEntity;
+    private  final  String id;
 
     public UserPrincipal(UserEntity userEntity) {
         this.userEntity = userEntity;
+        id = userEntity.getPublicId();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
-        List<RoleEntity> roles = userEntity.getRoles();
+        Set<RoleEntity> roles = userEntity.getRoles();
         if(roles == null) return grantedAuthorities;
 
         roles.forEach(role ->{
-                grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+                grantedAuthorities.add(new SimpleGrantedAuthority(role.getRole().name()));
 
                 role.getAuthorities().forEach(authority ->
-                        grantedAuthorities.add(new SimpleGrantedAuthority(authority.getName())));
+                        grantedAuthorities.add(new SimpleGrantedAuthority(authority.getAuthority().name())));
         });
 
         return grantedAuthorities;
@@ -65,5 +65,10 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+
+    public String getId() {
+        return id;
     }
 }

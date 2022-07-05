@@ -3,12 +3,8 @@ package com.bluesky.bugtraker.shared.bugstatus;
 /**
  * Bug priority refers to how urgently a bug needs to be fixed and eliminated.
  *
- *
  */
 public enum Priority {
-    /**
-     * Bug can be fixed at a later date. Other, more serious bugs take priority.
-     */
     /**
      * Bug can be fixed at a later date. Other, more serious bugs take priority.
      */

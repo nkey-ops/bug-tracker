@@ -28,7 +28,9 @@ public class ProjectEntity implements Serializable {
     @JoinColumn(nullable = false)
     private UserEntity createdBy;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER,
+                cascade = CascadeType.REMOVE,
+                mappedBy = "project")
     private Set<BugEntity> bugs;
 
 

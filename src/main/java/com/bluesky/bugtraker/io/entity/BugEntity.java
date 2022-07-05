@@ -11,10 +11,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity(name = "Bug")
 @Table(name = "bugs")
@@ -32,12 +29,18 @@ public class BugEntity implements Serializable {
     @Column(nullable = false, length = 30, unique = true)
     private String publicId;
 
+    @Column(nullable = false)
+    private String shortDescription;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Status status;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Severity severity;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Priority priority;
 
@@ -45,11 +48,14 @@ public class BugEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportedTime;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(nullable = false)
     private UserEntity reportedBy;
 
-    @ManyToMany(mappedBy = "workingOnBugs")
-    private List<UserEntity> bugFixers = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private ProjectEntity project;
+
 
     @Lob
     @Column(nullable = false)
@@ -59,6 +65,12 @@ public class BugEntity implements Serializable {
     @Column(nullable = false)
     private String erroneousProgramBehaviour;
 
+    @Lob
+    @Column
+    private  String howToSolve;
+
+    @ManyToMany(mappedBy = "workingOnBugs")
+    private Set<UserEntity> bugFixers;
 
     @Override
     public boolean equals(Object o) {

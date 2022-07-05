@@ -17,7 +17,12 @@ public class BugResponseModel {
     private Severity severity;
     private Priority priority;
     private Date reportedTime;
-    private UserDto reportedBy;
+
+    private String shortDescription;
+    private String howToReproduce;
+    private String erroneousProgramBehaviour;
+    private String howToSolve = "Solution is not found";
+    private UserResponseModel reportedBy;
 
     @Override
     public boolean equals(Object o) {

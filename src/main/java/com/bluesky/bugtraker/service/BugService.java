@@ -2,12 +2,16 @@ package com.bluesky.bugtraker.service;
 
 
 import com.bluesky.bugtraker.shared.dto.BugDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
-import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 public interface BugService {
-    BugDto getBug(String id);
-    BugDto create(BugDto bugDto, UserDto reporter);
-    BugDto create(BugDto bugDto, String userId);
+    BugDto getBugFromProject(String userId, String projectName,  String bugId);
+    BugDto createBug(String userId,  String projectName, BugDto map, String reporterId);
 
+    BugDto  updateBug(String userId, String projectName, String bugId, BugDto map);
+
+    void deleteBug(String userId, String projectName, String bugId);
+
+    Set<BugDto> getBugsFromProject(String userId, String projectName);
 }

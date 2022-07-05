@@ -1,11 +1,11 @@
 package com.bluesky.bugtraker.service;
 
 
-import com.bluesky.bugtraker.io.entity.authorizationEntity.RoleEntity;
+import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.List;
+import java.util.Set;
 
 public interface UserService extends UserDetailsService {
 
@@ -16,5 +16,5 @@ public interface UserService extends UserDetailsService {
 
     UserDto getUserByEmail(String userName);
 
-    UserDto createAdminUser(String email, String password, List<RoleEntity> roles);
+    UserDto createAdminUser(String email, String password, Set<RoleEntity> roles);
 }

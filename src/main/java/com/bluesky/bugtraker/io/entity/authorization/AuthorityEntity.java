@@ -1,5 +1,6 @@
-package com.bluesky.bugtraker.io.entity.authorizationEntity;
+package com.bluesky.bugtraker.io.entity.authorization;
 
+import com.bluesky.bugtraker.shared.authorizationenum.Authority;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,18 +22,18 @@ public class AuthorityEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length =  30, unique = true)
-    private String  name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "name", nullable = false, length =  30, unique = true)
+    private Authority authority;
 
     @ManyToMany(mappedBy = "authorities")
     private Collection<RoleEntity> roles;
 
-    public AuthorityEntity(String name) {
-        this.name = name;
+    public AuthorityEntity(Authority name) {
+        this.authority = name;
     }
 
     public AuthorityEntity() {
-
     }
 
     public Long getId() {
