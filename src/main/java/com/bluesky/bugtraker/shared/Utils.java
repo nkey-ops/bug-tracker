@@ -13,6 +13,10 @@ public class Utils {
     public String generateUserId(int length){
         return  generateRandomString(length);
     }
+    public String generateProjectId(int length) {
+        return  generateRandomString(length);
+    }
+
     public String generateBugId(int length){
         return  generateRandomString(length);
     }

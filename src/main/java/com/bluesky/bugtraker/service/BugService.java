@@ -13,5 +13,5 @@ public interface BugService {
 
     void deleteBug(String userId, String projectName, String bugId);
 
-    Set<BugDto> getBugsFromProject(String userId, String projectName);
+    Set<BugDto> getBugsFromProject(String userId, String projectName, int page, int limit);
 }

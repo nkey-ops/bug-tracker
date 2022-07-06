@@ -2,17 +2,23 @@ package com.bluesky.bugtraker.service.impl;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.BugServiceException;
 import com.bluesky.bugtraker.io.entity.BugEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.repository.BugRepository;
 import com.bluesky.bugtraker.service.BugService;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.dto.BugDto;
+import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,8 +66,16 @@ public class BugServiceImp implements BugService {
     }
 
     @Override
-    public Set<BugDto> getBugsFromProject(String userId, String projectName) {
-        return projectService.getProject(userId, projectName).getBugs();
+    public Set<BugDto> getBugsFromProject(String userId, String projectName, int page, int limit) {
+        if(page-- < 0 || limit < 1) throw new IllegalArgumentException();
+
+        ProjectEntity projectEntity = modelMapper.map(projectService.getProject(userId, projectName),
+                                                        ProjectEntity.class);
+
+        Page<BugEntity> entityPages = bugRepo.findAllByProject(projectEntity, PageRequest.of(page, limit));
+        List<BugEntity> content = entityPages.getContent();
+        return modelMapper.map(content, new TypeToken<Set<BugDto>>() {}.getType());
+
     }
 
     @Override

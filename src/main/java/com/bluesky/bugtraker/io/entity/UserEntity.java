@@ -1,6 +1,8 @@
 package com.bluesky.bugtraker.io.entity;
 
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,7 +57,7 @@ public class UserEntity implements Serializable {
 
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.REMOVE,
-            mappedBy = "createdBy")
+            mappedBy = "creator")
     private Set<ProjectEntity> projects;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -67,17 +69,18 @@ public class UserEntity implements Serializable {
     @JoinTable(name = "users_roles")
     private Set<RoleEntity> roles;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return id.equals(that.id) && publicId.equals(that.publicId) && email.equals(that.email) && encryptedPassword.equals(that.encryptedPassword) && userName.equals(that.userName) && Objects.equals(emailVerificationToken, that.emailVerificationToken) && emailVerificationStatus.equals(that.emailVerificationStatus);
+        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(userName, that.userName) && Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, email, encryptedPassword, userName, emailVerificationToken, emailVerificationStatus);
+        return Objects.hash(id, publicId, userName, email);
     }
 
     @Override

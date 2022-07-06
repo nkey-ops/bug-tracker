@@ -26,7 +26,6 @@ public class WebSecurity {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
-//                .antMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                 .anyRequest().authenticated()
                 .and().apply(customDsl);
 

@@ -4,24 +4,36 @@ import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
 import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Date;
 import java.util.Objects;
 
 @Getter @Setter
-public class BugResponseModel {
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "publicId")
+public class BugResponseModel extends RepresentationModel<BugResponseModel> {
     private String publicId;
     private Status status;
     private Severity severity;
     private Priority priority;
     private Date reportedTime;
+    @JsonIgnore
+    private ProjectResponseModel project;
 
     private String shortDescription;
     private String howToReproduce;
     private String erroneousProgramBehaviour;
     private String howToSolve = "Solution is not found";
+
+    @JsonIgnore
     private UserResponseModel reportedBy;
 
     @Override

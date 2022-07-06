@@ -13,8 +13,9 @@ public class UserPrincipal implements UserDetails {
     @Serial
     private static final long serialVersionUID = 8772880620156304062L;
     private final UserEntity userEntity;
-    private  final  String id;
 
+
+    private  final  String id;
     public UserPrincipal(UserEntity userEntity) {
         this.userEntity = userEntity;
         id = userEntity.getPublicId();
@@ -70,5 +71,19 @@ public class UserPrincipal implements UserDetails {
 
     public String getId() {
         return id;
+    }
+
+    public UserEntity getUserEntity() {
+        return userEntity;
+    }
+
+
+
+    public boolean isSubscribedTo(String userId, String projectName){
+        return  userEntity.getSubscribedToProjects()
+                .stream()
+                .anyMatch(project ->
+                        project.getCreator().getPublicId().equals(userId)
+                        && project.getName().equals(projectName));
     }
 }

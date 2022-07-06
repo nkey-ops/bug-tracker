@@ -20,7 +20,7 @@ public class UserDto implements Serializable {
     private String email;
     private String password;
 
-    private Set<ProjectDto> userProjects;
+    private Set<ProjectDto> projects;
 
 
     @Override

@@ -4,6 +4,8 @@ package com.bluesky.bugtraker.io.entity;
 import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

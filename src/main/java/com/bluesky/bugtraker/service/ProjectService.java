@@ -14,5 +14,5 @@ public interface ProjectService{
 
     void deleteProject(String userId, String projectName);
 
-    Set<ProjectDto> getProjects(String userId);
+    Set<ProjectDto> getProjects(String userId, int pages, int limit);
 }

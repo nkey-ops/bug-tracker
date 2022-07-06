@@ -1,9 +1,16 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+
 
 @Getter @Setter
 public class UserResponseModel {
@@ -11,6 +18,8 @@ public class UserResponseModel {
     private String userName;
     private String email;
 
+    @JsonIgnore
+    private Set<ProjectResponseModel> projects = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
