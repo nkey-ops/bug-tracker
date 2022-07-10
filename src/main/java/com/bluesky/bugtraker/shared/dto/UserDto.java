@@ -1,19 +1,28 @@
 package com.bluesky.bugtraker.shared.dto;
 
 
+import com.bluesky.bugtraker.io.entity.BugEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
+
 @Getter
 @Setter
 public class UserDto implements Serializable {
     @Serial
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private static final long serialVersionUID = 2882079079986131255L;
+
     private Long id;
     private String publicId;
     private String userName;
@@ -21,6 +30,10 @@ public class UserDto implements Serializable {
     private String password;
 
     private Set<ProjectDto> projects;
+    private Set<BugDto> reportedBugs;
+    private Set<BugEntity> workingOnBugs;
+    private Set<ProjectEntity> subscribedToProjects;
+
 
 
     @Override

@@ -63,7 +63,7 @@ public class InitialUserSetup {
         authorities.addAll(Arrays.asList(creatAdminAuthority, deleteAdminAuthority));
         RoleEntity superAdminRole = createRole(ROLE_SUPER_ADMIN, authorities);
 
-        userService.createAdminUser(superAdminUserEmail, superAdminUserPassword, Set.of(superAdminRole));
+//        userService.createAdminUser(superAdminUserEmail, superAdminUserPassword, Set.of(superAdminRole));
     }
 
     //    TODO try to use streams

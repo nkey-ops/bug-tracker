@@ -1,13 +1,15 @@
 package com.bluesky.bugtraker.security;
 
-import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserPrincipal implements UserDetails {
     @Serial

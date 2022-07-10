@@ -3,8 +3,6 @@ package com.bluesky.bugtraker.view.model.request;
 import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
-import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import lombok.Getter;
 import lombok.Setter;
 

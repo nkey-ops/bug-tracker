@@ -1,7 +1,5 @@
 package com.bluesky.bugtraker.security.filter;
 
-import com.bluesky.bugtraker.exceptions.ErrorMessages;
-import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.security.SecurityConstants;
@@ -67,7 +65,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             return null;
         else{
             UserEntity userEntity = userRepository.findByEmail(user)
-                    .orElseGet(null);
+                    .orElse(null);
 
             if(userEntity == null) return null;
 

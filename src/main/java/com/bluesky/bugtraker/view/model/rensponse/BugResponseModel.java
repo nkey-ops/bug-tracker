@@ -3,8 +3,6 @@ package com.bluesky.bugtraker.view.model.rensponse;
 import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
-import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;

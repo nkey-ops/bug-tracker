@@ -1,9 +1,9 @@
 package com.bluesky.bugtraker.shared.dto;
 
-import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,12 +13,13 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
 public class BugDto implements Serializable {
     @Serial
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private static final long serialVersionUID = 5211376248151308747L;
 
     private Long id;

@@ -9,7 +9,6 @@ import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.dto.BugDto;
-import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -67,38 +66,39 @@ public class BugServiceImp implements BugService {
 
     @Override
     public Set<BugDto> getBugsFromProject(String userId, String projectName, int page, int limit) {
-        if(page-- < 0 || limit < 1) throw new IllegalArgumentException();
+        if (page-- < 0 || limit < 1) throw new IllegalArgumentException();
 
         ProjectEntity projectEntity = modelMapper.map(projectService.getProject(userId, projectName),
-                                                        ProjectEntity.class);
+                ProjectEntity.class);
 
         Page<BugEntity> entityPages = bugRepo.findAllByProject(projectEntity, PageRequest.of(page, limit));
         List<BugEntity> content = entityPages.getContent();
-        return modelMapper.map(content, new TypeToken<Set<BugDto>>() {}.getType());
+        return modelMapper.map(content, new TypeToken<Set<BugDto>>() {
+        }.getType());
 
     }
 
     @Override
     public BugDto createBug(String userId, String projectName, BugDto bugDto, String reporterId) {
-        if(getBugFromProjectOptional(userId, projectName, bugDto.getPublicId()).isPresent())
-                throw new BugServiceException(RECORD_ALREADY_EXISTS, bugDto.getPublicId());
+        if (getBugFromProjectOptional(userId, projectName, bugDto.getPublicId()).isPresent())
+            throw new BugServiceException(RECORD_ALREADY_EXISTS, bugDto.getPublicId());
 
         bugDto.setPublicId(utils.generateBugId(30));
         bugDto.setReportedBy(userService.getUserById(reporterId));
-        bugDto.setProject(projectService.getProject(userId, projectName));
 
-        BugEntity bugEntity = modelMapper.map(bugDto, BugEntity.class);
+        projectService.addBug(userId, projectName, bugDto);
 
-    return  modelMapper.map(bugRepo.save(bugEntity), BugDto.class);
+        return getBugFromProject(userId, projectName, bugDto.getPublicId());
     }
+
 
     @Override
     public BugDto updateBug(String userId, String projectName, String bugId, BugDto bugDto) {
         BugDto oldBugDto = getBugFromProject(userId, projectName, bugId);
 
-        modelMapper.map(oldBugDto, bugDto);
+        modelMapper.map(bugDto, oldBugDto);
 
-        BugEntity savedEntity = bugRepo.save(modelMapper.map(bugDto, BugEntity.class));
+        BugEntity savedEntity = bugRepo.save(modelMapper.map(oldBugDto, BugEntity.class));
 
         return modelMapper.map(savedEntity, BugDto.class);
     }
@@ -107,8 +107,7 @@ public class BugServiceImp implements BugService {
     public void deleteBug(String userId, String projectName, String bugId) {
         BugDto bugDto = getBugFromProject(userId, projectName, bugId);
 
-
-        bugRepo.delete(modelMapper.map(bugDto, BugEntity.class));
+        projectService.removeBug(userId, projectName, bugDto);
     }
 
 }

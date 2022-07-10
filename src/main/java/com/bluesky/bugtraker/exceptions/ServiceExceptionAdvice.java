@@ -1,16 +1,13 @@
 package com.bluesky.bugtraker.exceptions;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
-import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +31,8 @@ public class ServiceExceptionAdvice {
         body.put("timestamp", new Date());
         body.put("status", httpStatus.value());
         body.put("error", ex.getMessage());
+
+        Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
 
         return new ResponseEntity<>(body, httpStatus);
     }

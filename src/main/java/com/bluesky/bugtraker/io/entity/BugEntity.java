@@ -4,8 +4,6 @@ package com.bluesky.bugtraker.io.entity;
 import com.bluesky.bugtraker.shared.bugstatus.Priority;
 import com.bluesky.bugtraker.shared.bugstatus.Severity;
 import com.bluesky.bugtraker.shared.bugstatus.Status;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +11,9 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "Bug")
 @Table(name = "bugs")
@@ -51,11 +51,9 @@ public class BugEntity implements Serializable {
     private Date reportedTime;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
     private UserEntity reportedBy;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
 
 
@@ -68,25 +66,23 @@ public class BugEntity implements Serializable {
     private String erroneousProgramBehaviour;
 
     @Lob
-    @Column
+    @Column(columnDefinition ="varchar(250) default 'Solution is not found.'" )
     private  String howToSolve;
 
     @ManyToMany(mappedBy = "workingOnBugs")
     private Set<UserEntity> bugFixers;
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BugEntity bugEntity = (BugEntity) o;
-        return id.equals(bugEntity.id)
-                && publicId.equals(bugEntity.publicId)
-                && reportedTime.equals(bugEntity.reportedTime)
-                && reportedBy.equals(bugEntity.reportedBy);
+        return id.equals(bugEntity.id) && publicId.equals(bugEntity.publicId) && shortDescription.equals(bugEntity.shortDescription) && status == bugEntity.status && severity == bugEntity.severity && priority == bugEntity.priority && reportedTime.equals(bugEntity.reportedTime) && howToReproduce.equals(bugEntity.howToReproduce) && erroneousProgramBehaviour.equals(bugEntity.erroneousProgramBehaviour) && Objects.equals(howToSolve, bugEntity.howToSolve);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, reportedTime, reportedBy);
+        return Objects.hash(id, publicId, shortDescription, status, severity, priority, reportedTime, howToReproduce, erroneousProgramBehaviour, howToSolve);
     }
 }

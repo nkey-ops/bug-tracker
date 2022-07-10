@@ -1,10 +1,10 @@
 package com.bluesky.bugtraker.io.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serial;
@@ -14,7 +14,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "projects")
-@Getter @Setter
+@Getter
+@Setter
 public class ProjectEntity implements Serializable {
     @Serial
     @Getter(AccessLevel.NONE)
@@ -26,20 +27,39 @@ public class ProjectEntity implements Serializable {
 
     @Column(nullable = false, length = 30, unique = true)
     private String publicId;
-    @Column(nullable = false, length =30)
+    @Column(nullable = false, length = 30)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
+    @ManyToOne(optional = false,
+               fetch =  FetchType.LAZY)
+    @JoinColumn(name="creator_id", nullable=false, updatable=false)
     private UserEntity creator;
 
-    @OneToMany(fetch = FetchType.EAGER,
-                cascade = CascadeType.REMOVE,
-                mappedBy = "project")
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<BugEntity> bugs;
 
-    @ManyToMany(mappedBy = "subscribedToProjects", fetch = FetchType.EAGER)
+    @ManyToMany
+    @JoinTable(name = "subscribers_projects")
     private Set<UserEntity> subscribers;
+
+    public boolean addBug(BugEntity bugEntity) {
+        boolean isAdded = bugs.add(bugEntity);
+
+        if (isAdded) bugEntity.setProject(this);
+
+        return isAdded;
+    }
+
+    public boolean removeBug(BugEntity bugEntity) {
+        boolean isRemoved = bugs.remove(bugEntity);
+
+        if (isRemoved) bugEntity.setProject(null);
+
+        return isRemoved;
+    }
 
 
     @Override
@@ -47,11 +67,12 @@ public class ProjectEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProjectEntity that = (ProjectEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(creator, that.creator) && Objects.equals(bugs, that.bugs) && Objects.equals(subscribers, that.subscribers);
+        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(name, that.name);
     }
+
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, creator, bugs, subscribers);
+        return Objects.hash(id, publicId, name);
     }
 }

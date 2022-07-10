@@ -1,11 +1,9 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -13,7 +11,7 @@ import java.util.Set;
 
 
 @Getter @Setter
-public class UserResponseModel {
+public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     private String publicId;
     private String userName;
     private String email;

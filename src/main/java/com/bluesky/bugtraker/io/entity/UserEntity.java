@@ -1,14 +1,13 @@
 package com.bluesky.bugtraker.io.entity;
 
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,7 +15,8 @@ import java.util.Set;
 
 @Entity(name = "User")
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 public class UserEntity implements Serializable {
 
     @Serial
@@ -39,33 +39,35 @@ public class UserEntity implements Serializable {
     @Column(nullable = false, length = 60)
     private String encryptedPassword;
 
-    @Column( length = 60)
+    @Column(length = 60)
     private String emailVerificationToken;
 
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
-// TODO check how bugEntity behaves when user is deleted
 
-    @OneToMany(fetch = FetchType.EAGER,
-            mappedBy = "reportedBy",
-            cascade = CascadeType.PERSIST)
+//    @OneToMany(
+//            mappedBy = "creator",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true
+//    )
+//    private Set<ProjectEntity> projects;
+// findBy createdBy
+
+    @OneToMany(mappedBy = "reportedBy",
+               cascade = CascadeType.PERSIST)
     private Set<BugEntity> reportedBugs;
+// findBy reportedBy
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.DETACH)
     @JoinTable(name = "working_on_bugs")
     private Set<BugEntity> workingOnBugs;
 
-    @OneToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.REMOVE,
-            mappedBy = "creator")
-    private Set<ProjectEntity> projects;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable( name = "users_subscribed_to_projects")
+    @ManyToMany(mappedBy = "subscribers")
     private Set<ProjectEntity> subscribedToProjects;
 
 
-    @ManyToMany(fetch =  FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles")
     private Set<RoleEntity> roles;
 
@@ -75,12 +77,12 @@ public class UserEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(userName, that.userName) && Objects.equals(email, that.email);
+        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(userName, that.userName) && Objects.equals(email, that.email) && Objects.equals(encryptedPassword, that.encryptedPassword) && Objects.equals(emailVerificationToken, that.emailVerificationToken) && Objects.equals(emailVerificationStatus, that.emailVerificationStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, userName, email);
+        return Objects.hash(id, publicId, userName, email, encryptedPassword, emailVerificationToken, emailVerificationStatus);
     }
 
     @Override
@@ -93,7 +95,6 @@ public class UserEntity implements Serializable {
                 ", userName='" + userName + '\'' +
                 ", emailVerificationToken='" + emailVerificationToken + '\'' +
                 ", emailVerificationStatus=" + emailVerificationStatus +
-                ", bugs=" + reportedBugs +
                 '}';
     }
 }

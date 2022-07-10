@@ -23,18 +23,18 @@ public class BugModelAssembler implements RepresentationModelAssembler<BugRespon
                         getUser(bug.getReportedBy().getPublicId())).withRel("reported by"),
 
                 linkTo(methodOn(ProjectController.class).
-                        getProject(bug.getReportedBy().getPublicId(),
+                        getProject(bug.getProject().getCreator().getPublicId(),
                                    bug.getProject().getName()))
                         .withRel("project"),
 
                 linkTo(methodOn(BugController.class).
-                        getBug(bug.getReportedBy().getPublicId(),
+                        getBug(bug.getProject().getCreator().getPublicId(),
                                 bug.getProject().getName(),
                                 bug.getPublicId()))
                         .withSelfRel(),
 
                 linkTo(methodOn(BugController.class)
-                        .getBugs(bug.getReportedBy().getPublicId(),
+                        .getBugs(bug.getProject().getCreator().getPublicId(),
                                 bug.getProject().getName(), 1, 15)).
                         withRel("bugs"));
         return bug;
