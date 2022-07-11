@@ -41,21 +41,23 @@ public class ProjectServiceImp implements ProjectService {
         this.utils = utils;
     }
 
-
-    private Optional<ProjectDto> getProjectOptional(String userId, String projectName) {
+    /*
+     *  Maybe occur an issue if database contains several projects with same name and creator
+     *  which is prohibited by the application criteria
+     * */
+    ProjectEntity getProjectEntity(String userId, String projectName) {
         UserDto userDto = userService.getUserById(userId);
+        UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
 
-        projectRepo.findByCreatorAndName(userDto.getId(), projectName);
-//        return userDto.getProjects()
-//                .stream()
-//                .filter(project -> project.getName().equals(projectName))
-//                .findFirst();
+        return projectRepo.findByCreatorAndName(userEntity, projectName)
+                .orElseThrow(() -> new ProjectServiceException(NO_RECORD_FOUND, projectName));
     }
 
     @Override
     public ProjectDto getProject(String userId, String projectName) {
-        return getProjectOptional(userId, projectName)
-                .orElseThrow(() -> new ProjectServiceException(NO_RECORD_FOUND, projectName));
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
+
+        return modelMapper.map(projectEntity, ProjectDto.class);
     }
 
     @Override
@@ -64,7 +66,8 @@ public class ProjectServiceImp implements ProjectService {
 
         UserEntity userEntity = modelMapper.map(userService.getUserById(userId), UserEntity.class);
 
-        Page<ProjectEntity> entityPages = projectRepo.findAllByCreator(userEntity, PageRequest.of(page, limit));
+        Page<ProjectEntity> entityPages =
+                projectRepo.findAllByCreator(userEntity, PageRequest.of(page, limit));
         List<ProjectEntity> content = entityPages.getContent();
 
         return modelMapper.map(content, new TypeToken<Set<ProjectDto>>() {
@@ -73,41 +76,38 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public ProjectDto createProject(String userId, ProjectDto projectDto) {
-        if (getProjectOptional(userId, projectDto.getName()).isPresent())
+        UserEntity creator = modelMapper.map(userService.getUserById(userId), UserEntity.class);
+
+        if(projectRepo.existsByCreatorAndName(creator, projectDto.getName()))
             throw new ProjectServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
 
-        projectDto.setPublicId(utils.generateProjectId(30));
-        projectDto.setCreator(userService.getUserById(userId));
+        ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
 
-        ProjectEntity savedProject = projectRepo.save(
-                modelMapper.map(projectDto, ProjectEntity.class));
+        projectEntity.setPublicId(utils.generateProjectId(30));
+        projectEntity.setCreator(creator);
 
 
-        return modelMapper.map(savedProject, ProjectDto.class);
+        return modelMapper.map(projectRepo.save(projectEntity), ProjectDto.class);
     }
 
     @Override
-    public ProjectDto setProjectName(String userId, String oldName, ProjectRequestBody projectRequestBody) {
-        ProjectDto projectDto = getProject(userId, oldName);
-        projectDto.setName(projectRequestBody.getName());
-
-        ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
+    public ProjectDto setProjectName(String userId, String projectName, ProjectRequestBody projectRequestBody) {
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
+        projectEntity.setName(projectRequestBody.getName());
 
         return modelMapper.map(projectRepo.save(projectEntity), ProjectDto.class);
     }
 
     @Override
     public void deleteProject(String userId, String projectName) {
-        ProjectDto projectDto = getProject(userId, projectName);
+         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
 
-        projectRepo.delete(modelMapper.map(projectDto, ProjectEntity.class));
+         projectRepo.delete(projectEntity);
     }
 
     @Override
     public void addBug(String userId, String projectName, BugDto bugDto) {
-        ProjectDto project = getProject(userId, projectName);
-
-        ProjectEntity projectEntity = modelMapper.map(project, ProjectEntity.class);
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
         BugEntity bugEntity = modelMapper.map(bugDto, BugEntity.class);
 
         boolean isAdded = projectEntity.addBug(bugEntity);
@@ -119,9 +119,7 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public void removeBug(String userId, String projectName, BugDto bugDto) {
-        ProjectDto project = getProject(userId, projectName);
-
-        ProjectEntity projectEntity = modelMapper.map(project, ProjectEntity.class);
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
         BugEntity bugEntity = modelMapper.map(bugDto, BugEntity.class);
 
         boolean isRemoved = projectEntity.removeBug(bugEntity);
@@ -135,43 +133,45 @@ public class ProjectServiceImp implements ProjectService {
     public ProjectDto addSubscriber(String userId,
                                     String projectName,
                                     String subscriberId) {
-        ProjectDto projectDto = getProject(userId, projectName);
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
 
-        boolean isAdded = projectDto.getSubscribers().add(userService.getUserById(subscriberId));
+        boolean isAdded = projectEntity.addSubscriber(
+                modelMapper.map(userService.getUserById(userId), UserEntity.class));
 
         if (!isAdded)
             throw new ProjectServiceException(RECORD_ALREADY_ADDED, subscriberId);
 
-        ProjectEntity updatedProject = modelMapper.map(projectDto, ProjectEntity.class);
-
-
-        return modelMapper.map(projectRepo.save(updatedProject), ProjectDto.class);
+        return modelMapper.map(
+                projectRepo.save(projectEntity), ProjectDto.class);
     }
 
     @Override
     public Set<UserDto> getSubscribers(String userId, String projectName, int page, int limit) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        ProjectDto projectDto = getProject(userId, projectName);
+        Set<UserDto> subscribers = getProject(userId, projectName).getSubscribers();
 
-        PageImpl<UserDto> pagedUsers = new PageImpl<>(
-                new ArrayList<>(projectDto.getSubscribers()),
-                Pageable.ofSize(page), limit);
+        PageImpl<UserDto> pagedUsers =
+                new PageImpl<>(
+                    subscribers.stream().toList(),
+                    Pageable.ofSize(page), limit);
+
 
         return new LinkedHashSet<>(pagedUsers.getContent());
     }
 
     @Override
     public ProjectDto removeSubscriber(String userId, String projectName, String subscriberId) {
-        ProjectDto projectDto = getProject(userId, projectName);
-        boolean isRemoved = projectDto.getSubscribers().remove((userService.getUserById(subscriberId)));
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
+
+        boolean isRemoved = projectEntity.removeSubscriber(
+                modelMapper.map(userService.getUserById(userId), UserEntity.class));
 
         if (!isRemoved)
             throw new ProjectServiceException(NO_RECORD_FOUND, subscriberId);
 
         return modelMapper.map(
-                projectRepo.save(modelMapper.map(projectDto, ProjectEntity.class)),
-                ProjectDto.class);
+                projectRepo.save(projectEntity), ProjectDto.class);
     }
 }
 

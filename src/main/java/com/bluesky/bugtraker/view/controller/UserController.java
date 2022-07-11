@@ -1,17 +1,30 @@
 package com.bluesky.bugtraker.view.controller;
 
 import com.bluesky.bugtraker.service.UserService;
+import com.bluesky.bugtraker.shared.dto.BugDto;
+import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.view.model.rensponse.BugResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.assembler.BugModelAssembler;
+import com.bluesky.bugtraker.view.model.rensponse.assembler.ProjectModelAssembler;
 import com.bluesky.bugtraker.view.model.rensponse.assembler.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/users")
@@ -41,7 +54,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public UserResponseModel updateUser(@PathVariable String id,
-                                                     @RequestBody UserRequestModel userRequestModel) {
+                                        @RequestBody UserRequestModel userRequestModel) {
 
         UserDto userDto =
                 modelMapper.map(userRequestModel, UserDto.class);
@@ -73,6 +86,70 @@ public class UserController {
         userService.deleteUser(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PreAuthorize("#id == principal.id")
+    @GetMapping("/{id}/reported-bugs")
+    public CollectionModel<BugResponseModel> getReportedBugs(
+            @PathVariable String id,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "15") int limit) {
+
+
+        Set<BugDto> bugs = userService.getReportedBugs(id, page, limit);
+        Set<BugResponseModel> bugResponseModels = modelMapper.map(
+                bugs, new TypeToken<Set<BugResponseModel>>() {
+                }.getType());
+
+        BugModelAssembler bugModelAssembler = new BugModelAssembler();
+
+        return bugModelAssembler.toCollectionModel(bugResponseModels)
+                .add(linkTo(methodOn(UserController.class)
+                        .getReportedBugs(id, page, limit)).withSelfRel());
+    }
+
+    @PreAuthorize("#id == principal.id")
+    @GetMapping("/{id}/bugs-to-be-fixed")
+    public CollectionModel<BugResponseModel> getWorkingOnBugs(
+            @PathVariable String id,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "15") int limit) {
+
+
+        Set<BugDto> workingOnBugs = userService.getGetWorkingOnBugs(id, page, limit);
+
+        Set<BugResponseModel> bugResponseModels = modelMapper.map(
+                workingOnBugs, new TypeToken<Set<BugResponseModel>>() {
+                }.getType());
+
+        BugModelAssembler bugModelAssembler = new BugModelAssembler();
+
+        return bugModelAssembler.toCollectionModel(bugResponseModels)
+                .add(linkTo(methodOn(UserController.class)
+                        .getWorkingOnBugs(id, page, limit)).withSelfRel());
+
+    }
+    @GetMapping("/{id}/subscribed-to-projects")
+    public CollectionModel<ProjectResponseModel> getSubscribedProjects(
+            @PathVariable String id,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "15") int limit) {
+
+
+        Set<ProjectDto> subscribedProjects = userService.getSubscribedProjects(id, page, limit);
+
+        Set<ProjectResponseModel> projectResponseModels = modelMapper.map(
+                subscribedProjects, new TypeToken<Set<ProjectResponseModel>>() {
+                }.getType());
+
+
+        ProjectModelAssembler projectModelAssembler = new ProjectModelAssembler();
+
+        return projectModelAssembler.toCollectionModel(projectResponseModels)
+                .add(linkTo(methodOn(UserController.class)
+                        .getSubscribedProjects(id, page, limit)).withSelfRel());
+
     }
 
 

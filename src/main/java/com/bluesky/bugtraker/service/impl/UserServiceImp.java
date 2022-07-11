@@ -1,27 +1,33 @@
 package com.bluesky.bugtraker.service.impl;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.BugEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
+import com.bluesky.bugtraker.io.repository.BugRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.security.UserPrincipal;
-import com.bluesky.bugtraker.service.BugService;
-import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
+import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.NO_RECORD_FOUND;
@@ -32,6 +38,7 @@ public class UserServiceImp implements UserService {
     //TODO make a constant values for user id length;
     private UserRepository userRepo;
     private RoleRepository roleRepo;
+    private BugRepository bugRepo;
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private Utils utils;
@@ -39,24 +46,25 @@ public class UserServiceImp implements UserService {
 
     @Autowired
     public UserServiceImp(UserRepository userRepo, RoleRepository roleRepo,
+                          BugRepository bugRepo,
                           BCryptPasswordEncoder bCryptPasswordEncoder, Utils utils) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
+        this.bugRepo = bugRepo;
 
 
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.utils = utils;
     }
 
-
-    private UserEntity getUserEntityByPublicId(String id){
+     UserEntity getUserEntity(String id){
         return userRepo.findByPublicId(id)
                 .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, id));
     }
 
     @Override
     public UserDto getUserById(String id) {
-        UserEntity userEntity = getUserEntityByPublicId(id);
+        UserEntity userEntity = getUserEntity(id);
         return modelMapper.map(userEntity, UserDto.class);
     }
     @Transactional
@@ -105,7 +113,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto updateUser(String id, UserDto userDto) {
-        UserEntity userEntity = getUserEntityByPublicId(id);
+        UserEntity userEntity = getUserEntity(id);
         userEntity.setUserName(userDto.getUserName());
 
         return modelMapper.map(userRepo.save(userEntity), UserDto.class);
@@ -114,7 +122,7 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void deleteUser(String id) {
-        UserEntity userEntity = getUserEntityByPublicId(id);
+        UserEntity userEntity = getUserEntity(id);
 
 //        userEntity.getSubscribedToProjects()
 //                .forEach(project ->
@@ -129,30 +137,42 @@ public class UserServiceImp implements UserService {
         userRepo.delete(userEntity);
     }
 
-//    @Override
-//    public void addProjectToUser(String userId, ProjectDto projectDto) {
-//        UserEntity userEntity = getUserEntityByPublicId(userId);
-//        ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
-//
-//        boolean isAdded = userEntity.addProject(projectEntity);
-//        if (!isAdded)
-//            throw new UserServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
-//
-//        userRepo.save(userEntity);
-//    }
-//
-//    @Override
-//    public void removeProject(String userId, ProjectDto projectDto) {
-//        UserEntity userEntity = getUserEntityByPublicId(userId);
-//        ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
-//
-//        boolean isRemoved = userEntity.removeProject(projectEntity);
-//
-//        if (!isRemoved)
-//            throw new UserServiceException(NO_RECORD_FOUND, projectDto.getName());
-//
-//        userRepo.save(userEntity);
-//    }
+    @Override
+    public Set<BugDto> getReportedBugs(String id, int page, int limit) {
+        if (page-- < 0 || limit < 1) throw new IllegalArgumentException();
+
+        List<BugEntity> bugs =
+                bugRepo.findAllByReporter(getUserEntity(id), PageRequest.of(page, limit));
+        return modelMapper.map(bugs, new TypeToken<Set<BugDto>>() {}.getType());
+    }
+
+    @Override
+    public Set<BugDto> getGetWorkingOnBugs(String id, int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+
+        Set<BugDto> workingOnBugs = getUserById(id).getWorkingOnBugs();
+
+        PageImpl<BugDto> pagedBugs =
+                new PageImpl<>(
+                        workingOnBugs.stream().toList(),
+                        Pageable.ofSize(page), limit);
+
+        return new LinkedHashSet<>(pagedBugs.getContent());
+    }
+
+    @Override
+    public Set<ProjectDto> getSubscribedProjects(String id, int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+
+        Set<ProjectDto> subscribedProjects = getUserById(id).getSubscribedToProjects();
+
+        PageImpl<ProjectDto> pagedProjects =
+                new PageImpl<>(
+                        subscribedProjects.stream().toList(),
+                        Pageable.ofSize(page), limit);
+
+        return new LinkedHashSet<>(pagedProjects.getContent());
+    }
 
 
     @Override

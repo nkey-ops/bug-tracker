@@ -2,6 +2,7 @@ package com.bluesky.bugtraker.service;
 
 
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
+import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,9 +22,9 @@ public interface UserService extends UserDetailsService {
 
     void deleteUser(String id);
 
-//    @Deprecated
-//    void addProjectToUser(String userId, ProjectDto projectDto);
-//
-//    @Deprecated
-//    void removeProject(String userId, ProjectDto projectDto);
+    Set<BugDto> getReportedBugs(String id, int page, int limit);
+
+    Set<BugDto> getGetWorkingOnBugs(String id, int page, int limit);
+
+    Set<ProjectDto> getSubscribedProjects(String id, int page, int limit);
 }

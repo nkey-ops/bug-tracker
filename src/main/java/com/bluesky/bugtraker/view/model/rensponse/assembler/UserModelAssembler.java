@@ -14,11 +14,23 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public  class UserModelAssembler implements RepresentationModelAssembler<UserResponseModel, UserResponseModel> {
     @Override
     public UserResponseModel toModel(UserResponseModel user) {
-         return user.add(
+        return user.add(
                 linkTo(methodOn(ProjectController.class).
-                        getProjects(user.getPublicId(), 1, 15)).withRel("projects"),
+                        getProjects(user.getPublicId(), 1, 15)).withRel("user projects"),
+
+                linkTo(methodOn(UserController.class).
+                        getSubscribedProjects(user.getPublicId(), 1, 15)).withRel("subscribed to projects"),
+
+                linkTo(methodOn(UserController.class).
+                        getReportedBugs(user.getPublicId(), 1, 15)).withRel("reported bugs"),
+
+                linkTo(methodOn(UserController.class).
+                        getWorkingOnBugs(user.getPublicId(), 1, 15)).withRel("working on bugs"),
+
+
                 linkTo(methodOn(UserController.class).
                         getUser(user.getPublicId())).withSelfRel());
+
     }
 
 

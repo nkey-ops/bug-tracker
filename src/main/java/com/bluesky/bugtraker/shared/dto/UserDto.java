@@ -3,6 +3,8 @@ package com.bluesky.bugtraker.shared.dto;
 
 import com.bluesky.bugtraker.io.entity.BugEntity;
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,10 +33,8 @@ public class UserDto implements Serializable {
 
     private Set<ProjectDto> projects;
     private Set<BugDto> reportedBugs;
-    private Set<BugEntity> workingOnBugs;
-    private Set<ProjectEntity> subscribedToProjects;
-
-
+    private Set<BugDto> workingOnBugs;
+    private Set<ProjectDto> subscribedToProjects;
 
     @Override
     public boolean equals(Object o) {
@@ -49,13 +49,4 @@ public class UserDto implements Serializable {
         return Objects.hash(publicId, userName, email, password);
     }
 
-    @Override
-    public String toString() {
-        return "UserDto{" +
-                "publicId='" + publicId + '\'' +
-                ", userName='" + userName + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
-    }
 }

@@ -32,13 +32,14 @@ public class ProjectEntity implements Serializable {
 
     @ManyToOne(optional = false,
                fetch =  FetchType.LAZY)
-    @JoinColumn(name="creator_id", nullable=false, updatable=false)
+    @JoinColumn(name="creator_id",
+                nullable=false,
+                updatable=false)
     private UserEntity creator;
 
     @OneToMany(
             cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+            orphanRemoval = true)
     private Set<BugEntity> bugs;
 
     @ManyToMany
@@ -60,7 +61,23 @@ public class ProjectEntity implements Serializable {
 
         return isRemoved;
     }
+    public boolean addSubscriber(UserEntity userEntity) {
+        boolean isAddedUser = subscribers.add(userEntity);
 
+        boolean isAddedProject =
+            userEntity.getSubscribedToProjects().add(this);
+
+        return isAddedUser && isAddedProject;
+    }
+
+    public boolean removeSubscriber(UserEntity userEntity) {
+        boolean isRemovedUser = subscribers.remove(userEntity);
+
+        boolean isRemovedProject =
+                userEntity.getSubscribedToProjects().remove(this);
+
+        return isRemovedUser && isRemovedProject;
+    }
 
     @Override
     public boolean equals(Object o) {

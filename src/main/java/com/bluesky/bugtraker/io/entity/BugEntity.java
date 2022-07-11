@@ -50,8 +50,10 @@ public class BugEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportedTime;
 
-    @ManyToOne
-    private UserEntity reportedBy;
+    @ManyToOne(optional = false,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
+    private UserEntity reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
@@ -66,11 +68,34 @@ public class BugEntity implements Serializable {
     private String erroneousProgramBehaviour;
 
     @Lob
-    @Column(columnDefinition ="varchar(250) default 'Solution is not found.'" )
-    private  String howToSolve;
+    @Column(columnDefinition = "varchar(250) default 'Solution is not found.'")
+    private String howToSolve;
 
-    @ManyToMany(mappedBy = "workingOnBugs")
+    @ManyToMany(cascade = CascadeType.DETACH)
+    @JoinTable(name = "bug_fixers_bugs",
+            joinColumns = {@JoinColumn(name = "bug_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id")}
+    )
     private Set<UserEntity> bugFixers;
+
+
+    public boolean addBugFixer(UserEntity bugFixer) {
+        boolean isAddedBugFixer =
+                bugFixers.add(bugFixer);
+        boolean isAddedBug =
+                bugFixer.getWorkingOnBugs().add(this);
+
+        return isAddedBugFixer && isAddedBug;
+    }
+
+    public boolean removeBugFixer(UserEntity bugFixer) {
+        boolean isRemovedBugFixer =
+                bugFixers.remove(bugFixer);
+        boolean isRemovedBug =
+                bugFixer.getWorkingOnBugs().remove(this);
+
+        return isRemovedBugFixer && isRemovedBug;
+    }
 
 
     @Override
@@ -78,11 +103,11 @@ public class BugEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BugEntity bugEntity = (BugEntity) o;
-        return id.equals(bugEntity.id) && publicId.equals(bugEntity.publicId) && shortDescription.equals(bugEntity.shortDescription) && status == bugEntity.status && severity == bugEntity.severity && priority == bugEntity.priority && reportedTime.equals(bugEntity.reportedTime) && howToReproduce.equals(bugEntity.howToReproduce) && erroneousProgramBehaviour.equals(bugEntity.erroneousProgramBehaviour) && Objects.equals(howToSolve, bugEntity.howToSolve);
+        return Objects.equals(id, bugEntity.id) && Objects.equals(publicId, bugEntity.publicId) && Objects.equals(shortDescription, bugEntity.shortDescription) && status == bugEntity.status && severity == bugEntity.severity && priority == bugEntity.priority && Objects.equals(reportedTime, bugEntity.reportedTime) && Objects.equals(reporter, bugEntity.reporter) && Objects.equals(howToReproduce, bugEntity.howToReproduce) && Objects.equals(erroneousProgramBehaviour, bugEntity.erroneousProgramBehaviour) && Objects.equals(howToSolve, bugEntity.howToSolve);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, shortDescription, status, severity, priority, reportedTime, howToReproduce, erroneousProgramBehaviour, howToSolve);
+        return Objects.hash(id, publicId, shortDescription, status, severity, priority, reportedTime, reporter, howToReproduce, erroneousProgramBehaviour, howToSolve);
     }
 }

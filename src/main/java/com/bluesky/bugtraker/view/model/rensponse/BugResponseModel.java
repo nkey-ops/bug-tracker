@@ -32,30 +32,20 @@ public class BugResponseModel extends RepresentationModel<BugResponseModel> {
     private String howToSolve = "Solution is not found";
 
     @JsonIgnore
-    private UserResponseModel reportedBy;
+    private UserResponseModel reporter;
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         BugResponseModel that = (BugResponseModel) o;
-        return Objects.equals(publicId, that.publicId) && status == that.status && severity == that.severity && priority == that.priority && Objects.equals(reportedTime, that.reportedTime) && Objects.equals(reportedBy, that.reportedBy);
+        return Objects.equals(publicId, that.publicId) && status == that.status && severity == that.severity && priority == that.priority && Objects.equals(reportedTime, that.reportedTime) && Objects.equals(shortDescription, that.shortDescription) && Objects.equals(howToReproduce, that.howToReproduce) && Objects.equals(erroneousProgramBehaviour, that.erroneousProgramBehaviour) && Objects.equals(howToSolve, that.howToSolve);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publicId, status, severity, priority, reportedTime, reportedBy);
-    }
-
-    @Override
-    public String toString() {
-        return "BugResponseModel{" +
-                "publicId='" + publicId + '\'' +
-                ", status=" + status +
-                ", severity=" + severity +
-                ", priority=" + priority +
-                ", reportedTime=" + reportedTime +
-                ", reportedBy=" + reportedBy +
-                '}';
+        return Objects.hash(super.hashCode(), publicId, status, severity, priority, reportedTime, shortDescription, howToReproduce, erroneousProgramBehaviour, howToSolve);
     }
 }

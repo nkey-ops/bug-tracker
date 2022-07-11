@@ -1,5 +1,7 @@
 package com.bluesky.bugtraker.view.model.rensponse.assembler;
 
+import com.bluesky.bugtraker.io.entity.BugEntity;
+import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.view.controller.BugController;
 import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.UserController;
@@ -20,12 +22,19 @@ public class BugModelAssembler implements RepresentationModelAssembler<BugRespon
     public BugResponseModel toModel(BugResponseModel bug) {
         bug.add(
                 linkTo(methodOn(UserController.class).
-                        getUser(bug.getReportedBy().getPublicId())).withRel("reported by"),
+                        getUser(bug.getReporter().getPublicId())).withRel("reported by"),
 
                 linkTo(methodOn(ProjectController.class).
                         getProject(bug.getProject().getCreator().getPublicId(),
                                    bug.getProject().getName()))
                         .withRel("project"),
+
+                linkTo(methodOn(BugController.class).
+                        getBugFixers(bug.getProject().getCreator().getPublicId(),
+                                   bug.getProject().getName(),
+                                   bug.getPublicId(),
+                                   1 , 15))
+                        .withRel("bug fixers"),
 
                 linkTo(methodOn(BugController.class).
                         getBug(bug.getProject().getCreator().getPublicId(),
@@ -49,6 +58,4 @@ public class BugModelAssembler implements RepresentationModelAssembler<BugRespon
 
         return result;
     }
-
-
 }

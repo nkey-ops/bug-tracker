@@ -15,8 +15,6 @@ public class UserPrincipal implements UserDetails {
     @Serial
     private static final long serialVersionUID = 8772880620156304062L;
     private final UserEntity userEntity;
-
-
     private  final  String id;
     public UserPrincipal(UserEntity userEntity) {
         this.userEntity = userEntity;

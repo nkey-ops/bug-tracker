@@ -63,7 +63,7 @@ public class ProjectController {
         return modelAssembler.toModel(responseModel);
     }
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize(value = "#userId == principal.id")
     @GetMapping
     public CollectionModel<ProjectResponseModel> getProjects(@PathVariable String userId,
                                                              @RequestParam(value = "page", defaultValue = "1") int page,
@@ -90,7 +90,7 @@ public class ProjectController {
                 modelMapper.map(projectDto, ProjectResponseModel.class));
     }
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize(value = "#userId == principal.id")
     @DeleteMapping(value = "/{projectName}")
     public ResponseEntity<?> deleteProject(@PathVariable String userId,
                                            @PathVariable String projectName) {
@@ -99,6 +99,8 @@ public class ProjectController {
 
         return ResponseEntity.noContent().build();
     }
+
+    //TODO return response status
     @PutMapping("/{projectName}/subscribers/{subscriberId}")
     public ProjectResponseModel addSubscriber(@PathVariable String userId,
                                               @PathVariable String projectName,
