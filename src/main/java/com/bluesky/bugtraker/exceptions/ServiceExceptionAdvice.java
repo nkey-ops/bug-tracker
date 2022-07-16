@@ -32,7 +32,7 @@ public class ServiceExceptionAdvice {
         body.put("status", httpStatus.value());
         body.put("error", ex.getMessage());
 
-        Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
+//        Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
 
         return new ResponseEntity<>(body, httpStatus);
     }

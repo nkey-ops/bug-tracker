@@ -16,20 +16,21 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class ProjectModelAssembler implements
                         RepresentationModelAssembler<ProjectResponseModel, ProjectResponseModel> {
-
-
-    //TODO need to add list of subscribers
     @Override
     public ProjectResponseModel toModel(ProjectResponseModel project) {
         project.add(
                 linkTo(methodOn(UserController.class).
                         getUser(project.getCreator().getPublicId())).withRel("creator"),
+
                 linkTo(methodOn(BugController.class).
                         getBugs(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of bugs"),
+
                 linkTo(methodOn(ProjectController.class).
                         getSubscribers(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of subscribers"),
+
                 linkTo(methodOn(ProjectController.class).
                         getProject(project.getCreator().getPublicId(), project.getName())).withSelfRel(),
+
                 linkTo(methodOn(ProjectController.class)
                         .getProjects(project.getCreator().getPublicId(), 1, 15)).withRel("list of projects"));
 

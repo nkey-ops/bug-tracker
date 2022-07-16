@@ -8,6 +8,7 @@ public class SecurityConstants {
     public static final String HEADER_STRING = "Authorization";
     public static final String SING_UP_URL = "/users";
     public static final String VERIFICATION_EMAIL_URL = "/users/email-verification";
+    public static final String LOGIN_URL = "/users/login";
 
 
     public static String getTokenSecret(){

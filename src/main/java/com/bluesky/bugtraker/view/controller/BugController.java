@@ -123,7 +123,7 @@ public class BugController {
 
         return ResponseEntity.ok().build();
     }
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#userId == principal.id or #fixerId == principal.id")
     @DeleteMapping("/{bugId}/fixers/{fixerId}")
     public ResponseEntity<?> removeBugFixer(@PathVariable String userId,
                                             @PathVariable String projectName,
@@ -134,7 +134,7 @@ public class BugController {
 
         return ResponseEntity.ok().build();
     }
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#userId == principal.id  or principal.isSubscribedTo(#userId, #projectName)")
     @GetMapping("/{bugId}/fixers")
     public CollectionModel<UserResponseModel> getBugFixers(
             @PathVariable String userId,

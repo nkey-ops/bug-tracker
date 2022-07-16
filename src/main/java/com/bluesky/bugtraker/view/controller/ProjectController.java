@@ -100,7 +100,7 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO return response status
+    @PreAuthorize("#id == principal.id")
     @PutMapping("/{projectName}/subscribers/{subscriberId}")
     public ProjectResponseModel addSubscriber(@PathVariable String userId,
                                               @PathVariable String projectName,
@@ -112,6 +112,7 @@ public class ProjectController {
 
         return modelAssembler.toModel(modelMapper.map(projectDto, ProjectResponseModel.class));
     }
+    @PreAuthorize("#id == principal.id or principal.isSubscribedTo(#userId, #projectName)")
     @GetMapping("/{projectName}/subscribers")
     public CollectionModel<UserResponseModel> getSubscribers(
                                                 @PathVariable String userId,
@@ -127,6 +128,7 @@ public class ProjectController {
 
         return userModelAssembler.toCollectionModel(userResponseModels);
     }
+    @PreAuthorize("#id == principal.id or #subscriberId == principal.id")
     @DeleteMapping("/{projectName}/subscribers/{subscriberId}")
     public ProjectResponseModel removeSubscriber(@PathVariable String userId,
                                                  @PathVariable String projectName,

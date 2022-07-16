@@ -19,6 +19,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -40,7 +41,8 @@ public class UserController {
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
-
+    @ModelAttribute("user")
+    @PreAuthorize("#id == principal.getId()")
     @GetMapping("/{id}")
     public UserResponseModel getUser(@PathVariable String id) {
         UserResponseModel responseModel =
@@ -48,6 +50,7 @@ public class UserController {
 
         return modelAssembler.toModel(responseModel);
     }
+
 
     @PreAuthorize("#id == principal.getId()")
     @PutMapping(value = "/{id}",
@@ -66,6 +69,7 @@ public class UserController {
         return modelAssembler.toModel(responseModel);
     }
 
+    @ModelAttribute("user")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @PostMapping
     public UserResponseModel createUser(@RequestBody UserRequestModel userRequestModel) {
@@ -130,6 +134,7 @@ public class UserController {
                         .getWorkingOnBugs(id, page, limit)).withSelfRel());
 
     }
+    @PreAuthorize("#id == principal.id")
     @GetMapping("/{id}/subscribed-to-projects")
     public CollectionModel<ProjectResponseModel> getSubscribedProjects(
             @PathVariable String id,

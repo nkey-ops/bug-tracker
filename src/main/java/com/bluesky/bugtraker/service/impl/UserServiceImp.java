@@ -122,19 +122,7 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void deleteUser(String id) {
-        UserEntity userEntity = getUserEntity(id);
-
-//        userEntity.getSubscribedToProjects()
-//                .forEach(project ->
-//                        projectService.removeSubscriber(
-//                                project.getCreator().getPublicId(),
-//                                project.getName(),
-//                                userEntity.getPublicId()
-//                        )
-//                );
-
-
-        userRepo.delete(userEntity);
+        userRepo.delete(getUserEntity(id));
     }
 
     @Override
@@ -177,7 +165,8 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepo.findByEmail(email).orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
+        UserEntity userEntity = userRepo.findByEmail(email)
+                .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
 
         return new UserPrincipal(userEntity);
     }
