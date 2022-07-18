@@ -1,16 +1,10 @@
 package com.bluesky.bugtraker.shared.dto;
 
 
-import com.bluesky.bugtraker.io.entity.BugEntity;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
-import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;

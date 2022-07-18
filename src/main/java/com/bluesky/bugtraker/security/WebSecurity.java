@@ -17,40 +17,44 @@ public class WebSecurity {
     public WebSecurity(CustomDsl customDsl) {
         this.customDsl = customDsl;
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        return  http
                 .cors().and()
                 .csrf().disable()
-                .authorizeRequests()
 
-                .antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**")
+                .authorizeRequests()
+                .antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/assets/**")
                 .permitAll()
-                .antMatchers(HttpMethod.POST, SecurityConstants.SING_UP_URL)
+                .antMatchers("/login", "/signup")
+                .permitAll()
+
+                .antMatchers(HttpMethod.POST, "/users")
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
+
                 .anyRequest().authenticated()
                 .and()
-
                 .formLogin()
                     .loginPage("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .loginProcessingUrl(SecurityConstants.LOGIN_URL)
-                        .successForwardUrl("/home")
-
-                        .failureForwardUrl("/loginFailure")
+                        .loginProcessingUrl(SecurityConstants.VERIFICATION_LOGIN_URL)
+                        .defaultSuccessUrl("/home", true)
                 .permitAll()
-
-
                 .and()
-                .apply(customDsl);
+                .logout().deleteCookies("JSESSIONID")
+                .and()
+                .rememberMe()
+                    .key(SecurityConstants.getTokenRememberMe())
+                    .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME)
 
+                .and().apply(customDsl)
+//                TODO try to find how to solve the problem with stateless session
+//                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().build();
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        return http.build();
     }
 }
 
@@ -60,15 +64,21 @@ public class WebSecurity {
 //    @Override
 //    protected void configure(HttpSecurity http) throws Exception {
 //        http.authorizeRequests()
+//                .antMatchers( "/login/**", "/signup")
+//                .permitAll()
 //                .anyRequest().authenticated()
 //                .and()
 //                .formLogin()
-//                .loginPage("/login")
+//                    .loginPage("/login")
+//                        .usernameParameter("email")
+//                        .passwordParameter("password")
+//                        .loginProcessingUrl(SecurityConstants.VERIFICATION_LOGIN_URL)
+//                        .defaultSuccessUrl("/home")
 //                .permitAll();
 //    }
 //
 //    @Override
 //    public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/webjars/**");
+//        web.ignoring().antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/assets/**");
 //    }
 //}

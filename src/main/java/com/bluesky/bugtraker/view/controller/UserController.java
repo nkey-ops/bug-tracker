@@ -1,5 +1,6 @@
 package com.bluesky.bugtraker.view.controller;
 
+import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
@@ -11,7 +12,6 @@ import com.bluesky.bugtraker.view.model.rensponse.assembler.BugModelAssembler;
 import com.bluesky.bugtraker.view.model.rensponse.assembler.ProjectModelAssembler;
 import com.bluesky.bugtraker.view.model.rensponse.assembler.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -19,15 +19,18 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.validation.Valid;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-@RestController
+@Controller
 @RequestMapping("/users")
 public class UserController {
     private UserService userService;
@@ -41,7 +44,6 @@ public class UserController {
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
-    @ModelAttribute("user")
     @PreAuthorize("#id == principal.getId()")
     @GetMapping("/{id}")
     public UserResponseModel getUser(@PathVariable String id) {
@@ -69,17 +71,24 @@ public class UserController {
         return modelAssembler.toModel(responseModel);
     }
 
-    @ModelAttribute("user")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @PostMapping
-    public UserResponseModel createUser(@RequestBody UserRequestModel userRequestModel) {
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ModelAndView createUser(@ModelAttribute("user") @Valid
+                                   UserRequestModel userRequestModel,
+                                   BindingResult bindingResult) {
+        ModelAndView mav = new ModelAndView("register");
 
-        UserDto userDto = userService.createUser(
-                modelMapper.map(userRequestModel, UserDto.class));
+        if (bindingResult.hasErrors()) {
+            return  mav.addObject("userRequest", userRequestModel);
+        }
 
 
-        return modelAssembler.toModel(
+        UserDto  userDto = userService.createUser(
+                    modelMapper.map(userRequestModel, UserDto.class));
+        UserResponseModel responseModel = modelAssembler.toModel(
                 modelMapper.map(userDto, UserResponseModel.class));
+
+
+        return new ModelAndView("redirect:/home", "userResponse", responseModel);
     }
 
 
@@ -134,6 +143,7 @@ public class UserController {
                         .getWorkingOnBugs(id, page, limit)).withSelfRel());
 
     }
+
     @PreAuthorize("#id == principal.id")
     @GetMapping("/{id}/subscribed-to-projects")
     public CollectionModel<ProjectResponseModel> getSubscribedProjects(

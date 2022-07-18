@@ -3,8 +3,6 @@ package com.bluesky.bugtraker.io.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.Hibernate;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serial;

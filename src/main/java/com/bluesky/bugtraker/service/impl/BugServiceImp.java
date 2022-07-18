@@ -10,7 +10,6 @@ import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.dto.BugDto;
-import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;

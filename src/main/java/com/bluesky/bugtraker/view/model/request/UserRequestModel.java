@@ -1,14 +1,27 @@
 package com.bluesky.bugtraker.view.model.request;
 
 
+import com.bluesky.bugtraker.validation.ValidEmail;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Getter @Setter
 public class UserRequestModel {
+    @NotNull
+    @NotEmpty
+    @Size(min = 5)
+    private String username;
+    @NotNull
+    @NotEmpty
+    @ValidEmail
     private String email;
+    @NotNull
+    @NotEmpty
     private String password;
 
 

@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface ProjectRepository extends PagingAndSortingRepository<ProjectEntity, Long> {

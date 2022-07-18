@@ -17,7 +17,6 @@ import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static com.bluesky.bugtraker.shared.authorizationenum.Authority.*;
 import static com.bluesky.bugtraker.shared.authorizationenum.Role.*;

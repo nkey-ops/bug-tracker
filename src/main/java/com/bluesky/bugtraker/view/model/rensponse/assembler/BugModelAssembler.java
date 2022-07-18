@@ -1,7 +1,5 @@
 package com.bluesky.bugtraker.view.model.rensponse.assembler;
 
-import com.bluesky.bugtraker.io.entity.BugEntity;
-import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.view.controller.BugController;
 import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.UserController;

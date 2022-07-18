@@ -21,7 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
 

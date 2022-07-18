@@ -37,7 +37,7 @@ public class CustomDsl extends AbstractHttpConfigurer<CustomDsl, HttpSecurity> {
 
     public AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager){
         AuthenticationFilter filter =new AuthenticationFilter(authenticationManager);
-        filter.setFilterProcessesUrl(SecurityConstants.LOGIN_URL);
+        filter.setFilterProcessesUrl(SecurityConstants.VERIFICATION_LOGIN_URL);
         filter.setPostOnly(true);
         return filter;
     }

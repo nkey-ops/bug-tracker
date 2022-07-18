@@ -3,11 +3,11 @@ package com.bluesky.bugtraker.exceptions;
 import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class ServiceExceptionAdvice {
 
     @ResponseBody
     @ExceptionHandler(ServiceException.class)
-    ResponseEntity<?> handleException(ServiceException ex) {
+    public ResponseEntity<?> handleException(ServiceException ex, Model model) {
 
         HttpStatus httpStatus = switch (ex.getErrorType()) {
             case MISSING_REQUIRED_FIELD -> HttpStatus.BAD_REQUEST;
@@ -35,5 +35,12 @@ public class ServiceExceptionAdvice {
 //        Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
 
         return new ResponseEntity<>(body, httpStatus);
+
+//        ModelAndView modelAndView = new ModelAndView("register");
+//        modelAndView
+//                .addObject("error", ex.getErrorType().getErrorMessage())
+//                .setStatus(httpStatus);
+//
+//        return  modelAndView;
     }
 }

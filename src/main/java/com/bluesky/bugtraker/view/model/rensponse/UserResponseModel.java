@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter @Setter
 public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     private String publicId;
-    private String userName;
+    private String username;
     private String email;
 
     @JsonIgnore
@@ -24,19 +24,19 @@ public class UserResponseModel extends RepresentationModel<UserResponseModel> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserResponseModel that = (UserResponseModel) o;
-        return Objects.equals(publicId, that.publicId) && Objects.equals(userName, that.userName) && Objects.equals(email, that.email);
+        return Objects.equals(publicId, that.publicId) && Objects.equals(username, that.username) && Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publicId, userName, email);
+        return Objects.hash(publicId, username, email);
     }
 
     @Override
     public String toString() {
         return "UserResponseModel{" +
                 "publicId='" + publicId + '\'' +
-                ", userName='" + userName + '\'' +
+                ", userName='" + username + '\'' +
                 ", email='" + email + '\'' +
                 '}';
     }

@@ -1,6 +1,5 @@
 package com.bluesky.bugtraker;
 
-import com.bluesky.bugtraker.context.SpringApplicationContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +19,5 @@ public class BugTrackerApplication {
         return  new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public SpringApplicationContext springApplicationContext() {return  new SpringApplicationContext(); }
 
 }

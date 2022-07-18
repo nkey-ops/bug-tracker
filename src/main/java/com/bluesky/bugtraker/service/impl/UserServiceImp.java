@@ -57,7 +57,13 @@ public class UserServiceImp implements UserService {
         this.utils = utils;
     }
 
-     UserEntity getUserEntity(String id){
+
+    @Override
+    public boolean isUserExistsByEmail(String email) {
+        return userRepo.existsByEmail(email);
+    }
+
+    private UserEntity getUserEntity(String id) {
         return userRepo.findByPublicId(id)
                 .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, id));
     }
@@ -67,13 +73,16 @@ public class UserServiceImp implements UserService {
         UserEntity userEntity = getUserEntity(id);
         return modelMapper.map(userEntity, UserDto.class);
     }
+
     @Transactional
     @Override
     public UserDto getUserByEmail(String email) {
-        UserEntity userEntity = userRepo.findByEmail(email).orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
+        UserEntity userEntity = userRepo.findByEmail(email)
+                .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
 
         return modelMapper.map(userEntity, UserDto.class);
     }
+
 
     @Override
     public UserDto createAdminUser(String email, String password, Set<RoleEntity> roles) {
@@ -131,7 +140,8 @@ public class UserServiceImp implements UserService {
 
         List<BugEntity> bugs =
                 bugRepo.findAllByReporter(getUserEntity(id), PageRequest.of(page, limit));
-        return modelMapper.map(bugs, new TypeToken<Set<BugDto>>() {}.getType());
+        return modelMapper.map(bugs, new TypeToken<Set<BugDto>>() {
+        }.getType());
     }
 
     @Override
@@ -166,7 +176,7 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
+                .orElseThrow(() -> new UsernameNotFoundException(NO_RECORD_FOUND + ": " + email));
 
         return new UserPrincipal(userEntity);
     }

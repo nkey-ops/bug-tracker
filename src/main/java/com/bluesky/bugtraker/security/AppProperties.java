@@ -17,5 +17,9 @@ public class AppProperties {
         return environment.getProperty("tokenSecret");
     }
 
+    public  String getTokenRememberMe(){
+        return environment.getProperty("tokenRememberMe");
+    }
+
 
 }
