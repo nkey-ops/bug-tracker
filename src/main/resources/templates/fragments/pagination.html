@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div th:fragment="paging (baseLink, limit, currentPage, totalPages)">
+    <div class="text-center">
+        <div class="btn-group" role="group" aria-label="Basic example">
+<!--             th:with="baseLink=('/my-projects')">-->
+            <!-- First -->
+            <div th:if="${currentPage > 1}">
+                <a type="button" class="btn btn-outline-primary"
+                   th:href="@{(${baseLink}) (page=${1},limit=${limit})}">First</a>
+            </div>
+            <div th:unless="${currentPage > 1}">
+                <button type="button" class="btn btn-outline-primary">First</button>
+            </div>
+            <!--  Previous  -->
+            <div th:if="${currentPage > 1}">
+                <a type="button" class="btn btn-outline-primary"
+                   th:href="@{(${baseLink}) (page=${currentPage - 1},limit=${limit})}">&lt;</a>
+            </div>
+            <div th:unless="${currentPage > 1}">
+                <button type="button" class="btn btn-outline-primary">&lt;</button>
+            </div>
+            <!-- Current-->
+            <button type="button" class="btn btn-outline-primary">[[${currentPage}]]
+            </button>
+            <!--  Next >   -->
+            <div th:if="${currentPage < totalPages}">
+                <a type="button" class="btn btn-outline-primary"
+                   th:href="@{(${baseLink})  (page=${currentPage + 1},limit=${limit})}">&gt;</a>
+            </div>
+            <div th:unless="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary">&gt;</button>
+            </div>
+            <!-- Last   -->
+            <div th:if="${currentPage < totalPages}">
+                <a type="button" class="btn btn-outline-primary"
+                   th:href="@{(${baseLink})  (page=${totalPages},limit=${limit})}">Last</a>
+            </div>
+            <div th:unless="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary">Last</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

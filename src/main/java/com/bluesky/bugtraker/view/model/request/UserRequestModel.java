@@ -14,7 +14,7 @@ import java.util.Objects;
 public class UserRequestModel {
     @NotNull
     @NotEmpty
-    @Size(min = 5)
+    @Size(min = 4)
     private String username;
     @NotNull
     @NotEmpty

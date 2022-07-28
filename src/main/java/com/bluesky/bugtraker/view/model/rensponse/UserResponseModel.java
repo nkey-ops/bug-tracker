@@ -16,8 +16,12 @@ public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     private String username;
     private String email;
 
-    @JsonIgnore
-    private Set<ProjectResponseModel> projects = new HashSet<>();
+    public UserResponseModel(String username) {
+        this.username = username;
+    }
+
+    public UserResponseModel() {
+    }
 
     @Override
     public boolean equals(Object o) {

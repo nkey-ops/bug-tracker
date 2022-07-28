@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Set;
 
-public interface UserService extends UserDetailsService {
+public interface UserService extends UserDetailsService  {
     UserDto createAdminUser(String email, String password, Set<RoleEntity> roles);
 
     UserDto createUser(UserDto userDto);

@@ -1,6 +1,7 @@
 package com.bluesky.bugtraker.shared.dto;
 
 
+import com.bluesky.bugtraker.io.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +22,7 @@ public class UserDto implements Serializable {
 
     private Long id;
     private String publicId;
-    private String userName;
+    private String username;
     private String email;
     private String password;
 
@@ -35,12 +36,12 @@ public class UserDto implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserDto userDto = (UserDto) o;
-        return Objects.equals(publicId, userDto.publicId) && Objects.equals(userName, userDto.userName) && Objects.equals(email, userDto.email) && Objects.equals(password, userDto.password);
+        return Objects.equals(publicId, userDto.publicId) && Objects.equals(username, userDto.username) && Objects.equals(email, userDto.email) && Objects.equals(password, userDto.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publicId, userName, email, password);
+        return Objects.hash(publicId, username, email, password);
     }
 
 }

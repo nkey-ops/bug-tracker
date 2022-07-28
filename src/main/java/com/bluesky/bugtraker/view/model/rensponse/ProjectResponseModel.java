@@ -12,6 +12,7 @@ import java.util.Set;
 @Getter @Setter
 public class ProjectResponseModel extends RepresentationModel<ProjectResponseModel> {
     private String name;
+
     private String publicId;
     @JsonIgnore
     private Set<BugResponseModel> bugs = new LinkedHashSet<>();

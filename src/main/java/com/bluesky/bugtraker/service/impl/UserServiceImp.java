@@ -47,7 +47,8 @@ public class UserServiceImp implements UserService {
     @Autowired
     public UserServiceImp(UserRepository userRepo, RoleRepository roleRepo,
                           BugRepository bugRepo,
-                          BCryptPasswordEncoder bCryptPasswordEncoder, Utils utils) {
+                          BCryptPasswordEncoder bCryptPasswordEncoder,
+                          Utils utils) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.bugRepo = bugRepo;
@@ -89,7 +90,7 @@ public class UserServiceImp implements UserService {
         if (userRepo.existsByEmail(email)) throw new UserServiceException(RECORD_ALREADY_EXISTS, email);
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email);
-        userEntity.setUserName("Admiral");
+        userEntity.setUsername("Admiral");
         userEntity.setPublicId(utils.generateUserId(30));
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(password));
 //        TODO after testing change to false;
@@ -123,7 +124,7 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDto updateUser(String id, UserDto userDto) {
         UserEntity userEntity = getUserEntity(id);
-        userEntity.setUserName(userDto.getUserName());
+        userEntity.setUsername(userDto.getUsername());
 
         return modelMapper.map(userRepo.save(userEntity), UserDto.class);
     }
@@ -172,11 +173,10 @@ public class UserServiceImp implements UserService {
         return new LinkedHashSet<>(pagedProjects.getContent());
     }
 
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(NO_RECORD_FOUND + ": " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(NO_RECORD_FOUND + " with : " +email));
 
         return new UserPrincipal(userEntity);
     }

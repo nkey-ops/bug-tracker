@@ -30,7 +30,7 @@ public class InitialUserSetup {
     private String superAdminUserPassword;
 
 
-    private AuthorityRepository authorityRepo;
+    private final AuthorityRepository authorityRepo;
     private RoleRepository roleRepo;
 
     private UserService userService;

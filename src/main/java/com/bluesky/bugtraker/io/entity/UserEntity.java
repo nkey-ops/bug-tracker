@@ -29,8 +29,7 @@ public class UserEntity implements Serializable {
     private String publicId;
 
     @Column(nullable = false, length = 20)
-    private String userName;
-
+    private String username;
     @Column(nullable = false, length = 320)
     private String email;
 
@@ -63,11 +62,11 @@ public class UserEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(userName, that.userName) && Objects.equals(email, that.email);
+        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(username, that.username) && Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, userName, email);
+        return Objects.hash(id, publicId, username, email);
     }
 }

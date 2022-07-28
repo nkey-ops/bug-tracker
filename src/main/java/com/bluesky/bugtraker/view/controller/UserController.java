@@ -1,6 +1,6 @@
 package com.bluesky.bugtraker.view.controller;
 
-import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
+import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
@@ -19,6 +19,8 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping("/users")
+@SessionAttributes("user")
 public class UserController {
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
@@ -42,6 +45,18 @@ public class UserController {
         this.modelAssembler = modelAssembler;
 
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+    }
+
+    @ModelAttribute("user")
+    public UserResponseModel getCurrentUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth.getPrincipal().toString().equals("anonymousUser"))
+            return new UserResponseModel("Anonymous User");
+
+        UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
+
+        return getUser(userPrincipal.getId());
     }
 
     @PreAuthorize("#id == principal.getId()")
@@ -72,14 +87,16 @@ public class UserController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ModelAndView createUser(@ModelAttribute("user") @Valid
+    public ModelAndView createUser(@ModelAttribute("userCredentials") @Valid
                                    UserRequestModel userRequestModel,
                                    BindingResult bindingResult) {
+
         ModelAndView mav = new ModelAndView("register");
 
         if (bindingResult.hasErrors()) {
-            return  mav.addObject("userRequest", userRequestModel);
+            return mav;
         }
+
 
 
         UserDto  userDto = userService.createUser(
@@ -88,7 +105,7 @@ public class UserController {
                 modelMapper.map(userDto, UserResponseModel.class));
 
 
-        return new ModelAndView("redirect:/home", "userResponse", responseModel);
+        return new ModelAndView("redirect:/home", "user", responseModel);
     }
 
 

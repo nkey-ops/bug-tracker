@@ -3,18 +3,19 @@ package com.bluesky.bugtraker.service;
 import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.view.model.request.ProjectRequestBody;
+import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
+import org.springframework.data.domain.Page;
 
 import java.util.Set;
 
 public interface ProjectService{
     ProjectDto getProject(String userId, String projectName);
 
-    Set<ProjectDto> getProjects(String userId, int pages, int limit);
+    Page<ProjectDto> getProjects(String userId, int pages, int limit);
 
     ProjectDto createProject(String userId, ProjectDto projectDto);
 
-    ProjectDto setProjectName(String userId, String projectName, ProjectRequestBody projectRequestBody);
+    ProjectDto setProjectName(String userId, String projectName, ProjectRequestModel projectRequestBody);
 
     void deleteProject(String userId, String projectName);
 

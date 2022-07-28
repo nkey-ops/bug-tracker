@@ -14,18 +14,19 @@ import java.util.Set;
 public class UserPrincipal implements UserDetails {
     @Serial
     private static final long serialVersionUID = 8772880620156304062L;
-    private final UserEntity userEntity;
+    //TODO change to UserDto
+    private final UserEntity user;
     private  final  String id;
-    public UserPrincipal(UserEntity userEntity) {
-        this.userEntity = userEntity;
-        id = userEntity.getPublicId();
+    public UserPrincipal(UserEntity user) {
+        this.user = user;
+        id = user.getPublicId();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
-        Set<RoleEntity> roles = userEntity.getRoles();
+        Set<RoleEntity> roles = user.getRoles();
         if(roles == null) return grantedAuthorities;
 
         roles.forEach(role ->{
@@ -40,12 +41,12 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return userEntity.getEncryptedPassword();
+        return user.getEncryptedPassword();
     }
 
     @Override
     public String getUsername() {
-        return userEntity.getEmail();
+        return user.getEmail();
     }
 
     @Override
@@ -73,14 +74,14 @@ public class UserPrincipal implements UserDetails {
         return id;
     }
 
-    public UserEntity getUserEntity() {
-        return userEntity;
+    public UserEntity getUser() {
+        return user;
     }
 
 
 
     public boolean isSubscribedTo(String userId, String projectName){
-        return  userEntity.getSubscribedToProjects()
+        return  user.getSubscribedToProjects()
                 .stream()
                 .anyMatch(project ->
                         project.getCreator().getPublicId().equals(userId)

@@ -22,10 +22,10 @@ public class BugModelAssembler implements RepresentationModelAssembler<BugRespon
                 linkTo(methodOn(UserController.class).
                         getUser(bug.getReporter().getPublicId())).withRel("reported by"),
 
-                linkTo(methodOn(ProjectController.class).
-                        getProject(bug.getProject().getCreator().getPublicId(),
-                                   bug.getProject().getName()))
-                        .withRel("project"),
+//                linkTo(methodOn(ProjectController.class).
+//                        getProject(bug.getProject().getCreator().getPublicId(),
+//                                   bug.getProject().getName()))
+//                        .withRel("project"),
 
                 linkTo(methodOn(BugController.class).
                         getBugFixers(bug.getProject().getCreator().getPublicId(),

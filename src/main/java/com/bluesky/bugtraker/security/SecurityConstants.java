@@ -3,6 +3,8 @@ package com.bluesky.bugtraker.security;
 import com.bluesky.bugtraker.context.SpringApplicationContext;
 
 public class SecurityConstants {
+
+
     private  static final AppProperties appProperties =
             (AppProperties) SpringApplicationContext.getBean("appProperties");
 

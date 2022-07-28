@@ -26,13 +26,13 @@ public class ProjectModelAssembler implements
                         getBugs(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of bugs"),
 
                 linkTo(methodOn(ProjectController.class).
-                        getSubscribers(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of subscribers"),
+                        getSubscribers(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of subscribers"));
 
-                linkTo(methodOn(ProjectController.class).
-                        getProject(project.getCreator().getPublicId(), project.getName())).withSelfRel(),
+//                linkTo(methodOn(ProjectController.class).
+//                        getProject(project.getCreator().getPublicId(), project.getName())).withSelfRel());
 
-                linkTo(methodOn(ProjectController.class)
-                        .getProjects(project.getCreator().getPublicId(), 1, 15)).withRel("list of projects"));
+//                linkTo(methodOn(ProjectController.class)
+//                        .getProjects(project.getCreator().getPublicId(), 1, 15)).withRel("list of projects"));
 
 
         return project;
@@ -42,8 +42,8 @@ public class ProjectModelAssembler implements
             Set<ProjectResponseModel> projectResponseModels, String userId) {
 
         CollectionModel<ProjectResponseModel> result = toCollectionModel(projectResponseModels);
-        result.add(
-                linkTo(methodOn(ProjectController.class).getProjects(userId, 1, 15)).withSelfRel());
+//        result.add(
+//                linkTo(methodOn(ProjectController.class).getProjects(userId, 1, 15)).withSelfRel());
 
         return result;
     }

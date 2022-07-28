@@ -15,8 +15,8 @@ public  class UserModelAssembler implements RepresentationModelAssembler<UserRes
     @Override
     public UserResponseModel toModel(UserResponseModel user) {
         return user.add(
-                linkTo(methodOn(ProjectController.class).
-                        getProjects(user.getPublicId(), 1, 15)).withRel("user projects"),
+//                linkTo(methodOn(ProjectController.class).
+//                        getProjects(user.getPublicId(), 1, 15)).withRel("user projects"),
 
                 linkTo(methodOn(UserController.class).
                         getSubscribedProjects(user.getPublicId(), 1, 15)).withRel("subscribed to projects"),

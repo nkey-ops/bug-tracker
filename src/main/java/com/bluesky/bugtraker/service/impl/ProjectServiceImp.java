@@ -11,7 +11,7 @@ import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.dto.BugDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.view.model.request.ProjectRequestBody;
+import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
@@ -63,16 +62,15 @@ public class ProjectServiceImp implements ProjectService {
     }
 
     @Override
-    public Set<ProjectDto> getProjects(String userId, int page, int limit) {
+    public Page<ProjectDto> getProjects(String userId, int page, int limit) {
         if (page-- < 1 || limit < 1) throw new IllegalArgumentException();
 
         UserEntity userEntity = modelMapper.map(userService.getUserById(userId), UserEntity.class);
 
-        Page<ProjectEntity> entityPages =
+          Page<ProjectEntity> entityPages =
                 projectRepo.findAllByCreator(userEntity, PageRequest.of(page, limit));
-        List<ProjectEntity> content = entityPages.getContent();
 
-        return modelMapper.map(content, new TypeToken<Set<ProjectDto>>() {
+        return modelMapper.map(entityPages, new TypeToken<Page<ProjectDto>>() {
         }.getType());
     }
 
@@ -93,7 +91,7 @@ public class ProjectServiceImp implements ProjectService {
     }
 
     @Override
-    public ProjectDto setProjectName(String userId, String projectName, ProjectRequestBody projectRequestBody) {
+    public ProjectDto setProjectName(String userId, String projectName, ProjectRequestModel projectRequestBody) {
         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
         projectEntity.setName(projectRequestBody.getName());
 
