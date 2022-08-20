@@ -24,6 +24,9 @@ public class Utils {
         return  generateRandomString(length);
     }
 
+    public String generateCommentId(int length) { return  generateRandomString(length);
+    }
+
     private String generateRandomString(int length) {
         StringBuilder returnValue = new StringBuilder(length);
 
@@ -33,5 +36,4 @@ public class Utils {
 
         return new String(returnValue);
     }
-
 }

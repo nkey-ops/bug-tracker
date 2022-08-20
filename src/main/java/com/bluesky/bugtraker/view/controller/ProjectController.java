@@ -7,39 +7,40 @@ import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.assembler.ProjectModelAssembler;
-import com.bluesky.bugtraker.view.model.rensponse.assembler.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
+import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Map;
 import java.util.Set;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
+// TODO change userId to creatorId
 @Controller
 @RequestMapping("/users/{userId}/projects")
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectModelAssembler modelAssembler;
-    private  final UserController userController;
+    private final UserController userController;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     public ProjectController(ProjectService projectService,
                              ProjectModelAssembler modelAssembler,
-                              UserController userController) {
+                             UserController userController) {
         this.projectService = projectService;
         this.modelAssembler = modelAssembler;
         this.userController = userController;
@@ -48,21 +49,22 @@ public class ProjectController {
     }
 
     @ModelAttribute("user")
-    public UserResponseModel getCurrentUser(){
+    public UserResponseModel getCurrentUser() {
         return userController.getCurrentUser();
     }
 
+
     @PreAuthorize("#userId == principal.id")
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ModelAndView createProject(@PathVariable String userId,
-                                      @ModelAttribute("project")
-                                      @Valid ProjectRequestModel projectRequestModel,
-                                      @ModelAttribute("user") UserResponseModel user,
-                                      BindingResult bindingResult) {
+    public String createProject(@PathVariable String userId,
+                                @Valid @ModelAttribute("projectRequestModel") ProjectRequestModel projectRequestModel,
+                                BindingResult bindingResult,
+                                Model model) {
 
-        ModelAndView mav = new ModelAndView("/forms/project-form");
-        mav.addObject("user", user);
-        if (bindingResult.hasErrors()) return mav;
+
+        model.addAttribute("creatorId", userId);
+
+        if (bindingResult.hasErrors()) return "forms/project-form";
 
         ProjectDto projectDto = modelMapper.map(projectRequestModel, ProjectDto.class);
 
@@ -71,14 +73,14 @@ public class ProjectController {
         } catch (ServiceException e) {
             bindingResult.addError(
                     new ObjectError("error", e.getErrorType().getErrorMessage()));
-            return mav;
+            return "forms/project-form";
         }
 
         ProjectResponseModel projectResponseModel =
                 modelMapper.map(projectDto, ProjectResponseModel.class);
-        projectRequestModel = null;
 
-        return mav.addObject("isCreated", "true");
+         model.addAttribute("isCreated", "true");
+        return "forms/project-form";
     }
 
     @PreAuthorize("#userId == principal.id or  principal.isSubscribedTo(#userId, #projectName)")
@@ -86,8 +88,9 @@ public class ProjectController {
     public String getProject(@PathVariable String userId,
                              @PathVariable String projectName,
                              @ModelAttribute("user") UserResponseModel user,
-                             Model model,
-                             @RequestParam Map<String, String> params ) {
+                             @RequestParam Map<String, String> params,
+                             Model model) {
+
         ProjectDto projectDto = projectService.getProject(userId, projectName);
         ProjectResponseModel projectResponseModel =
                 modelMapper.map(projectDto, ProjectResponseModel.class);
@@ -95,30 +98,58 @@ public class ProjectController {
         model.addAttribute("user", user);
         model.addAttribute("project", projectResponseModel);
 
+        String subscribersLink = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .slash("subscribers").toUri().toString();
 
+        model.addAttribute("subscribersLink", subscribersLink);
 
+        String bugsLink = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .slash("bugs").toUri().toString();
 
+        model.addAttribute("bugsLink", bugsLink);
 
-        return "objects/project";
+        return "pages/project";
     }
 
     @PreAuthorize(value = "#userId == principal.id")
     @GetMapping
-    public void getProjects(Model model,
-                            @PathVariable String userId,
-                            @RequestParam(value = "page", defaultValue = "1") int page,
-                            @RequestParam(value = "limit", defaultValue = "15") int limit) {
-        Page<ProjectDto> projectsDto = projectService.getProjects(userId, page, limit);
+    public String getProjects(
+            @PathVariable String userId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "8") int limit,
+            @ModelAttribute("user") UserResponseModel user,
+            Model model) {
+        Set<ProjectDto> projectsDto = projectService.getProjects(userId, page, limit);
 
-        Page<ProjectResponseModel> projectPages =
-                modelMapper.map(projectsDto, new TypeToken<Page<ProjectResponseModel>>() {
+        Set<ProjectResponseModel> pagedProjectsResponse =
+                modelMapper.map(projectsDto, new TypeToken<Set<ProjectResponseModel>>() {
                 }.getType());
 
 
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", projectPages.getTotalPages());
-        model.addAttribute("projectsList", projectPages.getContent());
-        model.addAttribute("totalProjects", projectPages.getTotalElements());
+        model.addAttribute("listName", "My Projects");
+
+        model.addAttribute("elementsList",  pagedProjectsResponse);
+        model.addAttribute("isEmpty",  pagedProjectsResponse.isEmpty());
+
+        model.addAttribute("projectCreatorId", userId);
+        model.addAttribute("projectRequestModel", new ProjectRequestModel());
+
+
+        String baseLink = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .toUri().toString();
+        model.addAttribute("baseLink", baseLink);
+
+
+
+        return "fragments/list/body/projects-body";
     }
 
     @PreAuthorize("#userId == principal.id")
@@ -143,48 +174,78 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#id == principal.id")
-    @PutMapping("/{projectName}/subscribers/{subscriberId}")
-    public ProjectResponseModel addSubscriber(@PathVariable String userId,
-                                              @PathVariable String projectName,
-                                              @PathVariable String subscriberId) {
+    @PreAuthorize("#userId == principal.id")
+    @PostMapping("/{projectName}/subscribers")
+    public String addSubscriber(@PathVariable String userId,
+                                @PathVariable String projectName,
+                                @ModelAttribute("subscriberRequestModel")
+                                    SubscriberRequestModel subscriber,
+                                BindingResult bindingResult,
+                                Model model,
+                                HttpServletResponse response) {
 
-        ProjectDto projectDto = projectService.addSubscriber(
-                userId, projectName, subscriberId);
+        model.addAttribute("projectCreatorId", userId);
+        model.addAttribute("projectName", projectName);
 
+        try {
+            projectService.addSubscriber(
+                    userId, projectName, subscriber);
+        } catch (ServiceException e) {
+            bindingResult.addError(
+                    new ObjectError("error",
+                            e.getErrorType().getErrorMessage()));
+            return "forms/subscriber-form :: subscriber-form";
+        }
+        response.setStatus(HttpStatus.CREATED.value());
 
-        return modelAssembler.toModel(modelMapper.map(projectDto, ProjectResponseModel.class));
+        model.addAttribute("isSuccess", true);
+        return "forms/subscriber-form :: #subscriber-form-block";
     }
 
-    @PreAuthorize("#id == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+
+    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
     @GetMapping("/{projectName}/subscribers")
-    public Set<UserResponseModel> getSubscribers(
+    public String getSubscribers(
             @PathVariable String userId,
             @PathVariable String projectName,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "limit", defaultValue = "15") int limit) {
+            Model model) {
 
-        Set<UserDto> userDtos = projectService.getSubscribers(
-                userId, projectName, page, limit);
+        Set<UserDto> subsDtos =
+                projectService.getSubscribers(
+                        userId, projectName);
 
-        Set<UserResponseModel> userResponseModels =
-                modelMapper.map(userDtos, new TypeToken<Set<UserResponseModel>>() {
+        Set<UserResponseModel> subscribersResponse =
+                modelMapper.map(subsDtos, new TypeToken<Set<UserResponseModel>>() {
                 }.getType());
 
-        return  userResponseModels;
+        model.addAttribute("elementsList", subscribersResponse);
+
+        String link = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .slash("subscribers").toUri().toString();
+
+        model.addAttribute("baseLink", link);
+        model.addAttribute("subscriberRequestModel", new SubscriberRequestModel());
+        model.addAttribute("projectCreatorId", userId);
+        model.addAttribute("projectName", projectName);
+
+
+        return "fragments/list/body/subscribers-body :: #subscribers-body";
     }
 
     @PreAuthorize("#id == principal.id or #subscriberId == principal.id")
     @DeleteMapping("/{projectName}/subscribers/{subscriberId}")
-    public ProjectResponseModel removeSubscriber(@PathVariable String userId,
-                                                 @PathVariable String projectName,
-                                                 @PathVariable String subscriberId) {
+    public HttpEntity<?> removeSubscriber(@PathVariable String userId,
+                                       @PathVariable String projectName,
+                                       @PathVariable String subscriberId) {
 
         ProjectDto projectDto = projectService.removeSubscriber(
                 userId, projectName, subscriberId);
 
-
-        return modelAssembler.toModel(modelMapper.map(projectDto, ProjectResponseModel.class));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+//        return "redirect:/users/" + userId + "/projects/" + projectName + "/subscribers";
     }
 
 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<!---->
+<div th:fragment="listInfo(listName)">
+    <h4 class="card-title">[[${listName}]]
+    </h4>
+</div>
+
+<!---->
+<div id="pagination" th:fragment="paging (baseLink, limit, currentPage, totalPages, id)">
+    <div class="text-center">
+        <div class="btn-group" role="group" aria-label="Basic example"
+             id="mainLink" th:href="${baseLink}">
+            <!-- First -->
+            <div th:if="${currentPage> 1}">
+                <button type="button" class="btn btn-outline-primary"
+                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${1}' + '&limit=' + '${limit}', '${id}' )|"
+                >First
+                </button>
+            </div>
+            <div th:unless="${currentPage > 1}">
+                <button type="button" class="btn btn-outline-primary">First</button>
+            </div>
+            <!--  Previous  -->
+            <div th:if="${currentPage > 1}">
+                <button type="button" class="btn btn-outline-primary"
+                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${currentPage - 1}' + '&limit=' + '${limit}', '${id}' )|"
+                >&lt;
+                </button>
+            </div>
+            <div th:unless="${currentPage > 1}">
+                <button type="button" class="btn btn-outline-primary">&lt;</button>
+            </div>
+            <!-- Current-->
+            <button type="button" class="btn btn-outline-primary">[[${currentPage}]]
+            </button>
+            <div th:if="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary"
+                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${currentPage + 1}' + '&limit=' + '${limit}', '${id}' )|"
+                >>
+                </button>
+            </div>
+
+            <div th:unless="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary">&gt;</button>
+            </div>
+            <!-- Last   -->
+            <div th:if="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary"
+                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${totalPages}' + '&limit=' + '${limit}', '${id}' )|"
+                >Last
+                </button>
+            </div>
+            <div th:unless="${currentPage < totalPages}">
+                <button type="button" class="btn btn-outline-primary">Last</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Empty List-->
+<div class="text-center" th:fragment="emptyList">
+    <h5 class="text-muted"> List is Empty </h5>
+</div>
+
+
+<script th:src="@{/assets/js/test/load-into.js}"></script>
+
+</body>
+</html>
+

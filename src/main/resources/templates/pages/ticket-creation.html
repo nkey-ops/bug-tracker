@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Form</title>
+
+    <!-- Js script -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <!-- end Js script -->
+
+    <!-- plugins:css -->
+    <link href="https://cdn.jsdelivr.net/webjars/bootstrap/5.1.3/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen"/>
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- endinject -->
+
+    <!-- Layout styles -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/assets/images/favicon.png">
+</head>
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <div th:replace="fragments/sidebar"></div>
+    <!-- partial:partials/_sidebar.html ends -->
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <div th:replace="fragments/navbar"></div>
+        <!-- partial:partials/_navbar.html  ends-->
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h3 class="page-title"> Ticket Form </h3>
+                </div>
+                <div class="row ">
+                    <!-- Ticket Form -->
+                    <div class="col-10 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body" th:include="/forms/ticket-form ::
+                                                        ticket-form(
+                                                            ticketRequestModel=${ticketRequestModel},
+                                                            projectCreatorId=${projectCreatorId},
+                                                            projectName=${projectName},
+                                                            statusList=${statusList},
+                                                            severityList=${severityList},
+                                                            priorityList=${priorityList})">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- content-wrapper ends -->
+                <!-- partial -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+</div>
+<!-- container-scroller -->
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+
+<!-- endinject -->
+<!-- Plugin js for this page -->
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"
+        src="/assets/js/off-canvas.js"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"
+        src="/assets/js/hoverable-collapse.js"></script>
+<script th:src="@{/assets/js/misc.js}"
+        src="/assets/js/misc.js"></script>
+<script th:src="@{/assets/js/settings.js}"
+        src="/assets/js/settings.js"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<!--My Custom js-->
+<script th:src="@{/assets/js/test/load-into.js}"></script>
+<script th:src="@{/assets/js/test/textarea.js}"></script>
+<!-- End custom js for this page -->
+</body>
+</html>

@@ -38,41 +38,43 @@ public class ProjectEntity implements Serializable {
     @OneToMany(
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private Set<BugEntity> bugs;
+    private Set<TicketEntity> tickets;
 
     @ManyToMany
-    @JoinTable(name = "subscribers_projects")
+    @JoinTable(name = "projects_subscribers",
+            joinColumns=@JoinColumn(name="project_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="subscriber_id", referencedColumnName="id"))
     private Set<UserEntity> subscribers;
 
-    public boolean addBug(BugEntity bugEntity) {
-        boolean isAdded = bugs.add(bugEntity);
+    public boolean addBug(TicketEntity ticketEntity) {
+        boolean isAdded = tickets.add(ticketEntity);
 
-        if (isAdded) bugEntity.setProject(this);
+        if (isAdded) ticketEntity.setProject(this);
 
         return isAdded;
     }
 
-    public boolean removeBug(BugEntity bugEntity) {
-        boolean isRemoved = bugs.remove(bugEntity);
+    public boolean removeBug(TicketEntity ticketEntity) {
+        boolean isRemoved = tickets.remove(ticketEntity);
 
-        if (isRemoved) bugEntity.setProject(null);
+        if (isRemoved) ticketEntity.setProject(null);
 
         return isRemoved;
     }
-    public boolean addSubscriber(UserEntity userEntity) {
-        boolean isAddedUser = subscribers.add(userEntity);
+    public boolean addSubscriber(UserEntity subscriber) {
+        boolean isAddedUser = subscribers.add(subscriber);
 
         boolean isAddedProject =
-            userEntity.getSubscribedToProjects().add(this);
+            subscriber.getSubscribedToProjects().add(this);
 
         return isAddedUser && isAddedProject;
     }
 
-    public boolean removeSubscriber(UserEntity userEntity) {
-        boolean isRemovedUser = subscribers.remove(userEntity);
+    public boolean removeSubscriber(UserEntity subscriber) {
+        boolean isRemovedUser = subscribers.remove(subscriber);
 
         boolean isRemovedProject =
-                userEntity.getSubscribedToProjects().remove(this);
+                subscriber.getSubscribedToProjects().remove(this);
 
         return isRemovedUser && isRemovedProject;
     }

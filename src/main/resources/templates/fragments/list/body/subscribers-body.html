@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div id="subscribers-body" class="card">
+    <div class="card-body">
+        <h4 class="card-title">Subscribers</h4>
+        <!-- List Content        -->
+        <div class="form-group"
+             th:insert="fragments/list/content ::
+                        subscribers(
+                                    list=${elementsList},
+                                    baseLink=${baseLink},
+                                    updateId='subscribers-body')">
+        </div>
+
+        <!-- Add Subscriber Form -->
+        <div th:insert="forms/subscriber-form ::
+                                    subscriber-form(
+                                        subscriberRequestModel=${subscriberRequestModel},
+                                        postRequestLink=${baseLink},
+                                        updateId='subscribers-body',
+                                        updateRequestLink=${baseLink})">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

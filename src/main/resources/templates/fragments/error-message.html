@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="default" >
+    <p class="alert alert-danger"
+       th:each="error: ${#fields.allErrors()}"
+       th:text="${error}">Input is incorrect</p>
+    <p th:text="${error}"></p>
+</div>
+
+</body>
+</html>

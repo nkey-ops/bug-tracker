@@ -1,17 +1,13 @@
 package com.bluesky.bugtraker.view.controller;
 
-import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
-import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpSession;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Controller
 public class NavigationController {
@@ -41,7 +37,13 @@ public class NavigationController {
     @RequestMapping(value = {"/home", "/"})
     public String home(@ModelAttribute("user") UserResponseModel user,
                        Model model) {
+
+        String myProjectsLink = linkTo(UserController.class)
+                .slash(user.getPublicId())
+                .slash("projects").toUri().toString();
+
         model.addAttribute("user", user);
+        model.addAttribute("projectsLink", myProjectsLink);
 
         return "index";
     }
@@ -50,8 +52,8 @@ public class NavigationController {
     @RequestMapping(value = "/project-form")
     public ModelAndView showProjectForm() {
 
-        ModelAndView mav = new ModelAndView("/forms/project-form",
-                "project", new ProjectRequestModel());
+        ModelAndView mav = new ModelAndView("project-form2");
+//                "project", new ProjectRequestModel());
 
         return mav.addObject("user", getCurrentUser());
     }
@@ -66,8 +68,20 @@ public class NavigationController {
 
 
         model.addAttribute("user", user);
-        projectController.getProjects(model, user.getPublicId(),  page, limit);
+//        projectController.getProjects(model, user.getPublicId(),  page, limit);
 
         return "/list/my-projects";
+    }
+
+
+    @RequestMapping("/test")
+    public  String test(){
+        return "/test";
+    }
+    @RequestMapping("/test-replace")
+    public  String testReplace(Model model){
+        model.addAttribute("customName", "My Name");
+
+        return "test-part :: part";
     }
 }

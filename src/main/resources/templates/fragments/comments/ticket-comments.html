@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div id="comments-block" class="card">
+    <div class="card-body">
+        <h4 class="card-title mb-1">Chat </h4>
+
+        <div class="row  d-flex justify-content-center">
+            <div class="col-md-12 form-group">
+                <div style="overflow-y: scroll !important; height:400px !important; overflow-x: hidden">
+                    <ul class="card p-2 align-content-center" style="background: #26353e"
+                        th:each="comment : ${commentsList}">
+                        <li th:replace="fragments/comments/comment ::
+                        comment(
+                                username=${comment.user.username},
+                                userComment=${comment.text},
+                                uploadTime=${comment.uploadTime}
+                                )">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-group" th:replace="fragments/list/list-parts ::
+                            paging (
+                                    baseLink=${baseLink},
+                                    limit=${limit},
+                                    currentPage=${currentPage},
+                                    totalPages=${totalPages},
+                                    id='comments-block')">
+
+            </div>
+        </div>
+        <div class="bg-grey p-2">
+
+            <form id="comment-form" class="forms-sample" th:object="${commentForm} " th:method="post"
+                  th:action="@{${baseLink}}">
+                <div class="d-flex flex-row align-items-start">
+                    <img class="rounded-circle"
+                         src="https://i.imgur.com/RpzrMR2.jpg"
+                         width="40"/>
+
+                    <textarea class="form-control ml-1 shadow-none textarea" th:field="*{text}"
+                              required style="resize: vertical"></textarea>
+                </div>
+                <div class="mt-2 text-right">
+                    <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
+                        comment
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm ml-1 shadow-none" type="reset">Cancel</button>
+                </div>
+            </form>
+            <script type="text/javascript">
+                $("#comment-form").submit(function (e) {
+
+                    e.preventDefault(); // avoid to execute the actual submit of the form.
+
+                    var form = $(this);
+                    var actionUrl = form.attr('action');
+
+                    $.ajax({
+                        type: "POST",
+                        url: actionUrl,
+                        data: form.serialize(), // serializes the form's elements.
+                        success: function (data) {
+                            $('#comments-block').html($(data).html());
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+
+
+</html>

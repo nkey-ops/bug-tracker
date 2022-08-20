@@ -2,10 +2,10 @@ package com.bluesky.bugtraker.view.controller;
 
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.dto.BugDto;
+import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.view.model.rensponse.BugResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.assembler.BugModelAssembler;
@@ -15,6 +15,7 @@ import com.bluesky.bugtraker.view.model.request.UserRequestModel;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,8 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponseModel getUser(@PathVariable String id) {
         UserResponseModel responseModel =
-                modelMapper.map(userService.getUserById(id), UserResponseModel.class);
+                modelMapper.map(
+                        userService.getUserById(id), UserResponseModel.class);
 
         return modelAssembler.toModel(responseModel);
     }
@@ -87,7 +89,7 @@ public class UserController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ModelAndView createUser(@ModelAttribute("userCredentials") @Valid
+    public ModelAndView createUser(@Valid @ModelAttribute
                                    UserRequestModel userRequestModel,
                                    BindingResult bindingResult) {
 
@@ -97,15 +99,13 @@ public class UserController {
             return mav;
         }
 
-
-
         UserDto  userDto = userService.createUser(
                     modelMapper.map(userRequestModel, UserDto.class));
         UserResponseModel responseModel = modelAssembler.toModel(
                 modelMapper.map(userDto, UserResponseModel.class));
 
 
-        return new ModelAndView("redirect:/home", "user", responseModel);
+        return new ModelAndView("redirect:/home");
     }
 
 
@@ -119,43 +119,43 @@ public class UserController {
     }
 
 
-    @PreAuthorize("#id == principal.id")
-    @GetMapping("/{id}/reported-bugs")
-    public CollectionModel<BugResponseModel> getReportedBugs(
-            @PathVariable String id,
+    @PreAuthorize("#userId == principal.id")
+    @GetMapping("/{userId}/reported-bugs")
+    public CollectionModel<TicketResponseModel> getReportedBugs(
+            @PathVariable String userId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "15") int limit) {
 
 
-        Set<BugDto> bugs = userService.getReportedBugs(id, page, limit);
-        Set<BugResponseModel> bugResponseModels = modelMapper.map(
-                bugs, new TypeToken<Set<BugResponseModel>>() {
+        Page<TicketDto> bugs = userService.getReportedTickets(userId, page, limit);
+        Set<TicketResponseModel> ticketResponseModels = modelMapper.map(
+                bugs.getContent(), new TypeToken<Set<TicketResponseModel>>() {
                 }.getType());
 
         BugModelAssembler bugModelAssembler = new BugModelAssembler();
 
-        return bugModelAssembler.toCollectionModel(bugResponseModels)
+        return bugModelAssembler.toCollectionModel(ticketResponseModels)
                 .add(linkTo(methodOn(UserController.class)
-                        .getReportedBugs(id, page, limit)).withSelfRel());
+                        .getReportedBugs(userId, page, limit)).withSelfRel());
     }
 
     @PreAuthorize("#id == principal.id")
     @GetMapping("/{id}/bugs-to-be-fixed")
-    public CollectionModel<BugResponseModel> getWorkingOnBugs(
+    public CollectionModel<TicketResponseModel> getWorkingOnBugs(
             @PathVariable String id,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "15") int limit) {
 
 
-        Set<BugDto> workingOnBugs = userService.getGetWorkingOnBugs(id, page, limit);
+        Page<TicketDto> workingOnBugs = userService.getWorkingOnTickets(id, page, limit);
 
-        Set<BugResponseModel> bugResponseModels = modelMapper.map(
-                workingOnBugs, new TypeToken<Set<BugResponseModel>>() {
+        Set<TicketResponseModel> ticketResponseModels = modelMapper.map(
+                workingOnBugs.getContent(), new TypeToken<Set<TicketResponseModel>>() {
                 }.getType());
 
         BugModelAssembler bugModelAssembler = new BugModelAssembler();
 
-        return bugModelAssembler.toCollectionModel(bugResponseModels)
+        return bugModelAssembler.toCollectionModel(ticketResponseModels)
                 .add(linkTo(methodOn(UserController.class)
                         .getWorkingOnBugs(id, page, limit)).withSelfRel());
 
@@ -163,16 +163,16 @@ public class UserController {
 
     @PreAuthorize("#id == principal.id")
     @GetMapping("/{id}/subscribed-to-projects")
-    public CollectionModel<ProjectResponseModel> getSubscribedProjects(
+    public CollectionModel<ProjectResponseModel> getSubscribedOnProjects(
             @PathVariable String id,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "15") int limit) {
 
 
-        Set<ProjectDto> subscribedProjects = userService.getSubscribedProjects(id, page, limit);
+        Page<ProjectDto> subscribedOnProjects = userService.getSubscribedOnProjects(id, page, limit);
 
         Set<ProjectResponseModel> projectResponseModels = modelMapper.map(
-                subscribedProjects, new TypeToken<Set<ProjectResponseModel>>() {
+                subscribedOnProjects.getContent(), new TypeToken<Set<ProjectResponseModel>>() {
                 }.getType());
 
 
@@ -180,7 +180,7 @@ public class UserController {
 
         return projectModelAssembler.toCollectionModel(projectResponseModels)
                 .add(linkTo(methodOn(UserController.class)
-                        .getSubscribedProjects(id, page, limit)).withSelfRel());
+                        .getSubscribedOnProjects(id, page, limit)).withSelfRel());
 
     }
 

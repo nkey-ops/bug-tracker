@@ -1,7 +1,5 @@
 package com.bluesky.bugtraker.view.model.rensponse.assembler;
 
-import com.bluesky.bugtraker.view.controller.BugController;
-import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.UserController;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import org.springframework.hateoas.CollectionModel;
@@ -20,13 +18,13 @@ public class ProjectModelAssembler implements
     public ProjectResponseModel toModel(ProjectResponseModel project) {
         project.add(
                 linkTo(methodOn(UserController.class).
-                        getUser(project.getCreator().getPublicId())).withRel("creator"),
+                        getUser(project.getCreator().getPublicId())).withRel("creator"));
 
-                linkTo(methodOn(BugController.class).
-                        getBugs(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of bugs"),
+//                linkTo(methodOn(BugController.class).
+//                        getBugs(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of bugs"));
 
-                linkTo(methodOn(ProjectController.class).
-                        getSubscribers(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of subscribers"));
+//                linkTo(methodOn(ProjectController.class).
+//                        getSubscribers(project.getCreator().getPublicId(), project.getName(), 1, 15)).withRel("list of subscribers"));
 
 //                linkTo(methodOn(ProjectController.class).
 //                        getProject(project.getCreator().getPublicId(), project.getName())).withSelfRel());

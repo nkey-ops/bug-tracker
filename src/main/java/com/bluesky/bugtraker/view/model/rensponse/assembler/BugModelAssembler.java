@@ -1,9 +1,8 @@
 package com.bluesky.bugtraker.view.model.rensponse.assembler;
 
-import com.bluesky.bugtraker.view.controller.BugController;
-import com.bluesky.bugtraker.view.controller.ProjectController;
+import com.bluesky.bugtraker.view.controller.TicketController;
 import com.bluesky.bugtraker.view.controller.UserController;
-import com.bluesky.bugtraker.view.model.rensponse.BugResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -14,10 +13,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class BugModelAssembler implements RepresentationModelAssembler<BugResponseModel, BugResponseModel> {
+public class BugModelAssembler implements RepresentationModelAssembler<TicketResponseModel, TicketResponseModel> {
 
     @Override
-    public BugResponseModel toModel(BugResponseModel bug) {
+    public TicketResponseModel toModel(TicketResponseModel bug) {
         bug.add(
                 linkTo(methodOn(UserController.class).
                         getUser(bug.getReporter().getPublicId())).withRel("reported by"),
@@ -27,32 +26,32 @@ public class BugModelAssembler implements RepresentationModelAssembler<BugRespon
 //                                   bug.getProject().getName()))
 //                        .withRel("project"),
 
-                linkTo(methodOn(BugController.class).
+                linkTo(methodOn(TicketController.class).
                         getBugFixers(bug.getProject().getCreator().getPublicId(),
                                    bug.getProject().getName(),
                                    bug.getPublicId(),
                                    1 , 15))
-                        .withRel("bug fixers"),
+                        .withRel("bug fixers"));
 
-                linkTo(methodOn(BugController.class).
-                        getBug(bug.getProject().getCreator().getPublicId(),
-                                bug.getProject().getName(),
-                                bug.getPublicId()))
-                        .withSelfRel(),
+//                linkTo(methodOn(TicketController.class).
+//                        getTicket(bug.getProject().getCreator().getPublicId(),
+//                                bug.getProject().getName(),
+//                                bug.getPublicId()))
+//                        .withSelfRel());
 
-                linkTo(methodOn(BugController.class)
-                        .getBugs(bug.getProject().getCreator().getPublicId(),
-                                bug.getProject().getName(), 1, 15)).
-                        withRel("bugs"));
+//                linkTo(methodOn(BugController.class)
+//                        .getBugs(bug.getProject().getCreator().getPublicId(),
+//                                bug.getProject().getName(), 1, 15)).
+//                        withRel("bugs"));
         return bug;
     }
 
-    public CollectionModel<BugResponseModel> toCollectionModelWithSelfRel(
-            Set<BugResponseModel> bugResponseModels, String userId, String projectName) {
+    public CollectionModel<TicketResponseModel> toCollectionModelWithSelfRel(
+            Set<TicketResponseModel> ticketResponseModels, String userId, String projectName) {
 
-        CollectionModel<BugResponseModel> result = toCollectionModel(bugResponseModels);
-        result.add(
-                linkTo(methodOn(BugController.class).getBugs(userId, projectName, 1, 15)).withSelfRel());
+        CollectionModel<TicketResponseModel> result = toCollectionModel(ticketResponseModels);
+//        result.add(
+//                linkTo(methodOn(BugController.class).getBugs(userId, projectName, 1, 15)).withSelfRel());
 
         return result;
     }

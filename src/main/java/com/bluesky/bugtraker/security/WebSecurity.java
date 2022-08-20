@@ -5,22 +5,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
 public class WebSecurity {
 
-    private  final UserDetailsService userDetailsService;
-
-    public WebSecurity(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//      @formatter:off
         return http
                 .cors()
                 .and()
@@ -30,7 +24,7 @@ public class WebSecurity {
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/login", "/signup")
                 .permitAll()
-                .antMatchers(HttpMethod.POST, "/users/login")
+                .antMatchers(HttpMethod.POST, "/users")
                 .permitAll()
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
@@ -39,23 +33,28 @@ public class WebSecurity {
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
-                    .defaultSuccessUrl("/home", false)
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/home", true)
                     .usernameParameter("email")
                     .passwordParameter("password")
                     .loginProcessingUrl("/users/login")
                 .permitAll()
                 .and()
-                .logout().deleteCookies("JSESSIONID")
+                .logout()
+                    .logoutUrl("/logout")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
                 .and()
                 .rememberMe()
-                    .key(SecurityConstants.getTokenRememberMe())
+                .key(SecurityConstants.getTokenRememberMe())
                 .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME)
-                .userDetailsService(userDetailsService)
                 .and().build();
+//      @formatter:on
+    }
 
-
-
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

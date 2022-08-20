@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,14 +43,23 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean emailVerificationStatus;
 
-    @ManyToMany(mappedBy = "bugFixers",
-            fetch = FetchType.LAZY)
-    private Set<BugEntity> workingOnBugs;
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Set<TicketEntity> reportedTickets = new HashSet<>();
 
+    @ManyToMany(mappedBy = "ticketFixers",
+            fetch = FetchType.LAZY)
+    private Set<TicketEntity> workingOnTickets = new HashSet<>();
 
     @ManyToMany(mappedBy = "subscribers",
             fetch = FetchType.LAZY)
-    private Set<ProjectEntity> subscribedToProjects;
+    private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
+
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Set<CommentEntity> comments = new HashSet<>();
 
 
     @ManyToMany(fetch = FetchType.EAGER)

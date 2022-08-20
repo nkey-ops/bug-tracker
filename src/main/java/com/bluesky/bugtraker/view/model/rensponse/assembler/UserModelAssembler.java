@@ -1,6 +1,5 @@
 package com.bluesky.bugtraker.view.model.rensponse.assembler;
 
-import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.UserController;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import org.springframework.hateoas.CollectionModel;
@@ -19,7 +18,7 @@ public  class UserModelAssembler implements RepresentationModelAssembler<UserRes
 //                        getProjects(user.getPublicId(), 1, 15)).withRel("user projects"),
 
                 linkTo(methodOn(UserController.class).
-                        getSubscribedProjects(user.getPublicId(), 1, 15)).withRel("subscribed to projects"),
+                        getSubscribedOnProjects(user.getPublicId(), 1, 15)).withRel("subscribed to projects"),
 
                 linkTo(methodOn(UserController.class).
                         getReportedBugs(user.getPublicId(), 1, 15)).withRel("reported bugs"),

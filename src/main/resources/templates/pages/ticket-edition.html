@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Form</title>
+
+
+
+    <!-- plugins:css -->
+    <link href="https://cdn.jsdelivr.net/webjars/bootstrap/5.1.3/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen"/>
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- endinject -->
+
+    <!-- Layout styles -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/assets/images/favicon.png">
+</head>
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <div th:replace="fragments/sidebar"></div>
+    <!-- partial:partials/_sidebar.html ends -->
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <div th:replace="fragments/navbar"></div>
+        <!-- partial:partials/_navbar.html  ends-->
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h3 class="page-title"> Ticket Form </h3>
+                </div>
+                <div class="row ">
+                    <!-- Ticket Form -->
+                    <div class="col-10 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div  class="form-group"
+                                      th:fragment="ticket-edit-form">
+                                    <form class="forms-sample" th:object="${ticketForm} " th:method="post"
+                                          th:action="@{/users/__${ticket.project.creator.publicId}__/projects/__${ticket.project.name}__/bugs/__${ticket.publicId}__}">
+
+                                        <p class="alert alert-danger"
+                                           th:each="error: ${#fields.allErrors()}"
+                                           th:text="${error}">Input is incorrect</p>
+
+                                        <div class="form-group">
+                                            <label for="description">Bug Short Description</label>
+                                            <input id="description" class="form-control "
+                                                   th:field="*{shortDescription}"
+                                                   type="text"    autocomplete="off" placeholder="Description...">
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group row">
+                                                    <label for="status" class="col-sm-3 col-form-label">Status</label>
+                                                    <div class="col-sm-9">
+                                                        <select id="status" class="form-control" th:field="*{status}">
+                                                            <option th:each="status : ${statusList}"
+                                                                    th:value="${status}" th:text="${status}" ></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group row">
+                                                    <label for="priority" class="col-sm-3 col-form-label">Priority</label>
+                                                    <div class="col-sm-9">
+                                                        <select id="priority" class="form-control" th:field="*{priority}">
+                                                            <option th:each="priotity : ${priorityList}"
+                                                                    th:value="${priotity}" th:text="${priotity}" ></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group row">
+                                                    <label for="severity" class="col-sm-3 col-form-label">Severity</label>
+                                                    <div class="col-sm-9">
+                                                        <select id="severity" class="form-control" th:field="*{severity}">
+                                                            <option th:each="severity : ${severityList}"
+                                                                    th:value="${severity}" th:text="${severity}" ></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label for="how-to-reproduce">How to Reproduce
+                                                    <small  class="text-muted float-right message"></small>
+                                                </label>
+                                            </div>
+                                            <textarea id="how-to-reproduce" th:field="*{howToReproduce}" class="form-control"
+                                                      required spellcheck="false" placeholder="Reproduction Steps..."
+                                                      maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label for="behaviour">Erroneous Program Behaviour
+                                                    <small  class="text-muted float-right message" ></small>
+                                                </label>
+                                            </div>
+                                            <textarea id="behaviour" th:field="*{erroneousProgramBehaviour}" class="form-control"
+                                                      required spellcheck="false" placeholder="Program Behaviour..."
+                                                      maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
+                                        </div>
+
+
+                                        <div class="form-group text-center">
+                                            <button type="submit" class="btn btn-outline-primary btn-lg">Update</button>
+                                        </div>
+
+                                    </form>
+                                    <script th:inline="javascript">
+                                        /*<![CDATA[*/
+                                        document.getElementById("description").value = /*[[${ticket.shortDescription}]]*/''
+                                        document.getElementById("status").value = /*[[${ticket.status}]]*/''
+                                        document.getElementById("priority").value = /*[[${ticket.priority}]]*/''
+                                        document.getElementById("severity").value = /*[[${ticket.severity}]]*/''
+                                        document.getElementById("how-to-reproduce").value = /*[[${ticket.howToReproduce}]]*/''
+                                        document.getElementById("behaviour").value = /*[[${ticket.erroneousProgramBehaviour}]]*/''
+                                        /*]]>*/
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- content-wrapper ends -->
+                <!-- partial -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+</div>
+<!-- container-scroller -->
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+
+<!-- endinject -->
+<!-- Plugin js for this page -->
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"
+        src="/assets/js/off-canvas.js"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"
+        src="/assets/js/hoverable-collapse.js"></script>
+<script th:src="@{/assets/js/misc.js}"
+        src="/assets/js/misc.js"></script>
+<script th:src="@{/assets/js/settings.js}"
+        src="/assets/js/settings.js"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<!--My Custom js-->
+<script th:src="@{/assets/js/test/load-into.js}"></script>
+<script th:src="@{/assets/js/test/textarea.js}"></script>
+<!-- End custom js for this page -->
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div id="subscriber-form-block" class="form-group"
+     th:fragment="subscriber-form(subscriberRequestModel, postRequestLink, updateId, updateRequestLink)">
+    <form id="subscriber-form" class="forms-sample" th:object="${subscriberRequestModel}" th:method="POST"
+          th:action="@{${postRequestLink}}">
+
+        <p class="alert alert-danger"
+           th:each="error: ${#fields.allErrors()}"
+           th:text="${error}">Input is incorrect</p>
+        <p class="alert alert-success"
+           th:if="${isSuccess}">Subscriber has been added</p>
+
+
+        <div class="form-group row">
+            <div class="input-group ">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">@</span>
+                </div>
+                <input th:field="*{publicId}" type="text" class="form-control" placeholder="Subscriber ID"/>
+                <span class="input-group-append">
+                        <button id="submit-subscriber" type="submit"
+                                class="btn btn-primary mr-2 float-right">Add</button>
+                </span>
+
+            </div>
+        </div>
+    </form>
+    <script th:inline="javascript">
+        $("#subscriber-form").submit(function (e) {
+
+            e.preventDefault(); // avoid to executeus the actual submit of the form.
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+            $.ajax({
+                type: "POST",
+                url: actionUrl,
+                data: form.serialize(), // serializes the form's elements.
+                success: function (data) {
+                    update([[${updateRequestLink}]], [[${updateId}]]);
+                    $('#subscriber-form-block').html($(data).html());
+                }
+            });
+
+        });
+    </script>
+</div>
+</body>
+</html>

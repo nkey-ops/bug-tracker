@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div id="tickets-body" class="card" th:fragment="tickets">
+    <div class="card-body">
+        <h4 class="card-title">Tickets</h4>
+        <!-- List Content        -->
+        <div class="form-group" th:unless="${isEmpty}"
+             th:insert="fragments/list/content ::
+                                    tickets(
+                                        list=${elementsList},
+                                        baseLink=${baseLink})">
+        </div>
+        <!-- List is Empty-->
+        <div class="form-group" th:if="${isEmpty}"
+             th:insert="fragments/list/list-parts ::
+                                                emptyList(listName='Tickets')"></div>
+
+        <!--Ticket Form-->
+        <div class="form-group text-center">
+            <a th:href="@{${baseLink} + '/ticket-form' }">
+                <button type="button" class="btn btn-outline-success btn-icon-text">
+                    <i class="mdi mdi-file-document-edit btn-icon-prepend"></i> Create Bug Report
+                </button>
+            </a>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

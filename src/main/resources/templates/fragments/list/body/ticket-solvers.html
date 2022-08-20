@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div id="tickets-solvers-body" class="card">
+    <div class="card-body">
+        <h4 class="card-title">Assigned Developers</h4>
+        <!-- List Content        -->
+        <div class="form-group" th:unless="${isEmpty}"
+             th:insert="fragments/list/content ::
+                                    subscribers(list,
+                                                projectCreatorId,
+                                                projectName,
+                                                baseLink)
+        </div>
+        <!-- List is Empty-->
+        <div class="form-group" th:if="${isEmpty}"
+             th:insert="fragments/list/list-parts ::
+                                                emptyList(listName='Assigned Developers')"></div>
+
+        <div th:insert="forms/subscriber-form ::
+                                subscriber-form(
+                                        subscriberRequestModel=${subscriberRequestModel},
+                                        projectCreatorId=${projectCreatorId},
+                                        projectName=${projectName})">
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

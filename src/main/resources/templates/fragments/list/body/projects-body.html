@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="my-projects" class="card" th:fragment="my-projects">
+    <div class="card-body">
+        <h4 class="card-title">My Projects</h4>
+        <!-- List Content        -->
+        <div class="form-group" th:if="${isEmpty} == false"
+             th:insert="fragments/list/content ::
+                                    projects(
+                                            list=${elementsList},
+                                            baseLink=${baseLink}
+                                            )">
+        </div>
+        <!-- List is Empty-->
+        <div class="form-group" th:if="${isEmpty} == true"
+             th:insert="fragments/list/list-parts ::
+                                                emptyList(listName='My Projects')">
+        </div>
+
+        <!-- Add Project Form-->
+        <div th:insert="forms/project-form ::
+                                    project-form(
+                                            projectRequestModel=${projectRequestModel},
+                                            creatorId=${projectCreatorId})">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

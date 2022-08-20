@@ -1,43 +1,44 @@
 package com.bluesky.bugtraker.service.impl;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
-import com.bluesky.bugtraker.io.entity.BugEntity;
+import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
+import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
-import com.bluesky.bugtraker.shared.dto.BugDto;
+import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
+import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
 
+
 @Service
 public class ProjectServiceImp implements ProjectService {
+
     private final ProjectRepository projectRepo;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final ModelMapper modelMapper = new ModelMapper();
     private final Utils utils;
 
 
     @Autowired
-    public ProjectServiceImp(ProjectRepository projectRepo, UserService userService,
+    public ProjectServiceImp(ProjectRepository projectRepo, UserRepository userRepository, UserService userService,
                              Utils utils) {
         this.projectRepo = projectRepo;
+        this.userRepository = userRepository;
         this.userService = userService;
         this.utils = utils;
     }
@@ -47,7 +48,7 @@ public class ProjectServiceImp implements ProjectService {
      *  which is prohibited by the application criteria
      * */
     ProjectEntity getProjectEntity(String userId, String projectName) {
-        UserDto userDto = userService.getUserById(userId);
+        com.bluesky.bugtraker.shared.dto.UserDto userDto = userService.getUserById(userId);
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
 
         return projectRepo.findByCreatorAndName(userEntity, projectName)
@@ -62,15 +63,15 @@ public class ProjectServiceImp implements ProjectService {
     }
 
     @Override
-    public Page<ProjectDto> getProjects(String userId, int page, int limit) {
-        if (page-- < 1 || limit < 1) throw new IllegalArgumentException();
+    public Set<ProjectDto> getProjects(String userId, int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
         UserEntity userEntity = modelMapper.map(userService.getUserById(userId), UserEntity.class);
 
-          Page<ProjectEntity> entityPages =
-                projectRepo.findAllByCreator(userEntity, PageRequest.of(page, limit));
+        Set<ProjectEntity> entityPages =
+                projectRepo.findAllByCreator(userEntity);
 
-        return modelMapper.map(entityPages, new TypeToken<Page<ProjectDto>>() {
+        return modelMapper.map(entityPages, new TypeToken<Set<ProjectDto>>() {
         }.getType());
     }
 
@@ -78,7 +79,7 @@ public class ProjectServiceImp implements ProjectService {
     public ProjectDto createProject(String userId, ProjectDto projectDto) {
         UserEntity creator = modelMapper.map(userService.getUserById(userId), UserEntity.class);
 
-        if(projectRepo.existsByCreatorAndName(creator, projectDto.getName()))
+        if (projectRepo.existsByCreatorAndName(creator, projectDto.getName()))
             throw new ProjectServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
 
         ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
@@ -100,64 +101,64 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public void deleteProject(String userId, String projectName) {
-         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
+        ProjectEntity projectEntity = getProjectEntity(userId, projectName);
 
-         projectRepo.delete(projectEntity);
+        projectRepo.delete(projectEntity);
     }
 
     @Override
-    public void addBug(String userId, String projectName, BugDto bugDto) {
+    public void addBug(String userId, String projectName, TicketDto ticketDto) {
         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
-        BugEntity bugEntity = modelMapper.map(bugDto, BugEntity.class);
 
-        boolean isAdded = projectEntity.addBug(bugEntity);
+        TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
+        ticketEntity.setProject(getProjectEntity(userId, projectName));
+
+        boolean isAdded = projectEntity.addBug(ticketEntity);
         if (!isAdded)
-            throw new ProjectServiceException(RECORD_ALREADY_EXISTS, bugEntity.getPublicId());
+            throw new ProjectServiceException(RECORD_ALREADY_EXISTS, ticketEntity.getPublicId());
 
         projectRepo.save(projectEntity);
     }
 
     @Override
-    public void removeBug(String userId, String projectName, BugDto bugDto) {
+    public void removeBug(String userId, String projectName, TicketDto ticketDto) {
         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
-        BugEntity bugEntity = modelMapper.map(bugDto, BugEntity.class);
+        TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
-        boolean isRemoved = projectEntity.removeBug(bugEntity);
+        boolean isRemoved = projectEntity.removeBug(ticketEntity);
         if (!isRemoved)
-            throw new ProjectServiceException(NO_RECORD_FOUND, bugEntity.getPublicId());
+            throw new ProjectServiceException(NO_RECORD_FOUND, ticketEntity.getPublicId());
 
         projectRepo.save(projectEntity);
     }
 
     @Override
-    public ProjectDto addSubscriber(String userId,
-                                    String projectName,
-                                    String subscriberId) {
+    public void addSubscriber(String userId,
+                              String projectName,
+                              SubscriberRequestModel subscriber) {
+
         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
+        UserDto subscriberDto = userService.getUserById(subscriber.getPublicId());
 
         boolean isAdded = projectEntity.addSubscriber(
-                modelMapper.map(userService.getUserById(userId), UserEntity.class));
+                modelMapper.map(subscriberDto, UserEntity.class));
 
         if (!isAdded)
-            throw new ProjectServiceException(RECORD_ALREADY_ADDED, subscriberId);
-
-        return modelMapper.map(
-                projectRepo.save(projectEntity), ProjectDto.class);
+            throw new ProjectServiceException(RECORD_ALREADY_ADDED, subscriber.getPublicId());
+        else
+            projectRepo.save(projectEntity);
     }
 
     @Override
-    public Set<UserDto> getSubscribers(String userId, String projectName, int page, int limit) {
-        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+    public Set<UserDto> getSubscribers(String userId, String projectName) {
 
-        Set<UserDto> subscribers = getProject(userId, projectName).getSubscribers();
+        Set<ProjectEntity> projects = Set.of(getProjectEntity(userId, projectName));
 
-        PageImpl<UserDto> pagedUsers =
-                new PageImpl<>(
-                    subscribers.stream().toList(),
-                    Pageable.ofSize(page), limit);
+        Set<UserEntity> subscribersEntity =
+                userRepository.findALlBySubscribedToProjectsIn(projects);
 
+        return modelMapper.map(subscribersEntity, new TypeToken<Set<UserDto>>() {}.getType());
 
-        return new LinkedHashSet<>(pagedUsers.getContent());
     }
 
     @Override

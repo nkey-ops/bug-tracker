@@ -2,6 +2,7 @@ package com.bluesky.bugtraker.security;
 
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
+import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,12 +15,11 @@ import java.util.Set;
 public class UserPrincipal implements UserDetails {
     @Serial
     private static final long serialVersionUID = 8772880620156304062L;
-    //TODO change to UserDto
-    private final UserEntity user;
+    private final UserDto user;
     private  final  String id;
-    public UserPrincipal(UserEntity user) {
+    public UserPrincipal(UserDto user) {
         this.user = user;
-        id = user.getPublicId();
+        this.id = user.getPublicId();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getEncryptedPassword();
+        return user.getPassword();
     }
 
     @Override
@@ -69,22 +69,17 @@ public class UserPrincipal implements UserDetails {
         return true;
     }
 
-
     public String getId() {
         return id;
     }
 
-    public UserEntity getUser() {
-        return user;
-    }
 
 
-
-    public boolean isSubscribedTo(String userId, String projectName){
+    public boolean isSubscribedTo(String projectCreatorId, String projectName){
         return  user.getSubscribedToProjects()
                 .stream()
                 .anyMatch(project ->
-                        project.getCreator().getPublicId().equals(userId)
+                        project.getCreator().getPublicId().equals(projectCreatorId)
                         && project.getName().equals(projectName));
     }
 }

@@ -1,33 +1,33 @@
 package com.bluesky.bugtraker.service.impl;
 
+import com.bluesky.bugtraker.exceptions.serviceexception.RoleServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
-import com.bluesky.bugtraker.io.entity.BugEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
-import com.bluesky.bugtraker.io.repository.BugRepository;
+import com.bluesky.bugtraker.io.repository.ProjectRepository;
+import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.bluesky.bugtraker.shared.dto.BugDto;
+import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.NO_RECORD_FOUND;
@@ -36,26 +36,29 @@ import static com.bluesky.bugtraker.exceptions.ErrorMessages.RECORD_ALREADY_EXIS
 @Service
 public class UserServiceImp implements UserService {
     //TODO make a constant values for user id length;
-    private UserRepository userRepo;
-    private RoleRepository roleRepo;
-    private BugRepository bugRepo;
+    private final UserRepository userRepo;
+    private final RoleRepository roleRepo;
+    private final TicketRepository ticketRepo;
+    private final ProjectRepository projectRepo;
 
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private Utils utils;
-    private ModelMapper modelMapper = new ModelMapper();
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final Utils utils;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public UserServiceImp(UserRepository userRepo, RoleRepository roleRepo,
-                          BugRepository bugRepo,
-                          BCryptPasswordEncoder bCryptPasswordEncoder,
-                          Utils utils) {
+                          TicketRepository ticketRepo,
+                          ProjectRepository projectRepo, BCryptPasswordEncoder bCryptPasswordEncoder,
+                          Utils utils, ModelMapper modelMapper) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
-        this.bugRepo = bugRepo;
+        this.ticketRepo = ticketRepo;
+        this.projectRepo = projectRepo;
 
 
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.utils = utils;
+        this.modelMapper = modelMapper;
     }
 
 
@@ -65,6 +68,8 @@ public class UserServiceImp implements UserService {
     }
 
     private UserEntity getUserEntity(String id) {
+        if(id == null) throw new NullPointerException("Id cannot be null");
+
         return userRepo.findByPublicId(id)
                 .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, id));
     }
@@ -78,6 +83,9 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public UserDto getUserByEmail(String email) {
+        if(email == null)
+            throw new NullPointerException("Email cannot be null");
+
         UserEntity userEntity = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
 
@@ -85,40 +93,31 @@ public class UserServiceImp implements UserService {
     }
 
 
-    @Override
-    public UserDto createAdminUser(String email, String password, Set<RoleEntity> roles) {
-        if (userRepo.existsByEmail(email)) throw new UserServiceException(RECORD_ALREADY_EXISTS, email);
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(email);
-        userEntity.setUsername("Admiral");
-        userEntity.setPublicId(utils.generateUserId(30));
-        userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(password));
-//        TODO after testing change to false;
-        userEntity.setEmailVerificationStatus(true);
-        userEntity.setRoles(roles);
-
-        return modelMapper.map(userRepo.save(userEntity), UserDto.class);
-    }
-
-    @Override
-    public UserDto createUser(UserDto userDto) {
+    public UserDto createUserWithRoles(UserDto userDto, Set<Role> roles) {
         if (userRepo.existsByEmail(userDto.getEmail()))
             throw new UserServiceException(RECORD_ALREADY_EXISTS, userDto.getEmail());
 
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
+
         userEntity.setPublicId(utils.generateUserId(30));
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
         userEntity.setEmailVerificationToken("mock");
         //        TODO after testing change to false;
         userEntity.setEmailVerificationStatus(true);
 
-
-        userEntity.setRoles(Set.of(
-                roleRepo.findByRole((Role.ROLE_USER)).get()));
+        Set<RoleEntity> roleEntities =  roleRepo.findAllByRoleIn(roles)
+                .orElseThrow(() ->
+                        new RoleServiceException(NO_RECORD_FOUND, roles.toString()));
+        userEntity.setRoles(roleEntities);
 
         UserEntity savedEntity = userRepo.save(userEntity);
 
         return modelMapper.map(savedEntity, UserDto.class);
+    }
+
+    @Override
+    public UserDto createUser(UserDto userDto) {
+       return createUserWithRoles(userDto, Set.of(Role.ROLE_USER));
     }
 
     @Override
@@ -132,52 +131,54 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void deleteUser(String id) {
+        if(id == null)
+            throw new NullPointerException("Id cannot be null");
+
+        if(!userRepo.existsByPublicId(id)){
+            throw new UserServiceException(NO_RECORD_FOUND, id);
+        }
+
         userRepo.delete(getUserEntity(id));
     }
 
     @Override
-    public Set<BugDto> getReportedBugs(String id, int page, int limit) {
-        if (page-- < 0 || limit < 1) throw new IllegalArgumentException();
-
-        List<BugEntity> bugs =
-                bugRepo.findAllByReporter(getUserEntity(id), PageRequest.of(page, limit));
-        return modelMapper.map(bugs, new TypeToken<Set<BugDto>>() {
-        }.getType());
-    }
-
-    @Override
-    public Set<BugDto> getGetWorkingOnBugs(String id, int page, int limit) {
+    public Page<TicketDto> getReportedTickets(String userId, int page, int limit) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        Set<BugDto> workingOnBugs = getUserById(id).getWorkingOnBugs();
-
-        PageImpl<BugDto> pagedBugs =
-                new PageImpl<>(
-                        workingOnBugs.stream().toList(),
-                        Pageable.ofSize(page), limit);
-
-        return new LinkedHashSet<>(pagedBugs.getContent());
+        Page<TicketEntity> bugs =
+                ticketRepo.findAllByReporter(
+                        getUserEntity(userId), PageRequest.of(page - 1, limit));
+        return modelMapper.map(bugs, new TypeToken<Page<TicketDto>>() {}.getType());
     }
 
     @Override
-    public Set<ProjectDto> getSubscribedProjects(String id, int page, int limit) {
+    public Page<TicketDto> getWorkingOnTickets(String userId, int page, int limit) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        Set<ProjectDto> subscribedProjects = getUserById(id).getSubscribedToProjects();
+        Page<TicketEntity> ticketFixers = ticketRepo.findAllByTicketFixersIn(
+                Set.of(getUserEntity(userId)), PageRequest.of(page - 1, limit));
+        return modelMapper.map(ticketFixers, new TypeToken<Page<TicketDto>>() {}.getType());
+    }
 
-        PageImpl<ProjectDto> pagedProjects =
-                new PageImpl<>(
-                        subscribedProjects.stream().toList(),
-                        Pageable.ofSize(page), limit);
 
-        return new LinkedHashSet<>(pagedProjects.getContent());
+    @Override
+    public Page<ProjectDto> getSubscribedOnProjects(String userId, int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+
+        Page<ProjectEntity> projectEntities = projectRepo.findAllBySubscribersIn(
+                Set.of(getUserEntity(userId)), PageRequest.of(page - 1, limit));
+        return modelMapper.map(projectEntities, new TypeToken<Page<ProjectDto>>() {}.getType());
+
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(NO_RECORD_FOUND + " with : " +email));
 
-        return new UserPrincipal(userEntity);
+        UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+
+        return new UserPrincipal(userDto);
     }
 }

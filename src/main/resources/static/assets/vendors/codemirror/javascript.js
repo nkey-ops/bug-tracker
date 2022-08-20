@@ -41,7 +41,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }();
 
   var isOperatorChar = /[+\-*&%=<>!?|~^@]/;
-  var isJsonldKeyword = /^@(context|id|value|language|type|container|list|set|reverse|index|base|vocab|graph)"/;
+  var isJsonldKeyword = /^@(applicationContext|id|value|language|type|container|list|set|reverse|index|base|vocab|graph)"/;
 
   function readRegexp(stream) {
     var escaped = false, next, inSet = false;
@@ -228,7 +228,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   function inScope(state, varname) {
     for (var v = state.localVars; v; v = v.next)
       if (v.name == varname) return true;
-    for (var cx = state.context; cx; cx = cx.prev) {
+    for (var cx = state.applicationContext; cx; cx = cx.prev) {
       for (var v = cx.vars; v; v = v.next)
         if (v.name == varname) return true;
     }
@@ -236,7 +236,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
 
   function parseJS(state, style, type, content, stream) {
     var cc = state.cc;
-    // Communicate our context to the combinators.
+    // Communicate our applicationContext to the combinators.
     // (Less wasteful than consing up a hundred closures on every call.)
     cx.state = state; cx.stream = stream; cx.marked = null, cx.cc = cc; cx.style = style;
 
@@ -272,12 +272,12 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   function register(varname) {
     var state = cx.state;
     cx.marked = "def";
-    if (state.context) {
-      if (state.lexical.info == "var" && state.context && state.context.block) {
+    if (state.applicationContext) {
+      if (state.lexical.info == "var" && state.applicationContext && state.applicationContext.block) {
         // FIXME function decls are also not block scoped
-        var newContext = registerVarScoped(varname, state.context)
+        var newContext = registerVarScoped(varname, state.applicationContext)
         if (newContext != null) {
-          state.context = newContext
+          state.applicationContext = newContext
           return
         }
       } else if (!inList(varname, state.localVars)) {
@@ -289,18 +289,18 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (parserConfig.globalVars && !inList(varname, state.globalVars))
       state.globalVars = new Var(varname, state.globalVars)
   }
-  function registerVarScoped(varname, context) {
-    if (!context) {
+  function registerVarScoped(varname, applicationContext) {
+    if (!applicationContext) {
       return null
-    } else if (context.block) {
-      var inner = registerVarScoped(varname, context.prev)
+    } else if (applicationContext.block) {
+      var inner = registerVarScoped(varname, applicationContext.prev)
       if (!inner) return null
-      if (inner == context.prev) return context
-      return new Context(inner, context.vars, true)
-    } else if (inList(varname, context.vars)) {
-      return context
+      if (inner == applicationContext.prev) return applicationContext
+      return new Context(inner, applicationContext.vars, true)
+    } else if (inList(varname, applicationContext.vars)) {
+      return applicationContext
     } else {
-      return new Context(context.prev, new Var(varname, context.vars), false)
+      return new Context(applicationContext.prev, new Var(varname, applicationContext.vars), false)
     }
   }
 
@@ -315,16 +315,16 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
 
   var defaultVars = new Var("this", new Var("arguments", null))
   function pushcontext() {
-    cx.state.context = new Context(cx.state.context, cx.state.localVars, false)
+    cx.state.applicationContext = new Context(cx.state.applicationContext, cx.state.localVars, false)
     cx.state.localVars = defaultVars
   }
   function pushblockcontext() {
-    cx.state.context = new Context(cx.state.context, cx.state.localVars, true)
+    cx.state.applicationContext = new Context(cx.state.applicationContext, cx.state.localVars, true)
     cx.state.localVars = null
   }
   function popcontext() {
-    cx.state.localVars = cx.state.context.vars
-    cx.state.context = cx.state.context.prev
+    cx.state.localVars = cx.state.applicationContext.vars
+    cx.state.applicationContext = cx.state.applicationContext.prev
   }
   popcontext.lex = true
   function pushlex(type, info) {
@@ -775,7 +775,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "?") return cont(classfield)
     if (type == ":") return cont(typeexpr, maybeAssign)
     if (value == "=") return cont(expressionNoComma)
-    var context = cx.state.lexical.prev, isInterface = context && context.info == "interface"
+    var applicationContext = cx.state.lexical.prev, isInterface = applicationContext && applicationContext.info == "interface"
     return pass(isInterface ? functiondecl : functiondef)
   }
   function afterExport(type, value) {
@@ -841,7 +841,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
         cc: [],
         lexical: new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false),
         localVars: parserConfig.localVars,
-        context: parserConfig.localVars && new Context(null, null, false),
+        applicationContext: parserConfig.localVars && new Context(null, null, false),
         indented: basecolumn || 0
       };
       if (parserConfig.globalVars && typeof parserConfig.globalVars == "object")

@@ -14,11 +14,8 @@ public class ProjectResponseModel extends RepresentationModel<ProjectResponseMod
     private String name;
 
     private String publicId;
-    @JsonIgnore
-    private Set<BugResponseModel> bugs = new LinkedHashSet<>();
-    @JsonIgnore
+    private Set<TicketResponseModel> bugs = new LinkedHashSet<>();
     private Set<UserResponseModel> subscribers = new LinkedHashSet<>();
-    @JsonIgnore
     private UserResponseModel creator;
 
     @Override
