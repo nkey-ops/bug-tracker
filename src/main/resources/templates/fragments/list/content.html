@@ -7,54 +7,6 @@
 </head>
 
 <body>
-<div class="table-responsive" th:fragment="subscribers(list, baseLink, updateId)">
-
-    <div class="text-center"  th:if="${#lists.isEmpty(list)} == true">
-        <h5 class="text-muted"> List is Empty </h5>
-    </div>
-
-    <div th:if="${#lists.isEmpty(list)} == false">
-        <table id="subscribers-table" data-toggle="bootgrid" class="table table-bordered">
-            <thead>
-            <tr>
-                <th>User</th>
-                <th>Username</th>
-                <th> Remove</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class='subscribers-row' th:data-url="'/users/' + ${subscriber.publicId}"
-                th:each="subscriber, iStat : ${list}">
-                <td class="py-1"><img alt="image"></td>
-                <td th:text="${subscriber.username}"></td>
-                <td>
-                    <button id="remove-subscriber" type="button" class="btn btn-outline-danger btn-sm"
-                            th:value="${baseLink} + '/' + ${subscriber.publicId}">
-                        <i class="mdi mdi-account-remove"></i>
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <script th:inline="javascript">
-        $(document).ready(function () {
-            $('#subscribers-table').DataTable();
-            // $(".subscribers-row").click(function () {
-            //     window.location = $(this).data("url");
-            // })
-        });
-        $("#remove-subscriber").click(function () {
-            $.ajax({
-                type: "DELETE",
-                url: $('#remove-subscriber').attr('value'),
-                success: function () {
-                    update([[${baseLink}]], [[${updateId}]]);
-                }
-            })
-        })
-    </script>
-</div>
 
 <div class="table-responsive" th:fragment="projects(list, baseLink)">
 

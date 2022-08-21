@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="ticket-details(ticket, ticketEditFormLink)">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-row justify-content-between">
+                <h4 class="card-title mb-1">Details
+                    <a th:href="${ticketEditFormLink}">
+                        <button type="button" class="btn btn-outline-warning btn-sm btn-rounded">
+                            <i class="mdi mdi-pencil"></i>
+                        </button>
+                    </a>
+                </h4>
+                <p class="text-muted mb-1">Last Updated: [[${#dates.format(ticket.lastUpdateTime, 'dd-MM-yyyy
+                    HH:mm')}]]</p>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="preview-list">
+                        <div class="preview-item border-bottom">
+                            <!-- Status -->
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-primary">
+                                    <i class="mdi mdi-marker-check"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">Status</h6>
+                                    <p class="text-muted mb-0">[[${ticket.status.name}]]</p>
+                                </div>
+                            </div>
+                            <!-- end Status -->
+                            <!-- Priority -->
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-success">
+                                    <i class="mdi mdi-clipboard-arrow-up-outline"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">Priority</h6>
+                                    <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
+                                </div>
+                            </div>
+                            <!-- end Priority-->
+                            <!-- Severity-->
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-danger">
+                                    <i class="mdi mdi-alert-outline"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">Severity</h6>
+                                    <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
+                                </div>
+                            </div>
+                            <!-- end Severity-->
+
+                        </div>
+                        <div class="preview-item border-bottom">
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-info">
+                                    <i class="mdi mdi mdi-clipboard-text"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">Description</h6>
+                                    <div style="resize:vertical; overflow:scroll; min-height: 30px">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        >[[${ticket.shortDescription}]]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-item border-bottom">
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-primary">
+                                    <i class="mdi mdi-repeat"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">How to Reproduce</h6>
+                                    <div style="resize:vertical; overflow:auto; ">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        >[[${ticket.howToReproduce}]]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-item border-bottom">
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-warning">
+                                    <i class=" mdi mdi-settings-box"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">Erroneous Program Behaviour</h6>
+                                    <div style="resize:vertical; overflow:auto;">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        >[[${ticket.erroneousProgramBehaviour}]]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-item ">
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-success">
+                                    <i class="mdi mdi-lightbulb-on-outline"></i>
+                                </div>
+                            </div>
+                            <div class="preview-item-content d-sm-flex flex-grow">
+                                <div class="flex-grow">
+                                    <h6 class="preview-subject">How to Solve</h6>
+                                    <div style="resize:vertical; overflow:auto; ">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        >[[${ticket.howToSolve}]]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -4,19 +4,19 @@ import com.bluesky.bugtraker.exceptions.ErrorMessages;
 
 import java.io.Serial;
 
-public class BugServiceException extends ServiceException {
+public class TicketServiceException extends ServiceException {
     @Serial
     private static final long serialVersionUID = 6578170926028564190L;
 
-    public BugServiceException(String message) {
+    public TicketServiceException(String message) {
         super(message);
     }
 
-    public BugServiceException(ErrorMessages message) {
+    public TicketServiceException(ErrorMessages message) {
         super(message);
     }
 
-    public BugServiceException(ErrorMessages message, String identifier) {
+    public TicketServiceException(ErrorMessages message, String identifier) {
         super(message, identifier);
     }
 }

@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat|Montserrat+Alternates|Montserrat+Subrayada|Ranga&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Montserrat+Alternates|Montserrat+Subrayada|Ranga&display=swap"
+          rel="stylesheet">
     <title></title>
 </head>
 
 <body>
 
 <div class="form-group"
-     th:fragment="ticket-form(ticketRequestModel, projectCreatorId,projectName,
+     th:fragment="ticket-form(ticketRequestModel, ticketFormPostRequestLink,
                             statusList, severityList, priorityList )">
     <form id="ticket-form" class="forms-sample" th:object="${ticketRequestModel} " th:method="POST"
-          th:action="@{/users/__${projectCreatorId}__/projects/__${projectName}__/bugs}">
+          th:action="@{${ticketFormPostRequestLink}}">
 
-      <div id="error-message"></div>
+        <p class="alert alert-danger"
+           th:each="error: ${#fields.allErrors()}"
+           th:text="${error}">Input is incorrect</p>
+        <p th:text="${error}"></p>
 
 
         <div class="form-group">
             <label for="description">Bug Short Description</label>
-            <input id="description" th:field="*{shortDescription}" type="text" class="form-control form-control-lg" required autofocus
+            <input id="description" th:field="*{shortDescription}" type="text" class="form-control form-control-lg"
+                   required autofocus
                    placeholder="Description...">
         </div>
 
@@ -29,7 +34,7 @@
                     <div class="col-sm-9">
                         <select id="status" class="form-control" th:field="*{status}">
                             <option th:each="status : ${statusList}"
-                                    th:value="${status}" th:text="${status}" ></option>
+                                    th:value="${status}" th:text="${status}"></option>
                         </select>
                     </div>
                 </div>
@@ -40,7 +45,7 @@
                     <div class="col-sm-9">
                         <select id="priority" class="form-control" th:field="*{priority}">
                             <option th:each="priotity : ${priorityList}"
-                                    th:value="${priotity}" th:text="${priotity}" ></option>
+                                    th:value="${priotity}" th:text="${priotity}"></option>
                         </select>
                     </div>
                 </div>
@@ -51,7 +56,7 @@
                     <div class="col-sm-9">
                         <select id="severity" class="form-control" th:field="*{severity}">
                             <option th:each="severity : ${severityList}"
-                                    th:value="${severity}" th:text="${severity}" ></option>
+                                    th:value="${severity}" th:text="${severity}"></option>
                         </select>
                     </div>
                 </div>
@@ -61,54 +66,54 @@
         <div class="form-group">
             <div class="row">
                 <label for="how-to-reproduce">How to Reproduce
-                <small  class="text-muted float-right message"></small>
+                    <small class="text-muted float-right message"></small>
                 </label>
             </div>
             <textarea id="how-to-reproduce" th:field="*{howToReproduce}" class="form-control"
                       required spellcheck="false" placeholder="Reproduction Steps..."
-                      maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
+                      maxlength="3000" rows="10" cols="40" style="resize: vertical"></textarea>
         </div>
 
         <div class="form-group">
             <div class="row">
                 <label for="behaviour">Erroneous Program Behaviour
-                <small  class="text-muted float-right message" ></small>
+                    <small class="text-muted float-right message"></small>
                 </label>
             </div>
             <textarea id="behaviour" th:field="*{erroneousProgramBehaviour}" class="form-control"
                       required spellcheck="false" placeholder="Program Behaviour..."
-                      maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
+                      maxlength="3000" rows="10" cols="40" style="resize: vertical"></textarea>
         </div>
         <div class="form-group text-center">
             <button type="submit" class="btn btn-outline-primary btn-lg">Submit</button>
         </div>
+
     </form>
-    <script type="text/javascript">
-        $("#ticket-form").submit(function (e) {
+    <!--    <script type="text/javascript">-->
+    <!--        $("#ticket-form").submit(function (e) {-->
 
-            e.preventDefault(); // avoid to execute the actual submit of the form.
+    <!--            e.preventDefault(); // avoid to execute the actual submit of the form.-->
 
-            var form = $(this);
-            var actionUrl = form.attr('action');
-            $.ajax({
-                type: "POST",
-                url: actionUrl,
-                data: form.serialize(), // serializes the form's elements.
-                success: function (data){
-                    alert(data);
-                },
-                error: function (data){
-                    alert(data);
-                    $('#error-message').html($(data).html());
-                    // $('#error-message').html("some text ");
-                },
-            });
-        });
-    </script>
+    <!--            var form = $(this);-->
+    <!--            var actionUrl = form.attr('action');-->
+    <!--            $.ajax({-->
+    <!--                type: "POST",-->
+    <!--                url: actionUrl,-->
+    <!--                data: form.serialize(), // serializes the form's elements.-->
+    <!--                dataType: "json",-->
+    <!--                success: function (data) {-->
+    <!--                        window.location.href = data.redirect;-->
+    <!--                },-->
+    <!--                error: function (jqXHR) {-->
+    <!--                    $('#error-message').html("<p class='alert alert-danger'>" + jqXHR.responseText + "</p>");-->
+    <!--                },-->
+    <!--            });-->
+    <!--        });-->
+    <!--    </script>-->
 
 </div>
 
-<script type="text/javascript"  th:src="@{/assets/js/test/textarea.js}"></script>
+<script type="text/javascript" th:src="@{/assets/js/test/textarea.js}"></script>
 
 </body>
 </html>

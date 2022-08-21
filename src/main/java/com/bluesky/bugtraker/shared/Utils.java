@@ -9,22 +9,27 @@ import java.util.Random;
 public class Utils {
 
 
-
     private final Random RANDOM = new SecureRandom();
     private final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    public String generateUserId(int length){
-        return  generateRandomString(length);
+    public String generateUserId(int length) {
+        return generateRandomString(length);
     }
+
     public String generateProjectId(int length) {
-        return  generateRandomString(length);
+        return generateRandomString(length);
     }
 
-    public String generateBugId(int length){
-        return  generateRandomString(length);
+    public String generateBugId(int length) {
+        return generateRandomString(length);
     }
 
-    public String generateCommentId(int length) { return  generateRandomString(length);
+    public String generateCommentId(int length) {
+        return generateRandomString(length);
+    }
+
+    public String generateTicketRecordId(int length) {
+        return generateRandomString(length);
     }
 
     private String generateRandomString(int length) {
@@ -36,4 +41,6 @@ public class Utils {
 
         return new String(returnValue);
     }
+
+
 }

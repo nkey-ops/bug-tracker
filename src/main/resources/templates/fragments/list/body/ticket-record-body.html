@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+<div id="tickets-record-body" class="card">
+    <div class="card-body">
+        <h4 class="card-title">History</h4>
+        <!-- List Content        -->
+        <div class="form-group"
+             th:insert="fragments/list/content/ticket-record-content ::
+                                    ticket-record-content(
+                                        list=${elementsList},
+                                        contentRequestLink=${baseLink})">
+        </div>
+    </div>
+</div>
+</body>
+</html>

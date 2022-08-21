@@ -45,18 +45,18 @@
                     <h3 class="page-title"> [[${project.name}]] </h3>
                 </div>
                 <div class="row ">
-                    <!-- Subscribers List -->
-
                     <div id="bugs-block" class="col-12 grid-margin"></div>
                     <div id="subscribers-block" class="col-6 grid-margin"></div>
 
-                    <script th:inline="javascript">
-                        window.onload = function () {
-                            $("#bugs-block").load(/*[[${bugsLink}]]*/);
-                            $("#subscribers-block").load(/*[[${subscribersLink}]]*/);
-                        }
-                    </script>
                 </div>
+
+
+                <script th:inline="javascript">
+                    window.onload = function () {
+                        $("#bugs-block").load(/*[[${ticketsLink}]]*/);
+                        $("#subscribers-block").load(/*[[${subscribersLink}]]*/);
+                    }
+                </script>
             </div>
             <!-- content-wrapper ends -->
             <!-- partial -->

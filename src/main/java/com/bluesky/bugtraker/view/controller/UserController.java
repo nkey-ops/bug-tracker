@@ -2,15 +2,12 @@ package com.bluesky.bugtraker.view.controller;
 
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
+import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
-import com.bluesky.bugtraker.view.model.rensponse.assembler.BugModelAssembler;
-import com.bluesky.bugtraker.view.model.rensponse.assembler.ProjectModelAssembler;
-import com.bluesky.bugtraker.view.model.rensponse.assembler.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
@@ -30,29 +27,24 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.validation.Valid;
 import java.util.Set;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @Controller
 @RequestMapping("/users")
 @SessionAttributes("user")
 public class UserController {
     private UserService userService;
     private ModelMapper modelMapper = new ModelMapper();
-    private UserModelAssembler modelAssembler;
 
-    public UserController(UserService userService, UserModelAssembler modelAssembler) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.modelAssembler = modelAssembler;
 
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
     @ModelAttribute("user")
-    public UserResponseModel getCurrentUser(){
+    public UserResponseModel getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (auth.getPrincipal().toString().equals("anonymousUser"))
+        if (auth.getPrincipal().toString().equals("anonymousUser"))
             return new UserResponseModel("Anonymous User");
 
         UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
@@ -63,11 +55,9 @@ public class UserController {
     @PreAuthorize("#id == principal.getId()")
     @GetMapping("/{id}")
     public UserResponseModel getUser(@PathVariable String id) {
-        UserResponseModel responseModel =
+        return
                 modelMapper.map(
                         userService.getUserById(id), UserResponseModel.class);
-
-        return modelAssembler.toModel(responseModel);
     }
 
 
@@ -81,11 +71,10 @@ public class UserController {
         UserDto userDto =
                 modelMapper.map(userRequestModel, UserDto.class);
 
-        UserResponseModel responseModel =
+        return
                 modelMapper.map(userService.updateUser(id, userDto),
                         UserResponseModel.class);
 
-        return modelAssembler.toModel(responseModel);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -99,11 +88,8 @@ public class UserController {
             return mav;
         }
 
-        UserDto  userDto = userService.createUser(
-                    modelMapper.map(userRequestModel, UserDto.class));
-        UserResponseModel responseModel = modelAssembler.toModel(
-                modelMapper.map(userDto, UserResponseModel.class));
-
+        UserDto userDto = userService.createUser(
+                modelMapper.map(userRequestModel, UserDto.class));
 
         return new ModelAndView("redirect:/home");
     }
@@ -121,7 +107,7 @@ public class UserController {
 
     @PreAuthorize("#userId == principal.id")
     @GetMapping("/{userId}/reported-bugs")
-    public CollectionModel<TicketResponseModel> getReportedBugs(
+    public String getReportedBugs(
             @PathVariable String userId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "15") int limit) {
@@ -132,11 +118,7 @@ public class UserController {
                 bugs.getContent(), new TypeToken<Set<TicketResponseModel>>() {
                 }.getType());
 
-        BugModelAssembler bugModelAssembler = new BugModelAssembler();
-
-        return bugModelAssembler.toCollectionModel(ticketResponseModels)
-                .add(linkTo(methodOn(UserController.class)
-                        .getReportedBugs(userId, page, limit)).withSelfRel());
+        return null;
     }
 
     @PreAuthorize("#id == principal.id")
@@ -153,12 +135,7 @@ public class UserController {
                 workingOnBugs.getContent(), new TypeToken<Set<TicketResponseModel>>() {
                 }.getType());
 
-        BugModelAssembler bugModelAssembler = new BugModelAssembler();
-
-        return bugModelAssembler.toCollectionModel(ticketResponseModels)
-                .add(linkTo(methodOn(UserController.class)
-                        .getWorkingOnBugs(id, page, limit)).withSelfRel());
-
+        return null;
     }
 
     @PreAuthorize("#id == principal.id")
@@ -176,15 +153,8 @@ public class UserController {
                 }.getType());
 
 
-        ProjectModelAssembler projectModelAssembler = new ProjectModelAssembler();
-
-        return projectModelAssembler.toCollectionModel(projectResponseModels)
-                .add(linkTo(methodOn(UserController.class)
-                        .getSubscribedOnProjects(id, page, limit)).withSelfRel());
-
+        return null;
     }
-
-
 }
 
 

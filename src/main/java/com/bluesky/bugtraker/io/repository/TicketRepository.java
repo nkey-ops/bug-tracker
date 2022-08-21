@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,5 +23,5 @@ public interface TicketRepository extends CrudRepository<TicketEntity, Long> {
 
     Set<TicketEntity> findAllByProject(ProjectEntity projectEntity);
 
-    Page<TicketEntity> findAllByTicketFixersIn(Set<UserEntity> ticketFixers, Pageable pageable);
+    Page<TicketEntity> findAllByAssignedDevsIn(Collection<UserEntity> assignedDevs, Pageable pageable);
 }

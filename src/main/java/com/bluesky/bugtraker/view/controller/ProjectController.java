@@ -6,13 +6,13 @@ import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
-import com.bluesky.bugtraker.view.model.rensponse.assembler.ProjectModelAssembler;
 import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -27,22 +27,20 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 // TODO change userId to creatorId
 @Controller
 @RequestMapping("/users/{userId}/projects")
 public class ProjectController {
     private final ProjectService projectService;
-    private final ProjectModelAssembler modelAssembler;
     private final UserController userController;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     public ProjectController(ProjectService projectService,
-                             ProjectModelAssembler modelAssembler,
                              UserController userController) {
         this.projectService = projectService;
-        this.modelAssembler = modelAssembler;
         this.userController = userController;
 
         modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
@@ -106,13 +104,13 @@ public class ProjectController {
 
         model.addAttribute("subscribersLink", subscribersLink);
 
-        String bugsLink = linkTo(UserController.class)
+        String ticketsLink = linkTo(UserController.class)
                 .slash(userId)
                 .slash("projects")
                 .slash(projectName)
-                .slash("bugs").toUri().toString();
+                .slash("tickets").toUri().toString();
 
-        model.addAttribute("bugsLink", bugsLink);
+        model.addAttribute("ticketsLink", ticketsLink);
 
         return "pages/project";
     }
@@ -141,6 +139,7 @@ public class ProjectController {
         model.addAttribute("projectRequestModel", new ProjectRequestModel());
 
 
+
         String baseLink = linkTo(UserController.class)
                 .slash(userId)
                 .slash("projects")
@@ -160,8 +159,7 @@ public class ProjectController {
 
         ProjectDto projectDto = projectService.setProjectName(userId, projectName, projectRequestBody);
 
-        return modelAssembler.toModel(
-                modelMapper.map(projectDto, ProjectResponseModel.class));
+        return null;
     }
 
     @PreAuthorize(value = "#userId == principal.id")
@@ -194,9 +192,10 @@ public class ProjectController {
             bindingResult.addError(
                     new ObjectError("error",
                             e.getErrorType().getErrorMessage()));
-            return "forms/subscriber-form :: subscriber-form";
+            return "forms/subscriber-form :: #subscriber-form-block";
         }
         response.setStatus(HttpStatus.CREATED.value());
+
 
         model.addAttribute("isSuccess", true);
         return "forms/subscriber-form :: #subscriber-form-block";
@@ -226,6 +225,7 @@ public class ProjectController {
                 .slash(projectName)
                 .slash("subscribers").toUri().toString();
 
+        model.addAttribute("listName", "Subscribers");
         model.addAttribute("baseLink", link);
         model.addAttribute("subscriberRequestModel", new SubscriberRequestModel());
         model.addAttribute("projectCreatorId", userId);

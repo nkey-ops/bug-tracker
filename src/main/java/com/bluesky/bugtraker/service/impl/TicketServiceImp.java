@@ -1,19 +1,15 @@
 package com.bluesky.bugtraker.service.impl;
 
-import com.bluesky.bugtraker.exceptions.serviceexception.BugServiceException;
-import com.bluesky.bugtraker.io.entity.CommentEntity;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.TicketEntity;
-import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
+import com.bluesky.bugtraker.io.entity.*;
 import com.bluesky.bugtraker.io.repository.CommentRepository;
+import com.bluesky.bugtraker.io.repository.TicketHistoryRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.TicketService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
-import com.bluesky.bugtraker.shared.dto.CommentDto;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.shared.dto.*;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -23,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
@@ -31,6 +26,7 @@ import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
 @Service
 public class TicketServiceImp implements TicketService {
     private final TicketRepository ticketRepo;
+    private final TicketHistoryRepository ticketRecordRepo;
     private final CommentRepository commentRepo;
     private final UserService userService;
     private final ProjectService projectService;
@@ -39,9 +35,14 @@ public class TicketServiceImp implements TicketService {
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
-    public TicketServiceImp(TicketRepository ticketRepo, CommentRepository commentRepo, UserService userService,
-                            Utils utils, ProjectService projectService) {
+    public TicketServiceImp(TicketRepository ticketRepo,
+                            TicketHistoryRepository ticketRecordRepo,
+                            CommentRepository commentRepo,
+                            UserService userService,
+                            Utils utils,
+                            ProjectService projectService) {
         this.ticketRepo = ticketRepo;
+        this.ticketRecordRepo = ticketRecordRepo;
         this.commentRepo = commentRepo;
         this.userService = userService;
         this.utils = utils;
@@ -51,20 +52,16 @@ public class TicketServiceImp implements TicketService {
     }
 
     //  TODO make bugId unique in bounds of the project  and change this method
-    private TicketEntity getTicketEntity(String userId,
-                                         String projectName,
-                                         String bugId) {
+    private TicketEntity getTicketEntity(String bugId) {
 
         return ticketRepo.findByPublicId(bugId)
-                .orElseThrow(() -> new BugServiceException(NO_RECORD_FOUND, bugId));
+                .orElseThrow(() -> new TicketServiceException(NO_RECORD_FOUND, bugId));
     }
 
     @Override
-    public TicketDto getTicket(String userId,
-                               String projectName,
-                               String bugId) {
+    public TicketDto getTicket(String bugId) {
 
-        TicketEntity ticketEntity = getTicketEntity(userId, projectName, bugId);
+        TicketEntity ticketEntity = getTicketEntity(bugId);
 
         return modelMapper.map(ticketEntity, TicketDto.class);
     }
@@ -85,19 +82,21 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public TicketDto createTicket(String userId, String projectName, TicketDto ticketDto, String reporterId) {
+    public void createTicket(String userId, String projectName, TicketDto ticketDto, String reporterId) {
         ProjectEntity projectEntity =
                 modelMapper.map(
                         projectService.getProject(userId, projectName),
                         ProjectEntity.class);
 
         if (ticketRepo.existsByProjectAndPublicId(projectEntity, ticketDto.getPublicId()))
-            throw new BugServiceException(RECORD_ALREADY_EXISTS, ticketDto.getPublicId());
+            throw new TicketServiceException(RECORD_ALREADY_EXISTS, ticketDto.getPublicId());
 
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
         ticketEntity.setPublicId(utils.generateBugId(10));
         ticketEntity.setReportedTime(Date.from(Instant.now()));
+        ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
+        ticketEntity.setHowToSolve("Solution is not found");
 
         ticketEntity.setReporter(
                 modelMapper.map(
@@ -108,70 +107,104 @@ public class TicketServiceImp implements TicketService {
 
         TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
 
-        return  modelMapper.map(savedTicketEntity, TicketDto.class);
-
-        //        projectService.addBug(userId, projectName, ticketDto);
-
-//        return getTicket(userId, projectName, ticketDto.getPublicId());
+        createTicketRecord(savedTicketEntity);
     }
 
 
     @Override
-    public void updateBug(String userId, String projectName, String bugId, TicketDto ticketDtoUpdates) {
-        TicketEntity ticketEntity = getTicketEntity(userId, projectName, bugId);
+    public void updateTicket(String userId, String projectName, String bugId, TicketDto ticketDtoUpdates) {
+        TicketEntity ticketEntity = getTicketEntity(bugId);
 
-        modelMapper.map(ticketEntity, ticketDtoUpdates);
+        modelMapper.map(ticketDtoUpdates, ticketEntity);
+        ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
 
-        ticketRepo.save(ticketEntity);
+        TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
+
+        createTicketRecord(savedTicketEntity);
     }
 
     @Override
-    public void deleteBug(String userId, String projectName, String bugId) {
-        TicketDto ticketDto = getTicket(userId, projectName, bugId);
+    public void deleteBug(String userId, String projectName, String ticketId) {
+        TicketDto ticketDto = getTicket(ticketId);
 
         projectService.removeBug(userId, projectName, ticketDto);
     }
 
-    @Override
-    public void addBugFixer(String userId, String projectName, String bugId, String fixerId) {
-        TicketEntity ticketEntity = getTicketEntity(userId, projectName, bugId);
+    private void createTicketRecord(TicketEntity mainTicketEntity) {
+        TicketRecordEntity ticketRecordEntity =
+                modelMapper.map(mainTicketEntity, TicketRecordEntity.class);
 
-        com.bluesky.bugtraker.shared.dto.UserDto fixerDto = userService.getUserById(fixerId);
-        boolean isAdded = ticketEntity.addBugFixer(
-                modelMapper.map(fixerDto, UserEntity.class));
+        ticketRecordEntity.setId(null);
+        ticketRecordEntity.setPublicId(utils.generateTicketRecordId(15));
+        ticketRecordEntity.setMainTicket(mainTicketEntity);
+
+
+        ticketRecordRepo.save(ticketRecordEntity);
+    }
+
+    @Override
+    public Page<TicketRecordDto> getTicketRecords(String ticketId, int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+
+        Page<TicketRecordEntity> pagedTicketHistoryEntities =
+                ticketRecordRepo.findAllByMainTicket(
+                        getTicketEntity(ticketId),
+                        PageRequest.of(page - 1, limit)
+                );
+        return modelMapper.map(pagedTicketHistoryEntities, new TypeToken<Page<ProjectDto>>() {
+        }.getType());
+
+    }
+
+    @Override
+    public TicketRecordDto getTicketRecord(String recordId) {
+        TicketRecordEntity ticketRecordEntity = ticketRecordRepo.findByPublicId(recordId);
+
+        return modelMapper.map(ticketRecordEntity, TicketRecordDto.class);
+    }
+
+    @Override
+    public void addAssignedDev(String ticketId, String assignedDevId) {
+        TicketEntity ticketEntity = getTicketEntity(ticketId);
+
+        UserDto assignedDevDto = userService.getUserById(assignedDevId);
+        boolean isAdded = ticketEntity.addAssignedDev(
+                modelMapper.map(assignedDevDto, UserEntity.class));
 
         if (!isAdded)
-            throw new BugServiceException(RECORD_ALREADY_ADDED, fixerId);
+            throw new TicketServiceException(RECORD_ALREADY_ADDED, assignedDevId);
 
         ticketRepo.save(ticketEntity);
     }
 
     @Override
-    public void removeBugFixer(String userId, String projectName, String bugId, String fixerId) {
-        TicketEntity ticketEntity = getTicketEntity(userId, projectName, bugId);
+    public void removeAssignedDev(String ticketId, String assignedDevId) {
+        TicketEntity ticketEntity = getTicketEntity(ticketId);
 
-        com.bluesky.bugtraker.shared.dto.UserDto fixerDto = userService.getUserById(fixerId);
-        boolean isRemoved = ticketEntity.removeBugFixer(
-                modelMapper.map(fixerDto, UserEntity.class));
+        UserDto assignedDevDto = userService.getUserById(assignedDevId);
+        UserEntity assignedDevEntity = modelMapper.map(assignedDevDto, UserEntity.class);
+
+        boolean isRemoved = ticketEntity.removeAssignedDev(assignedDevEntity);
 
         if (!isRemoved)
-            throw new BugServiceException(NO_RECORD_FOUND, fixerId);
+            throw new TicketServiceException(NO_RECORD_FOUND, assignedDevId);
 
         ticketRepo.save(ticketEntity);
     }
 
     @Override
-    public Set<com.bluesky.bugtraker.shared.dto.UserDto> getBugFixers(String userId, String projectName, String bugId,
-                                                                      int page, int limit) {
+    public Page<UserDto> getAssignedDevs(String ticketId,
+                                         int page, int limit) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
+        Set<UserEntity> assignedDevs = getTicketEntity(ticketId).getAssignedDevs();
 
-        Set<com.bluesky.bugtraker.shared.dto.UserDto> bugFixers = getTicket(userId, projectName, bugId).getBugFixers();
+        Set<UserDto> assignedDevDtos =
+                modelMapper.map(assignedDevs, new TypeToken<Set<UserDto>>() {}.getType());
 
-        PageImpl<UserDto> pagedUsers =
-                new PageImpl<>(bugFixers.stream().toList(),
+        return new PageImpl<>(
+                        assignedDevDtos.stream().toList(),
                         Pageable.ofSize(page), limit);
-
-        return new LinkedHashSet<>(pagedUsers.getContent());
     }
 
     @Override
@@ -181,21 +214,22 @@ public class TicketServiceImp implements TicketService {
         commentEntity.setPublicId(utils.generateCommentId(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        commentEntity.setTicket(getTicketEntity(userId, projectName, ticketId));
+        commentEntity.setTicket(getTicketEntity(ticketId));
         commentEntity.setUser(modelMapper.map(userService.getUserById(userId), UserEntity.class));
 
         commentRepo.save(commentEntity);
 
     }
 
+
     @Override
     public Page<CommentDto> getComments(String userId, String projectName,
-                                        String tickerId,
+                                        String ticketId,
                                         int page, int limit,
                                         String sortBy, String direction) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        TicketEntity ticketEntity = getTicketEntity(userId, projectName, tickerId);
+        TicketEntity ticketEntity = getTicketEntity(ticketId);
 
         PageRequest pageRequest =
                 PageRequest.of(page - 1, limit, Sort.Direction.fromString(direction), sortBy);
@@ -204,6 +238,7 @@ public class TicketServiceImp implements TicketService {
         Page<CommentEntity> commentEntities =
                 commentRepo.findAllByTicket(ticketEntity, pageRequest);
 
-        return modelMapper.map(commentEntities, new TypeToken<Page<CommentDto>>() {}.getType());
+        return modelMapper.map(commentEntities, new TypeToken<Page<CommentDto>>() {
+        }.getType());
     }
 }

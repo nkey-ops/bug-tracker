@@ -63,6 +63,15 @@ public class TicketEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportedTime;
 
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdateTime;
+
+    @OneToMany( mappedBy = "mainTicket",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Set<TicketRecordEntity> ticketHistory;
+
     @ManyToOne(optional = false,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
@@ -78,26 +87,25 @@ public class TicketEntity implements Serializable {
     private Set<CommentEntity> comments = new HashSet<>();
 
 
-    @ManyToMany(cascade = CascadeType.DETACH)
+    @ManyToMany
     @JoinTable(name = "tickets_users",
             joinColumns = {@JoinColumn(name = "ticket_id")},
-            inverseJoinColumns = {@JoinColumn(name = "user_id")}
-    )
-    private Set<UserEntity> ticketFixers;
+            inverseJoinColumns = {@JoinColumn(name = "user_id")})
+    private Set<UserEntity> assignedDevs;
 
 
-    public boolean addBugFixer(UserEntity bugFixer) {
+    public boolean addAssignedDev(UserEntity bugFixer) {
         boolean isAddedBugFixer =
-                ticketFixers.add(bugFixer);
+                assignedDevs.add(bugFixer);
         boolean isAddedBug =
                 bugFixer.getWorkingOnTickets().add(this);
 
         return isAddedBugFixer && isAddedBug;
     }
 
-    public boolean removeBugFixer(UserEntity bugFixer) {
+    public boolean removeAssignedDev(UserEntity bugFixer) {
         boolean isRemovedBugFixer =
-                ticketFixers.remove(bugFixer);
+                assignedDevs.remove(bugFixer);
         boolean isRemovedBug =
                 bugFixer.getWorkingOnTickets().remove(this);
 

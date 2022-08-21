@@ -391,7 +391,7 @@ class UserServiceImpTest {
 
         when(userRepository.findByPublicId(anyString()))
                 .thenReturn(Optional.of(outputUserEntity));
-        when(bugRepo.findAllByTicketFixersIn(anySet(), any(Pageable.class)))
+        when(bugRepo.findAllByAssignedDevsIn(anySet(), any(Pageable.class)))
                 .thenReturn(pagedTicketEntities);
         when(modelMapper.map(
                 ArgumentMatchers.<Page<TicketEntity>>any(),

@@ -3,7 +3,7 @@
 
 <body>
 <div id="subscriber-form-block" class="form-group"
-     th:fragment="subscriber-form(subscriberRequestModel, postRequestLink, updateId, updateRequestLink)">
+     th:fragment="subscriber-form(subscriberRequestModel, postRequestLink, updateRequestLink, updateId )">
     <form id="subscriber-form" class="forms-sample" th:object="${subscriberRequestModel}" th:method="POST"
           th:action="@{${postRequestLink}}">
 
@@ -31,17 +31,18 @@
     <script th:inline="javascript">
         $("#subscriber-form").submit(function (e) {
 
-            e.preventDefault(); // avoid to executeus the actual submit of the form.
+            e.preventDefault();
 
             var form = $(this);
             var actionUrl = form.attr('action');
             $.ajax({
                 type: "POST",
                 url: actionUrl,
-                data: form.serialize(), // serializes the form's elements.
+                data: form.serialize(),
                 success: function (data) {
                     update([[${updateRequestLink}]], [[${updateId}]]);
                     $('#subscriber-form-block').html($(data).html());
+
                 }
             });
 

@@ -53,7 +53,6 @@ public class NavigationController {
     public ModelAndView showProjectForm() {
 
         ModelAndView mav = new ModelAndView("project-form2");
-//                "project", new ProjectRequestModel());
 
         return mav.addObject("user", getCurrentUser());
     }

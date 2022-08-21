@@ -46,7 +46,7 @@
                                 <div  class="form-group"
                                       th:fragment="ticket-edit-form">
                                     <form class="forms-sample" th:object="${ticketForm} " th:method="post"
-                                          th:action="@{/users/__${ticket.project.creator.publicId}__/projects/__${ticket.project.name}__/bugs/__${ticket.publicId}__}">
+                                        th:action="@{${ticketEditionPostRequestLink}}">
 
                                         <p class="alert alert-danger"
                                            th:each="error: ${#fields.allErrors()}"
@@ -119,21 +119,30 @@
                                                       maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
                                         </div>
 
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label for="behaviour">How to Solve
+                                                    <small  class="text-muted float-right message" ></small>
+                                                </label>
+                                            </div>
+                                            <textarea id="solution" th:field="*{howToSolve}" class="form-control"
+                                                      required spellcheck="false" placeholder="Program Behaviour..."
+                                                      maxlength="3000" rows="10" cols="40" style="resize: vertical" ></textarea>
+                                        </div>
+
 
                                         <div class="form-group text-center">
                                             <button type="submit" class="btn btn-outline-primary btn-lg">Update</button>
                                         </div>
-
                                     </form>
                                     <script th:inline="javascript">
-                                        /*<![CDATA[*/
-                                        document.getElementById("description").value = /*[[${ticket.shortDescription}]]*/''
-                                        document.getElementById("status").value = /*[[${ticket.status}]]*/''
-                                        document.getElementById("priority").value = /*[[${ticket.priority}]]*/''
-                                        document.getElementById("severity").value = /*[[${ticket.severity}]]*/''
-                                        document.getElementById("how-to-reproduce").value = /*[[${ticket.howToReproduce}]]*/''
-                                        document.getElementById("behaviour").value = /*[[${ticket.erroneousProgramBehaviour}]]*/''
-                                        /*]]>*/
+                                        document.getElementById("description").value = [[${ticket.shortDescription}]]
+                                        document.getElementById("status").value = [[${ticket.status}]]
+                                        document.getElementById("priority").value = [[${ticket.priority}]]
+                                        document.getElementById("severity").value = [[${ticket.severity}]]
+                                        document.getElementById("how-to-reproduce").value = [[${ticket.howToReproduce}]]
+                                        document.getElementById("behaviour").value = [[${ticket.erroneousProgramBehaviour}]]
+                                        document.getElementById("solution").value = [[${ticket.howToSolve}]]
                                     </script>
                                 </div>
                             </div>

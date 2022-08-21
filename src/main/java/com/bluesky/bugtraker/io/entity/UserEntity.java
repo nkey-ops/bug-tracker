@@ -44,11 +44,10 @@ public class UserEntity implements Serializable {
     private Boolean emailVerificationStatus;
 
     @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     private Set<TicketEntity> reportedTickets = new HashSet<>();
 
-    @ManyToMany(mappedBy = "ticketFixers",
+    @ManyToMany(mappedBy = "assignedDevs",
             fetch = FetchType.LAZY)
     private Set<TicketEntity> workingOnTickets = new HashSet<>();
 

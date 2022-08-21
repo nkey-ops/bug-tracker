@@ -6,20 +6,26 @@ import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.util.Date;
+import javax.validation.constraints.NotNull;
 
 
-@Getter @Setter
+@Getter
+@Setter
 public class TicketRequestModel {
+    @NotNull
     private Status status;
+    @NotNull
     private Severity severity;
+    @NotNull
     private Priority priority;
 
-    private Date reportedTime;
-
+    @NotNull
     private String shortDescription;
+    @NotNull
     private String howToReproduce;
+    @NotNull
+    private String howToSolve;
+    @NotNull
     private String erroneousProgramBehaviour;
 
 

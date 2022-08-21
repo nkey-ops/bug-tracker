@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 //@ControllerAdvice
 //public class ServiceExceptionAdvice {
-
+//
 //    @ResponseBody
 //    @ExceptionHandler(ServiceException.class)
 //    public ResponseEntity<?> handleException(ServiceException ex, Model model) {
@@ -34,13 +35,13 @@ import java.util.Map;
 //
 ////        Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
 //
-//        return new ResponseEntity<>(body, httpStatus);
-
-//        ModelAndView modelAndView = new ModelAndView("register");
-//        modelAndView
-//                .addObject("error", ex.getErrorType().getErrorMessage())
-//                .setStatus(httpStatus);
+//        return new ResponseEntity<>(ex.getErrorType().getErrorMessage(), httpStatus );
 //
-//        return  modelAndView;
+////        ModelAndView modelAndView = new ModelAndView("register");
+////        modelAndView
+////                .addObject("error", ex.getErrorType().getErrorMessage())
+////                .setStatus(httpStatus);
+//
+////        return  modelAndView;
 //    }
 //}

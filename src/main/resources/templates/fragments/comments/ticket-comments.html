@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:th="http://www.thymeleaf.org">
 
 <body>
 <div id="comments-block" class="card">
@@ -22,19 +23,24 @@
                 </div>
             </div>
 
-            <div class="form-group" th:replace="fragments/list/list-parts ::
+            <div class="text-center"  th:if="${#lists.isEmpty(commentsList)} == true">
+                <h5 class="text-muted"> It's Empty </h5>
+            </div>
+
+            <div class="form-group"
+                 th:if="${#lists.size(commentsList) > limit}"
+                 th:include="fragments/list/list-parts ::
                             paging (
                                     baseLink=${baseLink},
                                     limit=${limit},
                                     currentPage=${currentPage},
                                     totalPages=${totalPages},
                                     id='comments-block')">
-
             </div>
         </div>
         <div class="bg-grey p-2">
 
-            <form id="comment-form" class="forms-sample" th:object="${commentForm} " th:method="post"
+            <form id="comment-form" class="forms-sample" th:object="${commentForm}" th:method="post"
                   th:action="@{${baseLink}}">
                 <div class="d-flex flex-row align-items-start">
                     <img class="rounded-circle"

@@ -49,117 +49,25 @@
                 </div>
 
                 <div class="row">
-                    <div id="ticket-info-block" class="col-md-12 grid-margin stretch-card">
-
-
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex flex-row justify-content-between">
-                                    <h4 class="card-title mb-1">Details
-                                        <a th:href="${ticketEditFormLink}">
-                                            <button type="button" class="btn btn-outline-warning btn-sm btn-rounded">
-                                                <i class="mdi mdi-pencil"></i>
-                                            </button>
-                                        </a>
-                                    </h4>
-                                    <p class="text-muted mb-1">Last Updated</p>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="preview-list">
-                                            <div class="preview-item border-bottom">
-                                                <!-- Status -->
-                                                <div class="preview-thumbnail">
-                                                    <div class="preview-icon bg-primary">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="preview-item-content d-sm-flex flex-grow">
-                                                    <div class="flex-grow">
-                                                        <h6 class="preview-subject">Status</h6>
-                                                        <p class="text-muted mb-0">[[${ticket.status.name}]]</p>
-                                                    </div>
-                                                </div>
-                                                <!-- end Status -->
-                                                <!-- Priority -->
-                                                <div class="preview-thumbnail">
-                                                    <div class="preview-icon bg-success">
-                                                        <i class="mdi mdi-cloud-download"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="preview-item-content d-sm-flex flex-grow">
-                                                    <div class="flex-grow">
-                                                        <h6 class="preview-subject">Priority</h6>
-                                                        <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
-                                                    </div>
-                                                </div>
-                                                <!-- end Priority-->
-                                                <!-- Severity-->
-                                                <div class="preview-thumbnail">
-                                                    <div class="preview-icon bg-info">
-                                                        <i class="mdi mdi-clock"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="preview-item-content d-sm-flex flex-grow">
-                                                    <div class="flex-grow">
-                                                        <h6 class="preview-subject">Severity</h6>
-                                                        <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
-                                                    </div>
-                                                </div>
-                                                <!-- end Severity-->
-
-                                            </div>
-
-                                            <div class="preview-item border-bottom">
-                                                <div class="preview-thumbnail">
-                                                    <div class="preview-icon bg-danger">
-                                                        <i class="mdi mdi-email-open"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="preview-item-content d-sm-flex flex-grow">
-                                                    <div class="flex-grow">
-                                                        <h6 class="preview-subject">How to Reproduce</h6>
-                                                        <div style="resize:vertical; overflow:auto; ">
-                                                            <p class="text-muted mb-0" style="white-space: pre-wrap" ;
-                                                            >[[${ticket.howToReproduce}]]</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="preview-item">
-                                                <div class="preview-thumbnail">
-                                                    <div class="preview-icon bg-warning">
-                                                        <i class="mdi mdi-chart-pie"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="preview-item-content d-sm-flex flex-grow">
-                                                    <div class="flex-grow">
-                                                        <h6 class="preview-subject">Erroneous Program Behaviour</h6>
-                                                        <div style="resize:vertical; overflow:auto;">
-                                                            <p class="text-muted mb-0" style="white-space: pre-wrap"
-                                                            >[[${ticket.erroneousProgramBehaviour}]]</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="ticket-info-block" class="col-md-8 grid-margin stretch-card"
+                         th:include="/details/ticket-details ::
+                                    ticket-details(
+                                                ticket=${ticket},
+                                                ticketEditFormLink=${ticketEditFormLink})">
                     </div>
+                    <div id="ticket-comments-block" class="col-md-4 grid-margin stretch-card"></div>
                 </div>
                 <div class="row">
-                    <div id="ticket-history-block" class="col-6 grid-margin"></div>
-                    <div id="ticket-comments-block" class="col-md-6 grid-margin stretch-card"></div>
+                    <div id="ticket-records-block" class="col-6 grid-margin stretch-card"></div>
+                    <div id="ticket-assigned-devs-block" class="col-md-6 grid-margin stretch-card"></div>
                 </div>
 
 
                 <script th:inline="javascript">
                     window.onload = function () {
-                        $("#ticket-comments-block").load(/*[[${ticketCommentsLink}]]*/);
-                        $("#ticket-history-block").load(/*[[${ticketHistoryLink}]]*/);
+                        $("#ticket-comments-block").load([[${ticketCommentsLink}]]);
+                        $("#ticket-assigned-devs-block").load([[${ticketAssignedDevsLink}]]);
+                        $("#ticket-records-block").load([[${ticketRecordsLink}]]);
                     }
                 </script>
             </div>
@@ -184,6 +92,7 @@
 
 <script th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
 <script th:src="@{/assets/vendors/perfect-scrollbar/dist/perfect-scrollbar.min.js}"></script>
+<script type="text/javascript" th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
 <!-- End plugin js for this page -->
 
 <!-- inject:js -->
@@ -199,6 +108,8 @@
 <!-- Custom js for this page -->
 <script th:src="@{/assets/js/dashboard.js}"></script>
 <script th:src="@{/assets/js/test/load-into.js}"></script>
+<script th:src="@{/assets/js/test/update.js}"></script>
+
 
 
 <!-- End custom js for this page -->

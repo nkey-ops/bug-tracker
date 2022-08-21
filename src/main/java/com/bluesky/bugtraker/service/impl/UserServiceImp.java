@@ -155,7 +155,7 @@ public class UserServiceImp implements UserService {
     public Page<TicketDto> getWorkingOnTickets(String userId, int page, int limit) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        Page<TicketEntity> ticketFixers = ticketRepo.findAllByTicketFixersIn(
+        Page<TicketEntity> ticketFixers = ticketRepo.findAllByAssignedDevsIn(
                 Set.of(getUserEntity(userId)), PageRequest.of(page - 1, limit));
         return modelMapper.map(ticketFixers, new TypeToken<Page<TicketDto>>() {}.getType());
     }

@@ -20,9 +20,10 @@ public class TicketResponseModel extends RepresentationModel<TicketResponseModel
     private String shortDescription;
     private String howToReproduce;
     private String erroneousProgramBehaviour;
-    private String howToSolve = "Solution is not found";
+    private String howToSolve;
 
     private Date reportedTime;
+    private Date lastUpdateTime;
     private UserResponseModel reporter;
 
     private ProjectResponseModel project;

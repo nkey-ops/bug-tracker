@@ -11,7 +11,7 @@ import java.util.Set;
 
 
 @Getter @Setter
-public class UserResponseModel extends RepresentationModel<UserResponseModel> {
+public class UserResponseModel  {
     private String publicId;
     private String username;
     private String email;

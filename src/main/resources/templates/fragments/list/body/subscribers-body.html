@@ -3,14 +3,14 @@
 <body>
 <div id="subscribers-body" class="card">
     <div class="card-body">
-        <h4 class="card-title">Subscribers</h4>
+        <h4 class="card-title">[[${listName}]]</h4>
         <!-- List Content        -->
         <div class="form-group"
-             th:insert="fragments/list/content ::
-                        subscribers(
-                                    list=${elementsList},
-                                    baseLink=${baseLink},
-                                    updateId='subscribers-body')">
+             th:insert="fragments/list/content/subscribers-content ::
+                                    subscribers(
+                                                list=${elementsList},
+                                                baseLink=${baseLink},
+                                                updateId='subscribers-body')">
         </div>
 
         <!-- Add Subscriber Form -->

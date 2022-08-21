@@ -11,16 +11,14 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
-public class TicketDto implements Serializable {
+public class TicketRecordDto implements Serializable {
     @Serial
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = 5211376248151308747L;
-
+    private static final long serialVersionUID = 8191538905244886046L;
     private Long id;
     private String publicId;
     private Status status;
@@ -35,19 +33,17 @@ public class TicketDto implements Serializable {
     private String erroneousProgramBehaviour;
     private String howToSolve;
     private UserDto reporter;
-    private Set<UserDto> assignedDevs;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TicketDto ticketDto = (TicketDto) o;
-        return Objects.equals(id, ticketDto.id) && Objects.equals(publicId, ticketDto.publicId) && status == ticketDto.status && severity == ticketDto.severity && priority == ticketDto.priority && Objects.equals(reportedTime, ticketDto.reportedTime) && Objects.equals(shortDescription, ticketDto.shortDescription) && Objects.equals(howToReproduce, ticketDto.howToReproduce) && Objects.equals(erroneousProgramBehaviour, ticketDto.erroneousProgramBehaviour) && Objects.equals(howToSolve, ticketDto.howToSolve);
+        TicketRecordDto that = (TicketRecordDto) o;
+        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && status == that.status && severity == that.severity && priority == that.priority && Objects.equals(reportedTime, that.reportedTime) && Objects.equals(lastUpdateTime, that.lastUpdateTime) && Objects.equals(project, that.project) && Objects.equals(shortDescription, that.shortDescription) && Objects.equals(howToReproduce, that.howToReproduce) && Objects.equals(erroneousProgramBehaviour, that.erroneousProgramBehaviour) && Objects.equals(howToSolve, that.howToSolve) && Objects.equals(reporter, that.reporter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, status, severity, priority, reportedTime, shortDescription, howToReproduce, erroneousProgramBehaviour, howToSolve);
+        return Objects.hash(id, publicId, status, severity, priority, reportedTime, lastUpdateTime, project, shortDescription, howToReproduce, erroneousProgramBehaviour, howToSolve, reporter);
     }
 }
-
