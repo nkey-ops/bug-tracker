@@ -7,10 +7,11 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity
+@Entity(name = "project")
 @Table(name = "projects")
 @Getter
 @Setter
@@ -35,10 +36,18 @@ public class ProjectEntity implements Serializable {
                 updatable=false)
     private UserEntity creator;
 
-    @OneToMany(
+    @OneToMany(mappedBy = "project",
             cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
             orphanRemoval = true)
-    private Set<TicketEntity> tickets;
+    private Set<TicketEntity> tickets = new HashSet<>();
+
+//    @OneToMany(
+//            fetch = FetchType.LAZY,
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    @JoinColumn(name = "project_id")
+//    private Set<TicketEntity> tickets;
 
     @ManyToMany
     @JoinTable(name = "projects_subscribers",
@@ -46,15 +55,25 @@ public class ProjectEntity implements Serializable {
             inverseJoinColumns=@JoinColumn(name="subscriber_id", referencedColumnName="id"))
     private Set<UserEntity> subscribers;
 
-    public boolean addBug(TicketEntity ticketEntity) {
+    @OneToMany(mappedBy = "project",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Set<CommentEntity> comments = new HashSet<>();
+
+    
+//    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+//    @JoinColumn(name = "project_id",
+//                referencedColumnName = "comment_id")
+//    private Set<CommentEntity> comments;
+
+    public boolean addTicket(TicketEntity ticketEntity) {
         boolean isAdded = tickets.add(ticketEntity);
 
         if (isAdded) ticketEntity.setProject(this);
 
         return isAdded;
     }
-
-    public boolean removeBug(TicketEntity ticketEntity) {
+    public boolean removeTicket(TicketEntity ticketEntity) {
         boolean isRemoved = tickets.remove(ticketEntity);
 
         if (isRemoved) ticketEntity.setProject(null);
@@ -69,7 +88,6 @@ public class ProjectEntity implements Serializable {
 
         return isAddedUser && isAddedProject;
     }
-
     public boolean removeSubscriber(UserEntity subscriber) {
         boolean isRemovedUser = subscribers.remove(subscriber);
 
@@ -86,7 +104,6 @@ public class ProjectEntity implements Serializable {
         ProjectEntity that = (ProjectEntity) o;
         return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(name, that.name);
     }
-
 
     @Override
     public int hashCode() {

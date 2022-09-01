@@ -1,14 +1,17 @@
 package com.bluesky.bugtraker.service;
 
-import com.bluesky.bugtraker.shared.dto.TicketDto;
+import com.bluesky.bugtraker.shared.dto.CommentDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
+import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 
 import java.util.Set;
 
-public interface ProjectService{
+public interface ProjectService {
     ProjectDto getProject(String userId, String projectName);
 
     Set<ProjectDto> getProjects(String userId, int pages, int limit);
@@ -29,5 +32,7 @@ public interface ProjectService{
 
     Set<UserDto> getSubscribers(String userId, String projectName);
 
+    void createComment(String userId, String projectName, String commentCreatorId, CommentDto map);
 
+    Page<CommentDto> getComments(String userId, String projectName, int page, int limit, String sortBy, Sort.Direction direction);
 }

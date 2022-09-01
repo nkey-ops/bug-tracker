@@ -27,22 +27,55 @@ public class CommentEntity implements Serializable {
     private String publicId;
 
     @Column(nullable = false, length = 1000)
-    private String text;
+    private String content;
 
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date uploadTime;
 
-    @ManyToOne(optional = false,
-            fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false)
-    private UserEntity user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", 
+            referencedColumnName = "id",
+            nullable = false, updatable = false)
+    private UserEntity creator;
 
     @ManyToOne(
             optional = false,
             fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id", nullable = false, updatable = false)
+    @JoinTable(name = "tickets_comments",
+            joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "ticket_id")
+    )
     private TicketEntity ticket;
 
+    @ManyToOne(
+            optional = false,
+            fetch = FetchType.LAZY)
+    @JoinTable(name = "tickets_projects",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "ticket_id")
+    )
+    private ProjectEntity project;
 
+
+    public boolean addCreator(UserEntity creator) {
+        boolean isCommentAdded = creator.getComments().add(this);
+        this.setCreator(creator);
+    
+        return  isCommentAdded;
+    }
+
+    public boolean addTicket(TicketEntity ticketEntity) {
+        boolean isTicketAdded = ticketEntity.getComments().add(this);
+        this.setTicket(ticketEntity);
+    
+        return  isTicketAdded;
+    }
+
+    public boolean addProject(ProjectEntity projectEntity) {
+        boolean isProjectAdded = projectEntity.getComments().add(this);
+        this.setProject(projectEntity);
+
+        return  isProjectAdded;
+    }
 }

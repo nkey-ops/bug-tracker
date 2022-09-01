@@ -49,34 +49,36 @@
                 </div>
 
                 <div class="row">
-                    <div id="ticket-info-block" class="col-md-8 grid-margin stretch-card"
-                         th:include="/details/ticket-details ::
+                    <div id="ticket-info-block" class="col-md-8 grid-margin stretch-card">
+                    <div th:replace="/details/ticket-details ::
                                     ticket-details(
                                                 ticket=${ticket},
-                                                ticketEditFormLink=${ticketEditFormLink})">
+                                                ticketEditFormLink=${ticketEditFormLink},
+                                                isMainTicket=${isMainTicket})">
                     </div>
-                    <div id="ticket-comments-block" class="col-md-4 grid-margin stretch-card"></div>
                 </div>
-                <div class="row">
-                    <div id="ticket-records-block" class="col-6 grid-margin stretch-card"></div>
-                    <div id="ticket-assigned-devs-block" class="col-md-6 grid-margin stretch-card"></div>
-                </div>
-
-
-                <script th:inline="javascript">
-                    window.onload = function () {
-                        $("#ticket-comments-block").load([[${ticketCommentsLink}]]);
-                        $("#ticket-assigned-devs-block").load([[${ticketAssignedDevsLink}]]);
-                        $("#ticket-records-block").load([[${ticketRecordsLink}]]);
-                    }
-                </script>
+                <div id="ticket-comments-block" class="col-md-4 grid-margin stretch-card"></div>
             </div>
-            <!-- content-wrapper ends -->
-            <!-- partial -->
+            <div class="row">
+                <div id="ticket-records-block" class="col-6 grid-margin stretch-card"></div>
+                <div id="ticket-assigned-devs-block" class="col-md-6 grid-margin stretch-card"></div>
+            </div>
+
+
+            <script th:inline="javascript">
+                window.onload = function () {
+                    $("#ticket-comments-block").load([[${ticketCommentsLink}]]);
+                    $("#ticket-assigned-devs-block").load([[${ticketAssignedDevsLink}]]);
+                    $("#ticket-records-block").load([[${ticketRecordsLink}]]);
+                }
+            </script>
         </div>
-        <!-- main-panel ends -->
+        <!-- content-wrapper ends -->
+        <!-- partial -->
     </div>
-    <!-- page-body-wrapper ends -->
+    <!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends -->
 </div>
 <!-- container-scroller -->
 <!-- plugins:js -->
@@ -92,7 +94,7 @@
 
 <script th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
 <script th:src="@{/assets/vendors/perfect-scrollbar/dist/perfect-scrollbar.min.js}"></script>
-<script type="text/javascript" th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
+<script th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
 <!-- End plugin js for this page -->
 
 <!-- inject:js -->
@@ -109,7 +111,6 @@
 <script th:src="@{/assets/js/dashboard.js}"></script>
 <script th:src="@{/assets/js/test/load-into.js}"></script>
 <script th:src="@{/assets/js/test/update.js}"></script>
-
 
 
 <!-- End custom js for this page -->

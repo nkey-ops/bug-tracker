@@ -23,7 +23,6 @@ public class TicketRequestModel {
     private String shortDescription;
     @NotNull
     private String howToReproduce;
-    @NotNull
     private String howToSolve;
     @NotNull
     private String erroneousProgramBehaviour;

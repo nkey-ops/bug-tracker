@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div id="ticket-comments-body" class="card">
+    <div class="card-body">
+        <h4 class="card-title mb-1">Chat </h4>
+
+        <div class="row  d-flex justify-content-center">
+            <div id="comments-content-block" class="col-md-12 form-group"></div>
+        </div>
+
+        <div class="bg-grey p-2" th:insert="forms/comment-form ::
+                                    comment-form(
+                                                commentForm=${commentForm}, 
+                                                postRequestLink=${commentPostRequestLink})">
+        </div>
+    </div>
+    <script th:inline="javascript">
+        $("#comments-content-block").load([[${commentsContentLink}]]);
+    </script>
+</div>
+</body>
+
+
+</html>

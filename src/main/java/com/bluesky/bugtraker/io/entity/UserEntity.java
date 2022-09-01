@@ -55,11 +55,11 @@ public class UserEntity implements Serializable {
             fetch = FetchType.LAZY)
     private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
 
-    @OneToMany(
+    @OneToMany(mappedBy = "creator",
             cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
             orphanRemoval = true)
     private Set<CommentEntity> comments = new HashSet<>();
-
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles")

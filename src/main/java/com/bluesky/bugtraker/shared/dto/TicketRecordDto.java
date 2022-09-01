@@ -1,5 +1,6 @@
 package com.bluesky.bugtraker.shared.dto;
 
+import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
@@ -33,6 +34,8 @@ public class TicketRecordDto implements Serializable {
     private String erroneousProgramBehaviour;
     private String howToSolve;
     private UserDto reporter;
+
+    private TicketEntity mainTicket;
 
     @Override
     public boolean equals(Object o) {

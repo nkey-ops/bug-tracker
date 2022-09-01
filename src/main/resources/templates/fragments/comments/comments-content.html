@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+
+<body>
+<div id="comments-content">
+    <div class="text-center" th:if="${#lists.isEmpty(commentsList)} == true">
+        <h5 class="text-muted"> It's Empty Here</h5>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(commentsList)} == false">
+        <div style="overflow-y: scroll !important; resize: vertical; overflow-x: hidden;">
+            <ul class="card p-2 align-content-center" style="background: #26353e"
+                th:each="comment : ${commentsList}">
+                <li th:replace="fragments/comments/comment ::
+                        comment(
+                                username=${comment.creator.username},
+                                userComment=${comment.content},
+                                uploadTime=${comment.uploadTime}
+                                )">
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="form-group"
+         th:if="${#lists.size(commentsList) > limit}"
+         th:include="fragments/list/list-parts ::
+                            paging (
+                                    listRequestLink=${listRequestLink},
+                                    limit=${limit},
+                                    currentPage=${currentPage},
+                                    totalPages=${totalPages},
+                                    id='comments-content')">
+    </div>
+    
+</div>
+</body>
+</html>

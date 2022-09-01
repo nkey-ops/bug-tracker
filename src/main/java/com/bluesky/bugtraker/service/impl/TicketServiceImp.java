@@ -88,9 +88,6 @@ public class TicketServiceImp implements TicketService {
                         projectService.getProject(userId, projectName),
                         ProjectEntity.class);
 
-        if (ticketRepo.existsByProjectAndPublicId(projectEntity, ticketDto.getPublicId()))
-            throw new TicketServiceException(RECORD_ALREADY_EXISTS, ticketDto.getPublicId());
-
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
         ticketEntity.setPublicId(utils.generateBugId(10));
@@ -101,9 +98,10 @@ public class TicketServiceImp implements TicketService {
         ticketEntity.setReporter(
                 modelMapper.map(
                         userService.getUserById(reporterId), UserEntity.class));
-        ticketEntity.setProject(
-                modelMapper.map(
-                        projectService.getProject(userId, projectName), ProjectEntity.class));
+
+        boolean isAdded =  projectEntity.addTicket(ticketEntity);
+        if (!isAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED, projectEntity.getPublicId());
 
         TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
 
@@ -137,7 +135,11 @@ public class TicketServiceImp implements TicketService {
         ticketRecordEntity.setId(null);
         ticketRecordEntity.setPublicId(utils.generateTicketRecordId(15));
         ticketRecordEntity.setMainTicket(mainTicketEntity);
+        
+        boolean isAdded = mainTicketEntity.addTicketRecord(ticketRecordEntity);
 
+        if (!isAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED, mainTicketEntity.getPublicId());
 
         ticketRecordRepo.save(ticketRecordEntity);
     }
@@ -208,31 +210,37 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public void createComment(String userId, String projectName, String ticketId, CommentDto comment) {
+    public void createComment(String ticketId, String creatorId, CommentDto comment) {
         CommentEntity commentEntity = modelMapper.map(comment, CommentEntity.class);
 
         commentEntity.setPublicId(utils.generateCommentId(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
-
-        commentEntity.setTicket(getTicketEntity(ticketId));
-        commentEntity.setUser(modelMapper.map(userService.getUserById(userId), UserEntity.class));
+        
+        UserEntity creator = modelMapper.map(userService.getUserById(creatorId), UserEntity.class);
+        TicketEntity ticketEntity = this.getTicketEntity(ticketId);
+        
+        boolean isCreatorAdded  = commentEntity.addCreator(creator);
+        if(!isCreatorAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED,  creatorId);
+        
+        boolean isTicketAdded = commentEntity.addTicket(ticketEntity);
+        if(!isTicketAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED,  ticketId);
 
         commentRepo.save(commentEntity);
-
     }
 
 
     @Override
-    public Page<CommentDto> getComments(String userId, String projectName,
-                                        String ticketId,
+    public Page<CommentDto> getComments(String ticketId,
                                         int page, int limit,
-                                        String sortBy, String direction) {
+                                        String sortBy, Sort.Direction dir) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
         TicketEntity ticketEntity = getTicketEntity(ticketId);
 
         PageRequest pageRequest =
-                PageRequest.of(page - 1, limit, Sort.Direction.fromString(direction), sortBy);
+                PageRequest.of(page - 1, limit, dir, sortBy);
 
 
         Page<CommentEntity> commentEntities =

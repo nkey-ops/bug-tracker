@@ -2,12 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="ticket-details(ticket, ticketEditFormLink)">
-    <div class="card">
+<div >
+    <div class="card" th:fragment="ticket-details(ticket, ticketEditFormLink, isMainTicket)">
         <div class="card-body">
             <div class="d-flex flex-row justify-content-between">
                 <h4 class="card-title mb-1">Details
-                    <a th:href="${ticketEditFormLink}">
+
+                    <a th:if="${isMainTicket} == true" th:href="${ticketEditFormLink}">
                         <button type="button" class="btn btn-outline-warning btn-sm btn-rounded">
                             <i class="mdi mdi-pencil"></i>
                         </button>
@@ -70,8 +71,8 @@
                             <div class="preview-item-content d-sm-flex flex-grow">
                                 <div class="flex-grow">
                                     <h6 class="preview-subject">Description</h6>
-                                    <div style="resize:vertical; overflow:scroll; min-height: 30px">
-                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                    <div style="resize:vertical; overflow:scroll;">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap; height: 16px"
                                         >[[${ticket.shortDescription}]]</p>
                                     </div>
                                 </div>
@@ -88,7 +89,7 @@
                                 <div class="flex-grow">
                                     <h6 class="preview-subject">How to Reproduce</h6>
                                     <div style="resize:vertical; overflow:auto; ">
-                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap; height: 16px"
                                         >[[${ticket.howToReproduce}]]</p>
                                     </div>
                                 </div>
@@ -105,7 +106,7 @@
                                 <div class="flex-grow">
                                     <h6 class="preview-subject">Erroneous Program Behaviour</h6>
                                     <div style="resize:vertical; overflow:auto;">
-                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap; height: 16px"
                                         >[[${ticket.erroneousProgramBehaviour}]]</p>
                                     </div>
                                 </div>
@@ -122,7 +123,7 @@
                                 <div class="flex-grow">
                                     <h6 class="preview-subject">How to Solve</h6>
                                     <div style="resize:vertical; overflow:auto; ">
-                                        <p class="text-muted mb-0" style="white-space: pre-wrap"
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap; height: 16px"
                                         >[[${ticket.howToSolve}]]</p>
                                     </div>
                                 </div>

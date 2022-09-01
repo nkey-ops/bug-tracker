@@ -20,8 +20,7 @@ public class UserResponseModel  {
         this.username = username;
     }
 
-    public UserResponseModel() {
-    }
+    public UserResponseModel() {}
 
     @Override
     public boolean equals(Object o) {

@@ -1,5 +1,6 @@
 package com.bluesky.bugtraker.shared.dto;
 
+import com.bluesky.bugtraker.io.entity.UserEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,8 @@ import java.util.Date;
 @Setter
 public class CommentDto {
         private  String publicId;
-        private UserDto user;
-        private String text;
+        private UserDto creator;
+        private String content;
         private Date uploadTime;
+
 }

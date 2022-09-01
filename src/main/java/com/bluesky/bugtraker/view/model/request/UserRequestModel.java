@@ -12,15 +12,12 @@ import java.util.Objects;
 
 @Getter @Setter
 public class UserRequestModel {
-    @NotNull
     @NotEmpty
-    @Size(min = 4)
+    @Size(min = 4 , message = "Length should be not less than 4 characters")
     private String username;
-    @NotNull
     @NotEmpty
     @ValidEmail
     private String email;
-    @NotNull
     @NotEmpty
     private String password;
 

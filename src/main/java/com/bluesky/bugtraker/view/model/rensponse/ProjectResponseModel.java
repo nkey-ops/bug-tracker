@@ -1,6 +1,5 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
@@ -14,7 +13,7 @@ public class ProjectResponseModel extends RepresentationModel<ProjectResponseMod
     private String name;
 
     private String publicId;
-    private Set<TicketResponseModel> bugs = new LinkedHashSet<>();
+    private Set<TicketResponseModel> tickets = new LinkedHashSet<>();
     private Set<UserResponseModel> subscribers = new LinkedHashSet<>();
     private UserResponseModel creator;
 
@@ -24,11 +23,11 @@ public class ProjectResponseModel extends RepresentationModel<ProjectResponseMod
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ProjectResponseModel that = (ProjectResponseModel) o;
-        return Objects.equals(name, that.name) && Objects.equals(bugs, that.bugs) && Objects.equals(subscribers, that.subscribers) && Objects.equals(creator, that.creator);
+        return Objects.equals(name, that.name) && Objects.equals(tickets, that.tickets) && Objects.equals(subscribers, that.subscribers) && Objects.equals(creator, that.creator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, bugs, subscribers, creator);
+        return Objects.hash(super.hashCode(), name, tickets, subscribers, creator);
     }
 }

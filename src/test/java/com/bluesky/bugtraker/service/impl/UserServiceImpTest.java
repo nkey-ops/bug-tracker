@@ -68,7 +68,7 @@ class UserServiceImpTest {
 
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
 
         userEmail = "email@sample";

@@ -3,15 +3,19 @@
 <head>
 </head>
 <body>
-<div id="project-result" class="form-group" th:fragment="project-form(projectRequestModel, creatorId)">
+<div id="project-form-block" class="form-group"
+     th:fragment="project-form(projectRequestModel, postRequestLink, updateRequestLink, updateId)">
     <form id="project-form" class="forms-sample"
           th:object="${projectRequestModel}" method="post"
-          th:action="@{/users/__${creatorId}__/projects}">
+          th:action="@{${postRequestLink}}">
+
+        <div id="error"></div>
+        <div id="success"></div>
 
         <p class="alert alert-danger"
            th:each="error: ${#fields.allErrors()}"
            th:text="${error}">Input is incorrect</p>
-        <p class="alert alert-success"
+        <p  class="alert alert-success"
            th:if="${isCreated}">Project has been created</p>
 
         <div class="form-group row">
@@ -26,20 +30,32 @@
             </div>
         </div>
     </form>
-
     <script th:inline="javascript">
-        /*<![CDATA[*/
-        $("#submit-project").click(function (event) {
-            event.preventDefault();
+        $("#project-form").submit(function (e) {
 
-            $.post($("#project-form").attr("action"), $("#project-form").serialize(), function (html) {
-                $("#project-result").replaceWith(html);
-                // $("#my-projects").load(/*[[${lastRequestLink}]]*/'', function () {
-                //     $("#result").html(html);
-                // });
+            e.preventDefault();
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+            $.ajax({
+                type: "POST",
+                url: actionUrl,
+                data: form.serialize(),
+
+                beforeSend: function (){
+                    $('#success').html('');
+                    $('#error').html('');
+                },
+                success: function (data) {
+                    update([[${updateRequestLink}]], [[${updateId}]]);
+                    $('#project-form-block').html($(data).html());
+                    $('#success').html('<p class="alert alert-success">' + 'Project has been createad' + '</p>')
+                },
+                error: function (jqXHR, textStatus, errorThrown){
+                    $('#error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                }
             });
         });
-        /*]]>*/
     </script>
 </div>
 </body>

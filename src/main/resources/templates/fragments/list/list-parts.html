@@ -9,14 +9,14 @@
 </div>
 
 <!---->
-<div id="pagination" th:fragment="paging (baseLink, limit, currentPage, totalPages, id)">
+<div id="pagination" th:fragment="paging (listRequestLink, limit, currentPage, totalPages, id)">
     <div class="text-center">
         <div class="btn-group" role="group" aria-label="Basic example"
-             id="mainLink" th:href="${baseLink}">
+             id="mainLink" th:href="${listRequestLink}">
             <!-- First -->
             <div th:if="${currentPage> 1}">
                 <button type="button" class="btn btn-outline-primary"
-                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${1}' + '&limit=' + '${limit}', '${id}' )|"
+                        th:attr="onclick=|loadInto('${listRequestLink}' + '?page=' + '${1}' + '&limit=' + '${limit}', '${id}' )|"
                 >First
                 </button>
             </div>
@@ -26,7 +26,7 @@
             <!--  Previous  -->
             <div th:if="${currentPage > 1}">
                 <button type="button" class="btn btn-outline-primary"
-                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${currentPage - 1}' + '&limit=' + '${limit}', '${id}' )|"
+                        th:attr="onclick=|loadInto('${listRequestLink}' + '?page=' + '${currentPage - 1}' + '&limit=' + '${limit}', '${id}' )|"
                 >&lt;
                 </button>
             </div>
@@ -38,7 +38,7 @@
             </button>
             <div th:if="${currentPage < totalPages}">
                 <button type="button" class="btn btn-outline-primary"
-                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${currentPage + 1}' + '&limit=' + '${limit}', '${id}' )|"
+                        th:attr="onclick=|loadInto('${listRequestLink}' + '?page=' + '${currentPage + 1}' + '&limit=' + '${limit}', '${id}' )|"
                 >>
                 </button>
             </div>
@@ -49,7 +49,7 @@
             <!-- Last   -->
             <div th:if="${currentPage < totalPages}">
                 <button type="button" class="btn btn-outline-primary"
-                        th:attr="onclick=|loadInto('${baseLink}' + '?page=' + '${totalPages}' + '&limit=' + '${limit}', '${id}' )|"
+                        th:attr="onclick=|loadInto('${listRequestLink}' + '?page=' + '${totalPages}' + '&limit=' + '${limit}', '${id}' )|"
                 >Last
                 </button>
             </div>

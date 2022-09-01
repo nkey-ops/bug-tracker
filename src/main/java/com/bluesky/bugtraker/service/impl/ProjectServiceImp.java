@@ -1,14 +1,18 @@
 package com.bluesky.bugtraker.service.impl;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
+import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
+import com.bluesky.bugtraker.io.entity.CommentEntity;
 import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.Utils;
+import com.bluesky.bugtraker.shared.dto.CommentDto;
 import com.bluesky.bugtraker.shared.dto.TicketDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
@@ -17,8 +21,13 @@ import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
@@ -29,16 +38,18 @@ public class ProjectServiceImp implements ProjectService {
 
     private final ProjectRepository projectRepo;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepo;
     private final UserService userService;
     private final ModelMapper modelMapper = new ModelMapper();
     private final Utils utils;
 
 
     @Autowired
-    public ProjectServiceImp(ProjectRepository projectRepo, UserRepository userRepository, UserService userService,
+    public ProjectServiceImp(ProjectRepository projectRepo, UserRepository userRepository, CommentRepository commentRepo, UserService userService,
                              Utils utils) {
         this.projectRepo = projectRepo;
         this.userRepository = userRepository;
+        this.commentRepo = commentRepo;
         this.userService = userService;
         this.utils = utils;
     }
@@ -48,7 +59,7 @@ public class ProjectServiceImp implements ProjectService {
      *  which is prohibited by the application criteria
      * */
     ProjectEntity getProjectEntity(String userId, String projectName) {
-        com.bluesky.bugtraker.shared.dto.UserDto userDto = userService.getUserById(userId);
+        UserDto userDto = userService.getUserById(userId);
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
 
         return projectRepo.findByCreatorAndName(userEntity, projectName)
@@ -113,7 +124,7 @@ public class ProjectServiceImp implements ProjectService {
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
         ticketEntity.setProject(getProjectEntity(userId, projectName));
 
-        boolean isAdded = projectEntity.addBug(ticketEntity);
+        boolean isAdded = projectEntity.addTicket(ticketEntity);
         if (!isAdded)
             throw new ProjectServiceException(RECORD_ALREADY_EXISTS, ticketEntity.getPublicId());
 
@@ -125,7 +136,7 @@ public class ProjectServiceImp implements ProjectService {
         ProjectEntity projectEntity = getProjectEntity(userId, projectName);
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
-        boolean isRemoved = projectEntity.removeBug(ticketEntity);
+        boolean isRemoved = projectEntity.removeTicket(ticketEntity);
         if (!isRemoved)
             throw new ProjectServiceException(NO_RECORD_FOUND, ticketEntity.getPublicId());
 
@@ -173,6 +184,47 @@ public class ProjectServiceImp implements ProjectService {
 
         return modelMapper.map(
                 projectRepo.save(projectEntity), ProjectDto.class);
+    }
+
+    @Override
+    public void createComment(String userId, String projectName, String commentCreatorId, CommentDto comment) {
+        CommentEntity commentEntity = modelMapper.map(comment, CommentEntity.class);
+
+        commentEntity.setPublicId(utils.generateCommentId(10));
+        commentEntity.setUploadTime(Date.from(Instant.now()));
+
+        UserEntity creator = modelMapper.map(userService.getUserById(commentCreatorId), UserEntity.class);
+        ProjectEntity projectEntity = this.getProjectEntity(userId, projectName);
+
+        boolean isCreatorAdded  = commentEntity.addCreator(creator);
+        if(!isCreatorAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED,  commentCreatorId);
+
+        boolean isProjectAdded = commentEntity.addProject(projectEntity);
+        if(!isProjectAdded)
+            throw new TicketServiceException(RECORD_ALREADY_ADDED,  projectName);
+
+        commentRepo.save(commentEntity);
+    }
+
+
+    @Override
+    public Page<CommentDto> getComments(String userId, String projectName,
+                                        int page, int limit,
+                                        String sortBy, Sort.Direction dir) {
+        if (page < 1 || limit < 1) throw new IllegalArgumentException();
+
+        ProjectEntity projectEntity = this.getProjectEntity(userId, projectName);
+        
+        PageRequest pageRequest =
+                PageRequest.of(page - 1, limit, dir, sortBy);
+
+
+        Page<CommentEntity> commentEntities =
+                commentRepo.findAllByProject(projectEntity, pageRequest);
+
+        return modelMapper.map(commentEntities, new TypeToken<Page<CommentDto>>() {
+        }.getType());
     }
 }
 

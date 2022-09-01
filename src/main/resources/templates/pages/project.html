@@ -45,16 +45,34 @@
                     <h3 class="page-title"> [[${project.name}]] </h3>
                 </div>
                 <div class="row ">
-                    <div id="bugs-block" class="col-12 grid-margin"></div>
+                    <div id="tickets-block" class="col-12 grid-margin"></div>
                     <div id="subscribers-block" class="col-6 grid-margin"></div>
-
+                    <div id="comments-block" class="col-6 grid-margin"></div>
                 </div>
 
+                <div class="form-group text-center">
+                    <button id="delete-project" type="button" class="btn btn-outline-danger btn-sm">
+                        <i class="mdi mdi-delete-forever"></i>Delete Project
+                    </button>
+                </div>
+                <script th:inline="javascript">
+                    $("#delete-project").click(function () {
+                        $.ajax({
+                            type: "DELETE",
+                            url: [[${selfLink}]],
+                            success: function () {
+                                alert([[${project.name}]] + ' has been deleted')
+                                window.location.href = [[${#request.contextPath}]] + '/home'
+                            }
+                        })
+                    })
+                </script>
 
                 <script th:inline="javascript">
                     window.onload = function () {
-                        $("#bugs-block").load(/*[[${ticketsLink}]]*/);
-                        $("#subscribers-block").load(/*[[${subscribersLink}]]*/);
+                        $("#tickets-block").load([[${ticketsLink}]]);
+                        $("#subscribers-block").load([[${subscribersLink}]]);
+                        $("#comments-block").load([[${commentsLink}]]);
                     }
                 </script>
             </div>
@@ -77,10 +95,8 @@
 <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
 <script th:src="@{/webjars/chart.js/3.8.0/dist/chart.min.js}"></script>
 
-<script type="text/javascript" th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
+<script  th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
 <!-- End plugin js for this page -->
-
-
 
 <!-- inject:js -->
 <script th:src="@{/assets/js/off-canvas.js}"></script>

@@ -22,6 +22,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -141,49 +143,31 @@ public class TicketController {
 
         model.addAttribute("ticket", ticketResponseModel);
 
-        String ticketEditForm = linkTo(UserController.class)
+        WebMvcLinkBuilder baseLink = linkTo(UserController.class)
                 .slash(userId)
                 .slash("projects")
                 .slash(projectName)
                 .slash("tickets")
-                .slash(ticketId)
-                .slash("edit")
-                .toUri().toString();
+                .slash(ticketId);
 
+        String ticketEditForm =
+                baseLink.slash("edit").toUri().toString();
         model.addAttribute("ticketEditFormLink", ticketEditForm);
 
-        String ticketCommentsLink = linkTo(UserController.class)
-                .slash(userId)
-                .slash("projects")
-                .slash(projectName)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("comments")
-                .toUri().toString();
-
+        String ticketCommentsLink =
+                baseLink.slash("comments")
+                        .slash("body").toUri().toString();
         model.addAttribute("ticketCommentsLink", ticketCommentsLink);
 
-        String ticketRecordsLink = linkTo(UserController.class)
-                .slash(userId)
-                .slash("projects")
-                .slash(projectName)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("records")
-                .toUri().toString();
-
+        String ticketRecordsLink =
+                baseLink.slash("records").toUri().toString();
         model.addAttribute("ticketRecordsLink", ticketRecordsLink);
 
-        String ticketAssignedDevsLink = linkTo(UserController.class)
-                .slash(userId)
-                .slash("projects")
-                .slash(projectName)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("assigned-devs")
-                .toUri().toString();
-
+        String ticketAssignedDevsLink =
+                baseLink.slash("assigned-devs").toUri().toString();
         model.addAttribute("ticketAssignedDevsLink", ticketAssignedDevsLink);
+
+        model.addAttribute("isMainTicket", true);
 
         return "pages/ticket";
     }
@@ -227,27 +211,24 @@ public class TicketController {
     @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
     @PostMapping(
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String createTicket(@PathVariable String userId,
-                               @PathVariable String projectName,
-                               @AuthenticationPrincipal UserPrincipal reporter,
-                               @ModelAttribute("ticketRequestModel") @Valid TicketRequestModel ticket,
-                               BindingResult bindingResult,
-                               RedirectAttributes attr) {
+    public ResponseEntity<?> createTicket(@PathVariable String userId,
+                                          @PathVariable String projectName,
+                                          @AuthenticationPrincipal UserPrincipal reporter,
+                                          @Valid @ModelAttribute("ticketRequestModel")
+                                          TicketRequestModel ticket) {
+
 
         TicketDto requestTicketDto = modelMapper.map(ticket, TicketDto.class);
 
-        try {
-            ticketService.createTicket(userId, projectName, requestTicketDto, reporter.getId());
-        } catch (ServiceException e) {
-            bindingResult.addError(
-                    new ObjectError("error", e.getErrorType().getErrorMessage()));
-            attr.addFlashAttribute("org.springframework.validation.BindingResult.ticketRequestModel", bindingResult);
-            attr.addFlashAttribute("ticketRequestModel", ticket);
+        ticketService.createTicket(userId, projectName, requestTicketDto, reporter.getId());
+        
+        String baseLink = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .toUri().toString();
 
-            return "redirect:/users/" + userId + "/projects/" + projectName + "/bugs/edit";
-        }
-
-        return "redirect:/users/" + userId + "/projects/" + projectName;
+        return ResponseEntity.status(HttpStatus.CREATED).body(baseLink);
     }
 
     @RequestMapping(value = "/{ticketId}",
@@ -336,73 +317,93 @@ public class TicketController {
                 modelMapper.map(ticketRecord, TicketRecordResponseModel.class);
 
         model.addAttribute("ticket", ticketRecordResponseModel);
-
-        return "details/ticket-record-details";
+        model.addAttribute("isMainTicket", false);
+        return "details/ticket-details :: ticket-details";
     }
 
     @PreAuthorize("#userId == principal.id")
-    @PostMapping(value = "/{bugId}/comments",
-            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public String createComment(@PathVariable String userId,
-                                @PathVariable String projectName,
-                                @PathVariable String bugId,
-                                @ModelAttribute("commentForm") CommentRequestModel comment,
-                                BindingResult bindingResult,
-                                Model model) {
+    @PostMapping(value = "/{ticketId}/comments",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> createComment(@PathVariable String userId,
+                                                @PathVariable String projectName,
+                                                @PathVariable String ticketId,
+                                                @AuthenticationPrincipal UserPrincipal creator,
+                                                @ModelAttribute("commentForm") CommentRequestModel comment
+    ) {
 
-        try {
-            ticketService.createComment(
-                    userId, projectName, bugId,
-                    modelMapper.map(comment, CommentDto.class)
-            );
-        } catch (ServiceException e) {
-            bindingResult.addError(
-                    new ObjectError("error", e.getErrorType().getErrorMessage()));
-        }
+        CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
+        ticketService.createComment(ticketId, creator.getId(), commentDto);
+        
+        String commentsList = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .slash("tickets")
+                .slash(ticketId)
+                .slash("comments")
+                .toUri().toString();
 
-        return "redirect:/users/" + userId + "/projects/" + projectName + "/tickets/" + bugId + "/comments";
+        return ResponseEntity.status(HttpStatus.CREATED.value()).body(commentsList);
     }
 
     @PreAuthorize("#userId == principal.id")
-    @GetMapping("/{bugId}/comments")
-    public String getComments(@PathVariable String userId,
-                              @PathVariable String projectName,
-                              @PathVariable String bugId,
-                              @RequestParam(value = "page", defaultValue = "1") int page,
-                              @RequestParam(value = "limit", defaultValue = "5") int limit,
-                              @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
-                              @RequestParam(value = "dir", defaultValue = "desc") String order,
-                              Model model) {
-
-        Page<CommentDto> pagedCommentsDto =
-                ticketService.getComments(userId, projectName, bugId, page, limit, sortBy, order);
-
-        List<CommentResponseModel> pagedCommentsResponseModel =
-                modelMapper.map(pagedCommentsDto.getContent(),
-                        new TypeToken<ArrayList<CommentResponseModel>>() {
-                        }.getType());
-
-        model.addAttribute("limit", limit);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", pagedCommentsDto.getTotalPages());
-
-
-        model.addAttribute("commentsList", pagedCommentsResponseModel);
-        model.addAttribute("commentForm", new CommentRequestModel());
+    @GetMapping("/{ticketId}/comments/body")
+    public String getCommentsBody(@PathVariable String userId,
+                                  @PathVariable String projectName,
+                                  @PathVariable String ticketId, 
+                                  Model model){
 
         String baseLink = linkTo(UserController.class)
                 .slash(userId)
                 .slash("projects")
                 .slash(projectName)
                 .slash("tickets")
-                .slash(bugId)
+                .slash(ticketId)
                 .slash("comments")
                 .toUri().toString();
 
-        model.addAttribute("baseLink", baseLink);
+        model.addAttribute("commentsContentLink", baseLink);
+        model.addAttribute("commentForm", new CommentRequestModel());
+        model.addAttribute("commentPostRequestLink", baseLink);
+        
+         return "fragments/comments/comments-body";
+    }
+    
+    @PreAuthorize("#userId == principal.id")
+    @GetMapping("/{ticketId}/comments")
+    public String getComments(@PathVariable String userId,
+                              @PathVariable String projectName,
+                              @PathVariable String ticketId,
+                              @RequestParam(value = "page", defaultValue = "1") int page,
+                              @RequestParam(value = "limit", defaultValue = "5") int limit,
+                              @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
+                              @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir,
+                              Model model) {
 
+        Page<CommentDto> pagedCommentsDto =
+                ticketService.getComments(ticketId, page, limit, sortBy, dir);
 
-        return "fragments/comments/ticket-comments :: #comments-block";
+        List<CommentResponseModel> pagedCommentsResponseModel = 
+                modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentResponseModel>>() {}.getType());
+
+        model.addAttribute("limit", limit);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pagedCommentsDto.getTotalPages());
+
+        model.addAttribute("commentsList", pagedCommentsResponseModel);
+
+        String baseLink = linkTo(UserController.class)
+                .slash(userId)
+                .slash("projects")
+                .slash(projectName)
+                .slash("tickets")
+                .slash(ticketId)
+                .slash("comments")
+                .toUri().toString();
+
+        model.addAttribute("listRequestLink", baseLink);
+
+        return "fragments/comments/comments-content";
     }
 
 
@@ -412,7 +413,7 @@ public class TicketController {
                                  @PathVariable String projectName,
                                  @PathVariable String ticketId,
                                  @ModelAttribute("subscriberRequestModel")
-                                                SubscriberRequestModel assignedDev,
+                                 SubscriberRequestModel assignedDev,
                                  BindingResult bindingResult,
                                  HttpServletResponse response) {
         try {
@@ -443,7 +444,8 @@ public class TicketController {
 
         Set<UserResponseModel> assignedDevsResponseModel =
                 modelMapper.map(assignedDevsDtos.getContent(),
-                        new TypeToken<Set<UserResponseModel>>() {}.getType());
+                        new TypeToken<Set<UserResponseModel>>() {
+                        }.getType());
 
         String baseLink = linkTo(UserController.class)
                 .slash(userId)
@@ -473,6 +475,6 @@ public class TicketController {
 
         ticketService.removeAssignedDev(ticketId, assignedDevId);
 
-        return  ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

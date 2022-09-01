@@ -40,7 +40,9 @@ public class NavigationController {
 
         String myProjectsLink = linkTo(UserController.class)
                 .slash(user.getPublicId())
-                .slash("projects").toUri().toString();
+                .slash("projects")
+                .slash("body")
+                .toUri().toString();
 
         model.addAttribute("user", user);
         model.addAttribute("projectsLink", myProjectsLink);

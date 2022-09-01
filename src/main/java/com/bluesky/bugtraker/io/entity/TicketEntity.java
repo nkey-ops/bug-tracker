@@ -67,24 +67,40 @@ public class TicketEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdateTime;
 
-    @OneToMany( mappedBy = "mainTicket",
+    @OneToMany(mappedBy = "mainTicket",
             cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
             orphanRemoval = true)
-    private Set<TicketRecordEntity> ticketHistory;
+    private Set<TicketRecordEntity> ticketRecords = new HashSet<>();
 
     @ManyToOne(optional = false,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
     private UserEntity reporter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name="project_id", 
+                referencedColumnName = "id",
+                nullable = false, updatable = false)
     private ProjectEntity project;
 
-    @OneToMany( mappedBy = "ticket",
+//    @OneToMany(
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    @JoinColumn(name = "ticket-id")
+//    private Set<CommentEntity> comments = new HashSet<>();
+
+    @OneToMany(mappedBy = "ticket",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Set<CommentEntity> comments = new HashSet<>();
+
+//    @OneToMany(x`
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    @JoinColumn(name = "ticket_id",
+//                referencedColumnName = "comment_id")
+//    private Set<CommentEntity> comments = new HashSet<>();
 
 
     @ManyToMany
@@ -94,6 +110,15 @@ public class TicketEntity implements Serializable {
     private Set<UserEntity> assignedDevs;
 
 
+    public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
+        boolean isTicketRecordEntityAdded =
+                ticketRecords.add(ticketRecordEntity);
+                
+        ticketRecordEntity.setMainTicket(this);
+        
+        return isTicketRecordEntityAdded;
+    }
+    
     public boolean addAssignedDev(UserEntity bugFixer) {
         boolean isAddedBugFixer =
                 assignedDevs.add(bugFixer);
@@ -125,4 +150,6 @@ public class TicketEntity implements Serializable {
     public int hashCode() {
         return Objects.hash(id, publicId, shortDescription, status, severity, priority, reportedTime, reporter, howToReproduce, erroneousProgramBehaviour, howToSolve);
     }
+
+    
 }

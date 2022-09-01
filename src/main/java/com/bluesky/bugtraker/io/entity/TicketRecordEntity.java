@@ -12,8 +12,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
-@Entity(name = "TicketHistory")
-@Table(name = "tickets_history")
+@Entity(name = "Ticket_Record")
+@Table(name = "ticket_records")
 @Getter
 @Setter
 public class TicketRecordEntity implements Serializable {
@@ -64,8 +64,10 @@ public class TicketRecordEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdateTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "main_ticket_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "ticket_id", 
+                referencedColumnName = "id", 
+                nullable = false, updatable = false)
     private TicketEntity mainTicket;
 
 }

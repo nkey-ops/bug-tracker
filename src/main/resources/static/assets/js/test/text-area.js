@@ -1,16 +1,13 @@
-/*global $, console*/
-
-
-$(function () {
+function textArea(textAreaId, messageId) {
     "use strict";
 
-    var maxText = $("textarea").attr("maxlength"),
+    var maxText = $('#' + textAreaId).attr("maxlength"),
 
-        ourMessage = $(".message");
+        ourMessage = $('#' + messageId);
 
     ourMessage.html('<span>' + maxText + '</span> Characters Remaining');
 
-    $("textarea").keydown(function () {
+    $('#' + textAreaId).keydown(function () {
 
         var textLength = $(this).val().length,
 
@@ -21,7 +18,7 @@ $(function () {
     });
 
 
-    $("textarea").keyup(function () {
+    $('#' + textAreaId).keyup(function () {
 
         var textLength = $(this).val().length,
 
@@ -31,4 +28,4 @@ $(function () {
 
     });
 
-});
+}
