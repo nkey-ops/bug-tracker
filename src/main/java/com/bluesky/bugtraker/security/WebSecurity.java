@@ -29,7 +29,6 @@ public class WebSecurity {
                 .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
                 .permitAll()
 
-
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -46,9 +45,10 @@ public class WebSecurity {
                     .deleteCookies("JSESSIONID")
                 .and()
                 .rememberMe()
-                .key(SecurityConstants.getTokenRememberMe())
-                .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME)
-                .and().build();
+                    .key(SecurityConstants.getTokenRememberMe())
+                    .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME)
+                .and()
+                .build();
 //      @formatter:on
     }
 

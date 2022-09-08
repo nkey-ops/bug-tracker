@@ -70,7 +70,7 @@ public class TicketServiceImp implements TicketService {
     public Set<TicketDto> getTickets(String userId, String projectName, int page, int limit) {
         if (page-- < 0 || limit < 1) throw new IllegalArgumentException();
 
-        ProjectEntity projectEntity = modelMapper.map(projectService.getProject(userId, projectName),
+        ProjectEntity projectEntity = modelMapper.map(projectService.getProject(projectName),
                 ProjectEntity.class);
 
 //        Page<BugEntity> pagedBugsEntities = bugRepo.findAllByProject(projectEntity, PageRequest.of(page, limit));
@@ -85,7 +85,7 @@ public class TicketServiceImp implements TicketService {
     public void createTicket(String userId, String projectName, TicketDto ticketDto, String reporterId) {
         ProjectEntity projectEntity =
                 modelMapper.map(
-                        projectService.getProject(userId, projectName),
+                        projectService.getProject(projectName),
                         ProjectEntity.class);
 
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
@@ -122,10 +122,10 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public void deleteBug(String userId, String projectName, String ticketId) {
+    public void deleteBug(String userId, String projectId, String ticketId) {
         TicketDto ticketDto = getTicket(ticketId);
 
-        projectService.removeBug(userId, projectName, ticketDto);
+        projectService.removeTicket(projectId, ticketDto);
     }
 
     private void createTicketRecord(TicketEntity mainTicketEntity) {

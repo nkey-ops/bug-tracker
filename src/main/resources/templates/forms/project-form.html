@@ -4,7 +4,7 @@
 </head>
 <body>
 <div id="project-form-block" class="form-group"
-     th:fragment="project-form(projectRequestModel, postRequestLink, updateRequestLink, updateId)">
+     th:fragment="project-form(projectRequestModel, postRequestLink, projectContentBlockLink)">
     <form id="project-form" class="forms-sample"
           th:object="${projectRequestModel}" method="post"
           th:action="@{${postRequestLink}}">
@@ -15,7 +15,7 @@
         <p class="alert alert-danger"
            th:each="error: ${#fields.allErrors()}"
            th:text="${error}">Input is incorrect</p>
-        <p  class="alert alert-success"
+        <p class="alert alert-success"
            th:if="${isCreated}">Project has been created</p>
 
         <div class="form-group row">
@@ -36,22 +36,23 @@
             e.preventDefault();
 
             var form = $(this);
-            var actionUrl = form.attr('action');
             $.ajax({
-                type: "POST",
-                url: actionUrl,
+                type: form.attr('method'),
+                url: form.attr('action'),
                 data: form.serialize(),
 
-                beforeSend: function (){
+                beforeSend: function () {
                     $('#success').html('');
                     $('#error').html('');
                 },
                 success: function (data) {
-                    update([[${updateRequestLink}]], [[${updateId}]]);
+                    $('#project-content-block').load([[${projectContentBlockLink}]]);
                     $('#project-form-block').html($(data).html());
                     $('#success').html('<p class="alert alert-success">' + 'Project has been createad' + '</p>')
+
+                    document.getElementById("project-form").reset();
                 },
-                error: function (jqXHR, textStatus, errorThrown){
+                error: function (jqXHR) {
                     $('#error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
                 }
             });

@@ -8,31 +8,30 @@ import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-
-import java.util.Set;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 public interface ProjectService {
-    ProjectDto getProject(String userId, String projectName);
+    ProjectDto getProject(String projectId);
 
-    Set<ProjectDto> getProjects(String userId, int pages, int limit);
+    ProjectDto createProject(String creatorId, ProjectDto projectDto);
 
-    ProjectDto createProject(String userId, ProjectDto projectDto);
+    ProjectDto setProjectName(String projectId, ProjectRequestModel projectRequestBody);
 
-    ProjectDto setProjectName(String userId, String projectName, ProjectRequestModel projectRequestBody);
+    void deleteProject(String projectId);
 
-    void deleteProject(String userId, String projectName);
+    void addTicket(String projectId, TicketDto ticketDto);
 
-    void addBug(String userId, String projectName, TicketDto ticketDto);
+    void removeTicket(String projectId, TicketDto ticketDto);
 
-    void removeBug(String userId, String projectName, TicketDto ticketDto);
+    void addSubscriber(String projectId, SubscriberRequestModel subscriber);
 
-    void addSubscriber(String userId, String projectName, SubscriberRequestModel subscriber);
+    ProjectDto removeSubscriber(String userId, String projectId, String subscriberId);
 
-    ProjectDto removeSubscriber(String userId, String projectName, String subscriberId);
+    DataTablesOutput<UserDto> getSubscribers(String projectId, DataTablesInput input);
 
-    Set<UserDto> getSubscribers(String userId, String projectName);
+    void createComment( String projectId, String commentCreatorId, CommentDto map);
 
-    void createComment(String userId, String projectName, String commentCreatorId, CommentDto map);
-
-    Page<CommentDto> getComments(String userId, String projectName, int page, int limit, String sortBy, Sort.Direction direction);
+    Page<CommentDto> getComments(String projectId, int page, int limit, String sortBy, Sort.Direction direction);
+    DataTablesOutput<ProjectDto> getProjects(DataTablesInput input);
 }

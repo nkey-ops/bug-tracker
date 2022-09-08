@@ -5,18 +5,18 @@
     <div class="card-body">  
         <h4 class="card-title">My Projects</h4>
         <!-- List Content        -->
-        <div id="project-content-block" class="form-group" ></div>
+        <div id="projects-content-block" class="form-group"></div>
+        
         <!-- Add Project Form-->
         <div th:insert="forms/project-form ::
                                     project-form(
                                             projectRequestModel=${projectRequestModel},
                                             postRequestLink=${baseLink},
-                                            updateRequestLink=${baseLink},
-                                            updateId='project-content')">
+                                            projectContentBlockLink=${projectContentBlockLink})">
         </div>
     </div>
     <script th:inline="javascript">
-        $("#project-content-block").load([[${baseLink}]]);
+        $("#projects-content-block").load([[${projectContentBlockLink}]]);
     </script>
 </div>
 

@@ -11,7 +11,4 @@ public class ProjectDto {
     private String publicId;
     private String name;
     private UserDto creator;
-    private Set<TicketDto> bugs;
-    private Set<UserDto> subscribers;
-
 }

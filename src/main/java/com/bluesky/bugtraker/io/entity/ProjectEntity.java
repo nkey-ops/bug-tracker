@@ -49,7 +49,7 @@ public class ProjectEntity implements Serializable {
 //    @JoinColumn(name = "project_id")
 //    private Set<TicketEntity> tickets;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_subscribers",
             joinColumns=@JoinColumn(name="project_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="subscriber_id", referencedColumnName="id"))
@@ -57,7 +57,8 @@ public class ProjectEntity implements Serializable {
 
     @OneToMany(mappedBy = "project",
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private Set<CommentEntity> comments = new HashSet<>();
 
     

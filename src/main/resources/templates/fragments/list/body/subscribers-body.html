@@ -3,25 +3,21 @@
 <body>
 <div id="subscribers-body" class="card">
     <div class="card-body">
-        <h4 class="card-title">[[${listName}]]</h4>
+        <h4 class="card-title">Subscribers</h4>
         <!-- List Content        -->
-        <div class="form-group"
-             th:insert="fragments/list/content/subscribers-content ::
-                                    subscribers(
-                                                list=${elementsList},
-                                                baseLink=${baseLink},
-                                                updateId='subscribers-body')">
-        </div>
-
-        <!-- Add Subscriber Form -->
+        <div id="subscribers-content-block" class="form-group"></div>
+        
+        <!-- Subscriber Form -->
         <div th:insert="forms/subscriber-form ::
                                     subscriber-form(
                                         subscriberRequestModel=${subscriberRequestModel},
                                         postRequestLink=${baseLink},
-                                        updateId='subscribers-body',
-                                        updateRequestLink=${baseLink})">
+                                        subscribersContentBlockLink=${subscribersContentBlockLink})">
         </div>
     </div>
+    <script th:inline="javascript">
+        $("#subscribers-content-block").load([[${subscribersContentBlockLink}]]);
+    </script>
 </div>
 
 </body>
