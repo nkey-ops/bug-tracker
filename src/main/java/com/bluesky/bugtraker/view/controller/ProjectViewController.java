@@ -39,7 +39,7 @@ public class ProjectViewController {
     public String getProjectsContentBlock(@PathVariable String creatorId,
                                           Model model) {
 //       TODO Throws expection because dataTableInput without values
-        String dataSource = linkTo(methodOn(ProjectController.class)
+            String dataSource = linkTo(methodOn(ProjectController.class)
                 .getProjects(creatorId, new DataTablesInput()))
                 .toUri().toString();
 
@@ -47,21 +47,37 @@ public class ProjectViewController {
 
         return "fragments/list/content/project-content";
     }
-
+    
+    @PreAuthorize(value = "#creatorId == principal.id")
+    @GetMapping("/{projectId}/subscribers/form")   
+    public String getSubscriberForm(@PathVariable String creatorId,
+                                    @PathVariable String projectId,
+                                    Model model){
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .addSubscriber(creatorId, projectId, new SubscriberRequestModel()))
+                .toUri().toString();
+        
+        model.addAttribute("subscriberRequestModel", new SubscriberRequestModel());
+        model.addAttribute("postRequestLink", baseLink);
+        model.addAttribute("subscribersContentBlockLink", baseLink + "/content-block");
+        
+        return "forms/subscriber-form"; 
+    }
+    
+    
     @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/{projectId}/subscribers/body")
     public String getSubscribersBody(@PathVariable String creatorId, 
                                      @PathVariable String projectId,
-                                  Model model) {
+                                     Model model) {
         String baseLink = linkTo(UserController.class)
                 .slash(creatorId)
                 .slash("projects")
                 .slash(projectId)
                 .slash("subscribers").toUri().toString();
 
-        model.addAttribute("baseLink", baseLink);
-        model.addAttribute("subscriberRequestModel", new SubscriberRequestModel());
         model.addAttribute("subscribersContentBlockLink", baseLink + "/content-block");
+        model.addAttribute("subscriberFormBlockLink", baseLink + "/form");
 
         return "fragments/list/body/subscribers-body";
     }
@@ -70,13 +86,14 @@ public class ProjectViewController {
     public String getSubscribersContentBlock(@PathVariable String creatorId,
                                              @PathVariable String projectId,
                                              Model model ) {
-//       TODO Throws expection because dataTableInput without values
         
-        String dataSource = linkTo(methodOn(ProjectController.class)
+        String dataSource = 
+                linkTo(methodOn(ProjectController.class)
                 .getSubscribers(creatorId, projectId, new DataTablesInput()))
                 .toUri().toString();
 
         model.addAttribute("dataSource", dataSource);
+        model.addAttribute("subscribersContentBlockLink", dataSource + "/content-block");
 
         return "fragments/list/content/subscribers-content";
     }

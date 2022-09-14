@@ -1,8 +1,17 @@
-package com.bluesky.bugtraker.shared;
+package com.bluesky.bugtraker.service;
 
+import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.modelmapper.internal.bytebuddy.description.method.MethodDescription;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -43,4 +52,16 @@ public class Utils {
     }
 
 
+    public <T> DataTablesOutput<T> convert(DataTablesOutput<?> source, Class<T> clazz) {
+        ModelMapper modelMapper = new ModelMapper();
+       
+        DataTablesOutput<T> result = new DataTablesOutput<>();
+       
+        modelMapper.map(source, result);
+
+        result.setData(modelMapper.map(source.getData(), new TypeToken<List<UserResponseModel>>() {
+                    }.getType()));
+        
+        return result;
+    }
 }

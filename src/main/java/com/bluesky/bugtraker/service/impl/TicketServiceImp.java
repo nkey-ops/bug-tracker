@@ -8,7 +8,7 @@ import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.TicketService;
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.Utils;
+import com.bluesky.bugtraker.service.Utils;
 import com.bluesky.bugtraker.shared.dto.*;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;

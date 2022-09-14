@@ -1,6 +1,5 @@
 package com.bluesky.bugtraker.view.controller;
 
-import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.shared.dto.CommentDto;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +26,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -68,7 +62,6 @@ public class ProjectController {
                                            @Valid @ModelAttribute("projectRequestModel")
                                            ProjectRequestModel projectRequestModel) {
 
-        String result = "forms/project-form :: #project-form-block";
         ProjectDto projectDto = modelMapper.map(projectRequestModel, ProjectDto.class);
 
         projectService.createProject(creatorId, projectDto);
@@ -111,14 +104,13 @@ public class ProjectController {
 
     @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping()
-//    @JsonView(DataTablesOutput.View.class)
     @ResponseBody
     public DataTablesOutput<ProjectResponseModel> getProjects(
             @PathVariable String creatorId,
             @Valid DataTablesInput input) {
 
         DataTablesOutput<ProjectDto> pagedProjectsDto =
-                projectService.getProjects(input);
+                projectService.getProjects(creatorId, input);
 
         DataTablesOutput<ProjectResponseModel> result = new DataTablesOutput<>();
         modelMapper.map(pagedProjectsDto, result);
@@ -152,32 +144,19 @@ public class ProjectController {
     }
 
     @PreAuthorize("#creatorId == principal.id")
-    @PostMapping("/{projectId}/subscribers")
-    public String addSubscriber(@PathVariable String creatorId,
-                                @PathVariable String projectId,
-                                @ModelAttribute("subscriberRequestModel")
-                                SubscriberRequestModel subscriber,
-                                BindingResult bindingResult,
-                                Model model,
-                                HttpServletResponse response) {
+    @PostMapping(value = "/{projectId}/subscribers",
+                 consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> addSubscriber(
+            @PathVariable String creatorId,
+            @PathVariable String projectId,
+            @ModelAttribute("subscriberRequestModel")
+            SubscriberRequestModel subscriber) {
 
-        model.addAttribute("projectCreatorId", creatorId);
-        model.addAttribute("projectName", projectId);
+        projectService.addSubscriber(projectId, subscriber);
 
-        try {
-            projectService.addSubscriber(projectId, subscriber);
-        } catch (ServiceException e) {
-            bindingResult.addError(
-                    new ObjectError("error",
-                            e.getErrorType().getErrorMessage()));
-            return "forms/subscriber-form :: #subscriber-form-block";
-        }
-        response.setStatus(HttpStatus.CREATED.value());
-
-
-        model.addAttribute("isSuccess", true);
-        return "forms/subscriber-form :: #subscriber-form-block";
+        return ResponseEntity.status(HttpStatus.CREATED.value()).build();
     }
+   
 
 
     @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
@@ -191,34 +170,33 @@ public class ProjectController {
         DataTablesOutput<UserDto> pagedSubsDtos =
                 projectService.getSubscribers(projectId, input);
 
+
         DataTablesOutput<UserResponseModel> result = new DataTablesOutput<>();
         modelMapper.map(pagedSubsDtos, result);
-
         result.setData(modelMapper.map(pagedSubsDtos.getData(), new TypeToken<List<UserResponseModel>>() {
         }.getType()));
 
         return result;
     }
 
-    @PreAuthorize("#id == principal.id or #subscriberId == principal.id")
+    @PreAuthorize("#creatorId == principal.id or #subscriberId == principal.id")
     @DeleteMapping("/{projectName}/subscribers/{subscriberId}")
-    public HttpEntity<?> removeSubscriber(@PathVariable String creatorId,
-                                          @PathVariable String projectName,
-                                          @PathVariable String subscriberId) {
+    public ResponseEntity<?> removeSubscriber(@PathVariable String creatorId,
+                                              @PathVariable String projectName,
+                                              @PathVariable String subscriberId) {
 
-        ProjectDto projectDto = projectService.removeSubscriber(
-                creatorId, projectName, subscriberId);
+        projectService.removeSubscriber(projectName, subscriberId);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PreAuthorize("#creatorId == principal.id")
     @PostMapping(value = "/{projectId}/comments",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public HttpEntity<?> createComment(@PathVariable String creatorId,
-                                       @PathVariable String projectId,
-                                       @AuthenticationPrincipal UserPrincipal creator,
-                                       @ModelAttribute("commentForm") CommentRequestModel comment) {
+    public ResponseEntity<?> createComment(@PathVariable String creatorId,
+                                           @PathVariable String projectId,
+                                           @AuthenticationPrincipal UserPrincipal creator,
+                                           @ModelAttribute("commentForm") CommentRequestModel comment) {
 
         CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
         projectService.createComment(projectId, creator.getId(), commentDto);

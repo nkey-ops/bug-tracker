@@ -46,7 +46,7 @@
                     $('#error').html('');
                 },
                 success: function (data) {
-                    $('#project-content-block').load([[${projectContentBlockLink}]]);
+                    $('#projects-content-block').load([[${projectContentBlockLink}]]);
                     $('#project-form-block').html($(data).html());
                     $('#success').html('<p class="alert alert-success">' + 'Project has been createad' + '</p>')
 

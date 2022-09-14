@@ -11,7 +11,7 @@ import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.Utils;
+import com.bluesky.bugtraker.service.Utils;
 import com.bluesky.bugtraker.shared.dto.CommentDto;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.TicketDto;
@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
+import static com.bluesky.bugtraker.service.specifications.Specs.findAllProjectsByCreatorId;
+import static com.bluesky.bugtraker.service.specifications.Specs.findAllUsersSubscribedToProject;
 
 
 @Service
@@ -73,24 +75,12 @@ public class ProjectServiceImp implements ProjectService {
         return modelMapper.map(projectEntity, ProjectDto.class);
     }
 
-    //    @Override
-//    public Set<ProjectDto> getProjects(String userId, int page, int limit) {
-//        if (page < 1 || limit < 1) throw new IllegalArgumentException();
-//
-//        UserEntity userEntity = modelMapper.map(userService.getUserById(userId), UserEntity.class);
-//
-//        Set<ProjectEntity> entityPages =
-//                projectRepo.findAllByCreator(userEntity);
-//
-//        return modelMapper.map(entityPages, new TypeToken<Set<ProjectDto>>() {
-//        }.getType());
-//    }
-
     @Override
-    public DataTablesOutput<ProjectDto> getProjects(DataTablesInput input) {
+    public DataTablesOutput<ProjectDto> getProjects(String creatorId, DataTablesInput input) {
+        Long creatorDBId = userService.getUserById(creatorId).getId();
 
-
-        DataTablesOutput<ProjectEntity> all = projectRepo.findAll(input);
+        DataTablesOutput<ProjectEntity> all = 
+                projectRepo.findAll(input, findAllProjectsByCreatorId(creatorDBId));
 
         DataTablesOutput<ProjectDto> result = new DataTablesOutput<>();
 
@@ -100,22 +90,6 @@ public class ProjectServiceImp implements ProjectService {
         
         return result;
     }
-    
-//    TODO remove
-//    @Override
-//    public Page<ProjectDto> getProjects(String userId,
-//                                        int page, int limit,
-//                                        Sort.Direction dir, String sortBy) {
-//        if (page < 0 || limit < 1) throw new IllegalArgumentException();
-//
-//        PageRequest pageRequest =
-//                PageRequest.of(page, limit, dir, sortBy);
-//
-//        Page<ProjectEntity> pagedProjectEntities =
-//                projectRepo.findAll(pageRequest);
-//        
-//        return  pagedProjectEntities.map(projectEntity -> modelMapper.map(projectEntity, ProjectDto.class));
-//    }
 
     @Override
     public ProjectDto createProject(String creatorId, ProjectDto projectDto) {
@@ -194,13 +168,15 @@ public class ProjectServiceImp implements ProjectService {
     public DataTablesOutput<UserDto> getSubscribers(String projectId, DataTablesInput input) {
 
         Set<ProjectEntity> projects = Set.of(getProjectEntity(projectId));
+        Long id = getProjectEntity(projectId).getId();
 
-        DataTablesOutput<UserEntity> all = userRepository.findAll(input);
+        DataTablesOutput<UserEntity> all = 
+                userRepository.findAll(input, findAllUsersSubscribedToProject(id)); 
         
         DataTablesOutput<UserDto> result = new DataTablesOutput<>();
 
         modelMapper.map(all, result);
-        result.setData(modelMapper.map(all.getData(), new TypeToken<List<ProjectDto>>() {
+        result.setData(modelMapper.map(all.getData(), new TypeToken<List<UserDto>>() {
         }.getType()));
 
         return result;
@@ -209,11 +185,12 @@ public class ProjectServiceImp implements ProjectService {
 
 
     @Override
-    public ProjectDto removeSubscriber(String userId, String projectId, String subscriberId) {
+    public ProjectDto removeSubscriber(String projectId, String subscriberId) {
         ProjectEntity projectEntity = getProjectEntity(projectId);
+        UserDto subscriberEntity = userService.getUserById(subscriberId);
 
         boolean isRemoved = projectEntity.removeSubscriber(
-                modelMapper.map(userService.getUserById(userId), UserEntity.class));
+                modelMapper.map(subscriberEntity, UserEntity.class));
 
         if (!isRemoved)
             throw new ProjectServiceException(NO_RECORD_FOUND, subscriberId);

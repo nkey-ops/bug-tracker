@@ -33,7 +33,7 @@ public class ProjectEntity implements Serializable {
                fetch =  FetchType.LAZY)
     @JoinColumn(name="creator_id",
                 nullable=false,
-                updatable=false)
+                updatable=false) 
     private UserEntity creator;
 
     @OneToMany(mappedBy = "project",

@@ -2,11 +2,16 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div class="table-responsive">
-    <table id="subscribers-table" class="table table-bordered">
+    <div id="subscribers-content-success"></div>
+    <div id="subscribers-content-error"></div>
+
+    <table id="subscribers-table" class="table nowrap table-bordered">
         <thead>
         <tr>
+            <th>#</th>
+            <th>ID</th>
             <th>Username</th>
-            <th>Remove</th>
+            <th>Action</th>
         </tr>
         </thead>
     </table>
@@ -15,38 +20,72 @@
             var oTable = $('#subscribers-table').DataTable({
                 serverSide: true,
                 deferRender: true,
-                
                 ajax: [[${dataSource}]],
+                order: [
+                    [2, 'desc']
+                ],
                 columns: [
-                    // {data: 'image'},
-                    {data: 'username'},
-                    {data: 'publicId'},
+                    {
+                        width: '1%',
+                        data: null,
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {
+                        
+                        data: 'publicId',
+                        visible: false,
+                    },
+                    {
+                        data: 'username',
+                    },
+                    {
+                        width: '1%',
+                        searchable: false,
+                        orderable: false,
+                        defaultContent: '<button type="button" class="btn btnDelete btn-outline-danger btn-sm">\n' +
+                            '               <i class="mdi mdi-account-remove"></i></button>'
+                    }
                 ]
-
-                    // <button id="remove-subscriber" type="button" class="btn btn-outline-danger btn-sm"
-                    //                         th:value="${baseLink} + '/' + ${subscriber.publicId}">
-                    //                     <i class="mdi mdi-account-remove"></i>
             });
-            $('.dataTable').on('click', 'tbody tr', function () {
-                var rowCells = $(this).closest("tr").children();
-                var id = rowCells.eq(1).text();
-                //hard code
-                window.location.href = [[${dataSource}]] + "/" + id
-            });
-        });
+            $('.dataTable')
+                .on('click', 'tbody tr', function (e) {
+                    var $link = $(this).find(".btnDelete");
+                    if (e.target === $link[0]) return false;
 
+                    var currentRow = $(this).closest("tr").children();
+                    var id = oTable.row(currentRow).data()['publicId'];
+                    //hard code
+                    window.location.href = "/users/" + id
+                })
+                .on('click', '.btnDelete', function () {
+                    var currentRow = $(this).closest("tr").children();
+                    var id = oTable.row(currentRow).data()['publicId'];
 
-        // $("#remove-subscriber").click(function () {
-        //     $.ajax({
-        //         type: "DELETE",
-        //         url: $('#remove-subscriber').attr('value'),
-        //         success: function () {
-        //             update([[${dataSource}]], [[${updateId}]]);
-        //         }
-        //     })
-        // })
+                    $.ajax({
+                        type: "DELETE",
+                        //hard code
+                        url: [[${dataSource}]] + "/" + id,
+                        beforeSend: function () {
+                            $('#subscriber-form-success').html('');
+                            $('#subscriber-form-error').html('');
+                        },
+                        success: function () {
+                            $('#subscribers-content-block').load([[${subscribersContentBlockLink}]], function () {
+                                $('#subscribers-content-success').html('<p class="alert alert-success">' + 'Subscriber has been removed' + '</p>');
+                            });
+                        },
+                        error: function (jqXHR) {
+                            $('#subscribers-content-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                        }
+                    })
+                });
+        })
+            ;
     </script>
 </div>
-
 </body>
 </html>

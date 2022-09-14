@@ -10,7 +10,7 @@ import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.shared.Utils;
+import com.bluesky.bugtraker.service.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.TicketDto;

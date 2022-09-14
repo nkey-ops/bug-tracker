@@ -6,6 +6,7 @@
     <table id="projects-table" class="table table-bordered">
         <thead>
         <tr>
+            <th>#</th>
             <th>Name</th>
             <th>Id</th>
         </tr>
@@ -15,19 +16,31 @@
                 var oTable = $('#projects-table').DataTable({
                     serverSide: true,
                     deferRender: true,
+                   
                     ajax: [[${dataSource}]],
+                    order: [
+                        [1, 'desc']
+                    ],
                     columns: [
+                        {
+                            width: '1%',
+                            data: null,
+                            searchable: false,
+                            orderable: false,
+                            render: function (data, type, row, meta) {
+                                return meta.row + meta.settings._iDisplayStart + 1;
+                            }
+                        },
                         {data: 'name'},
                         {data: 'publicId'},
                     ]
                 });
                 $('.dataTable').on('click', 'tbody tr', function() {
-                    var rowCells = $(this).closest("tr").children();
-                    var projectId = rowCells.eq(1).text();
+                    var currentRow = $(this).closest("tr").children();
+                    var id = oTable.row(currentRow).data()['publicId'];
                     //hard code
-                    window.location.href = [[${dataSource}]]  + "/" + projectId
+                    window.location.href = [[${dataSource}]]  + "/" + id;
                 });
-                    
             });
         </script>
     </table>

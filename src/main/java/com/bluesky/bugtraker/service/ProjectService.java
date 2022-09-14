@@ -26,12 +26,12 @@ public interface ProjectService {
 
     void addSubscriber(String projectId, SubscriberRequestModel subscriber);
 
-    ProjectDto removeSubscriber(String userId, String projectId, String subscriberId);
+    ProjectDto removeSubscriber(String projectId, String subscriberId);
 
     DataTablesOutput<UserDto> getSubscribers(String projectId, DataTablesInput input);
 
     void createComment( String projectId, String commentCreatorId, CommentDto map);
 
     Page<CommentDto> getComments(String projectId, int page, int limit, String sortBy, Sort.Direction direction);
-    DataTablesOutput<ProjectDto> getProjects(DataTablesInput input);
+    DataTablesOutput<ProjectDto> getProjects(String creatorId, DataTablesInput input);
 }

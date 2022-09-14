@@ -1,4 +1,4 @@
-package com.bluesky.bugtraker.view.controller;
+package com.bluesky.bugtraker.view.model.rensponse;
 
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;

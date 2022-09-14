@@ -2,13 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <body>
-<div id="subscriber-form-block" class="form-group"
-     th:fragment="subscriber-form(subscriberRequestModel, postRequestLink, subscribersContentBlockLink)">
-    <form id="subscriber-form" class="forms-sample" th:object="${subscriberRequestModel}" th:method="POST"
+<div id="subscriber-form-block" class="form-group">
+    <form id="subscriber-form" class="forms-sample" th:object="${subscriberRequestModel}" th:method="post"
           th:action="@{${postRequestLink}}">
 
-        <div id="error"></div>
-        <div id="success"></div>
+        <div id="subscriber-form-error"></div>
+        <div id="subscriber-form-success"></div>
 
         <div class="form-group row">
             <div class="input-group ">
@@ -26,27 +25,27 @@
     </form>
     <script th:inline="javascript">
         $("#subscriber-form").submit(function (e) {
-            e.preventDefault();
 
+            e.preventDefault();
             var form = $(this);
+            
             $.ajax({
                 type: form.attr('method'),
                 url: form.attr('action'),
                 data: form.serialize(),
-
+            
                 beforeSend: function () {
-                    $('#success').html('');
-                    $('#error').html('');
+                    $('#subscriber-form-success').html('');
+                    $('#subscriber-form-error').html('');
                 },
-                success: function (data) {
+                success: function () {
                     $('#subscribers-content-block').load([[${subscribersContentBlockLink}]]);
-                    $('#subscriber-form-block').html($(data).html());
-                    $('#success').html('<p class="alert alert-success">' + 'Subscribers has been added' + '</p>')
-
+                    $('#subscriber-form-success').html('<p class="alert alert-success">' + 'Subscriber has been added' + '</p>')
+                   
                     document.getElementById("subscriber-form").reset();
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    $('#error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                error: function (jqXHR) {
+                    $('#subscriber-form-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
                 }
             });
         });

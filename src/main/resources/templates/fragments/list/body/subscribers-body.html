@@ -8,15 +8,12 @@
         <div id="subscribers-content-block" class="form-group"></div>
         
         <!-- Subscriber Form -->
-        <div th:insert="forms/subscriber-form ::
-                                    subscriber-form(
-                                        subscriberRequestModel=${subscriberRequestModel},
-                                        postRequestLink=${baseLink},
-                                        subscribersContentBlockLink=${subscribersContentBlockLink})">
-        </div>
+        <div id="subscriber-form-block" class="form-group"></div>
     </div>
+    
     <script th:inline="javascript">
         $("#subscribers-content-block").load([[${subscribersContentBlockLink}]]);
+        $("#subscriber-form-block").load([[${subscriberFormBlockLink}]]);
     </script>
 </div>
 

@@ -12,6 +12,7 @@ import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import com.bluesky.bugtraker.view.model.rensponse.CommentResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.TicketRecordResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
