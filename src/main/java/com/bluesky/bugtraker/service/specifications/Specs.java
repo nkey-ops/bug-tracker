@@ -1,6 +1,7 @@
 package com.bluesky.bugtraker.service.specifications;
 
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -24,5 +25,14 @@ public class Specs {
             return cb.equal(root.get("creator").get("id"), creatorId);
         };       
     }
+
+    public  static  Specification<TicketEntity> findAllByProjectId(final Long projectId){
+        return (root, query, cb) -> {
+            
+            return cb.equal(root.get("project").get("id"), projectId);
+        };
+    }
+    
+    
     
 }

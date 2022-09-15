@@ -166,8 +166,6 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public DataTablesOutput<UserDto> getSubscribers(String projectId, DataTablesInput input) {
-
-        Set<ProjectEntity> projects = Set.of(getProjectEntity(projectId));
         Long id = getProjectEntity(projectId).getId();
 
         DataTablesOutput<UserEntity> all = 

@@ -83,33 +83,17 @@ public class TicketEntity implements Serializable {
                 referencedColumnName = "id",
                 nullable = false, updatable = false)
     private ProjectEntity project;
-
-//    @OneToMany(
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true)
-//    @JoinColumn(name = "ticket-id")
-//    private Set<CommentEntity> comments = new HashSet<>();
-
+    
     @OneToMany(mappedBy = "ticket",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Set<CommentEntity> comments = new HashSet<>();
-
-//    @OneToMany(x`
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true)
-//    @JoinColumn(name = "ticket_id",
-//                referencedColumnName = "comment_id")
-//    private Set<CommentEntity> comments = new HashSet<>();
-
-
     @ManyToMany
     @JoinTable(name = "tickets_users",
             joinColumns = {@JoinColumn(name = "ticket_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")})
     private Set<UserEntity> assignedDevs;
-
-
+  
     public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
         boolean isTicketRecordEntityAdded =
                 ticketRecords.add(ticketRecordEntity);

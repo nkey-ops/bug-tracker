@@ -15,13 +15,18 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import static com.bluesky.bugtraker.exceptions.ErrorMessages.*;
+import static com.bluesky.bugtraker.service.specifications.Specs.findAllByProjectId;
+import static com.bluesky.bugtraker.service.specifications.Specs.findAllUsersSubscribedToProject;
 
 @Service
 public class TicketServiceImp implements TicketService {
@@ -67,18 +72,19 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public Set<TicketDto> getTickets(String userId, String projectName, int page, int limit) {
-        if (page-- < 0 || limit < 1) throw new IllegalArgumentException();
+    public DataTablesOutput<TicketDto> getTickets(String projectId, DataTablesInput input) {
+        Long id = projectService.getProject(projectId).getId();
+        
+        DataTablesOutput<TicketEntity> all =
+                ticketRepo.findAll(input, findAllByProjectId(id));
 
-        ProjectEntity projectEntity = modelMapper.map(projectService.getProject(projectName),
-                ProjectEntity.class);
+        DataTablesOutput<TicketDto> result = new DataTablesOutput<>();
 
-//        Page<BugEntity> pagedBugsEntities = bugRepo.findAllByProject(projectEntity, PageRequest.of(page, limit));
-        Set<TicketEntity> pagedBugsEntities = ticketRepo.findAllByProject(projectEntity);
+        modelMapper.map(all, result);
+        result.setData(modelMapper.map(all.getData(), new TypeToken<List<TicketDto>>() {
+        }.getType()));
 
-        return modelMapper.map(pagedBugsEntities, new TypeToken<Set<TicketDto>>() {
-        }.getType());
-
+        return result;
     }
 
     @Override

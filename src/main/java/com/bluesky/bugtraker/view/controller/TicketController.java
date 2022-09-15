@@ -24,6 +24,8 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,7 +48,7 @@ import java.util.Set;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Controller
-@RequestMapping("/users/{userId}/projects/{projectName}/tickets")
+@RequestMapping("/users/{creatorId}/projects/{projectId}/tickets")
 public class TicketController {
 
     private final UserController userController;
@@ -68,8 +70,8 @@ public class TicketController {
 
 
     @GetMapping("/ticket-form")
-    public String showTicketForm(@PathVariable String userId,
-                                 @PathVariable String projectName,
+    public String showTicketForm(@PathVariable String creatorId,
+                                 @PathVariable String projectId,
                                  @ModelAttribute("user") UserResponseModel user,
                                  Model model) {
         model.addAttribute("user", user);
@@ -78,17 +80,17 @@ public class TicketController {
             model.addAttribute("ticketRequestModel", new TicketRequestModel());
         }
 
-        model.addAttribute("projectCreatorId", userId);
-        model.addAttribute("projectName", projectName);
+        model.addAttribute("projectCreatorId", creatorId);
+        model.addAttribute("projectName", projectId);
 
         model.addAttribute("statusList", Status.values());
         model.addAttribute("severityList", Severity.values());
         model.addAttribute("priorityList", Priority.values());
 
         String ticketFormPostRequestLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets").toUri().toString();
 
         model.addAttribute("ticketFormPostRequestLink", ticketFormPostRequestLink);
@@ -96,10 +98,10 @@ public class TicketController {
         return "pages/ticket-creation";
     }
 
-    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{ticketId}/edit")
-    public String showTicketEditForm(@PathVariable String userId,
-                                     @PathVariable String projectName,
+    public String showTicketEditForm(@PathVariable String creatorId,
+                                     @PathVariable String projectId,
                                      @PathVariable String ticketId,
                                      @ModelAttribute("user") UserResponseModel user,
                                      Model model) {
@@ -119,9 +121,9 @@ public class TicketController {
         model.addAttribute("priorityList", Priority.values());
 
         String ticketEditionPostRequestLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .toUri().toString();
@@ -132,10 +134,10 @@ public class TicketController {
     }
 
 
-    @PreAuthorize("#userId == principal.id or  principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or  principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{ticketId}")
-    public String getTicket(@PathVariable String userId,
-                            @PathVariable String projectName,
+    public String getTicket(@PathVariable String creatorId,
+                            @PathVariable String projectId,
                             @PathVariable String ticketId,
                             Model model) {
         TicketDto ticketDto = ticketService.getTicket(ticketId);
@@ -145,9 +147,9 @@ public class TicketController {
         model.addAttribute("ticket", ticketResponseModel);
 
         WebMvcLinkBuilder baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId);
 
@@ -173,47 +175,32 @@ public class TicketController {
         return "pages/ticket";
     }
 
-    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping
-    public String getTickets(@PathVariable String userId,
-                             @PathVariable String projectName,
-                             Model model) {
+    @ResponseBody
+    public DataTablesOutput<TicketResponseModel> getTickets(
+            @PathVariable String creatorId,
+            @PathVariable String projectId,
+            @Valid  DataTablesInput input) {
 
-        Set<TicketDto> pagedTicketsDto = ticketService.getTickets(userId, projectName, 5, 10);
-
-        Set<TicketResponseModel> pagedTicketsResponse =
-                modelMapper.map(pagedTicketsDto, new TypeToken<Set<TicketResponseModel>>() {
-                }.getType());
-
-        model.addAttribute("listName", "Tickets");
-
-        model.addAttribute("elementsList", pagedTicketsResponse);
-        model.addAttribute("isEmpty", pagedTicketsResponse.isEmpty());
+        DataTablesOutput<TicketDto> pagedTicketsDtos =
+                ticketService.getTickets(projectId, input);
 
 
-        String baseLink = linkTo(UserController.class)
-                .slash(userId)
-                .slash("projects")
-                .slash(projectName)
-                .slash("tickets")
-                .toUri().toString();
+        DataTablesOutput<TicketResponseModel> result = new DataTablesOutput<>();
+        modelMapper.map(pagedTicketsDtos, result);
+        result.setData(modelMapper.map(pagedTicketsDtos.getData(), new TypeToken<List<TicketResponseModel>>() {
+        }.getType()));
 
-        model.addAttribute("baseLink", baseLink);
-
-        model.addAttribute("statusList", Status.values());
-        model.addAttribute("severityList", Severity.values());
-        model.addAttribute("priorityList", Priority.values());
-
-
-        return "fragments/list/body/tickets-body";
+        return result;
     }
 
 
-    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
     @PostMapping(
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> createTicket(@PathVariable String userId,
-                                          @PathVariable String projectName,
+    public ResponseEntity<?> createTicket(@PathVariable String creatorId,
+                                          @PathVariable String projectId,
                                           @AuthenticationPrincipal UserPrincipal reporter,
                                           @Valid @ModelAttribute("ticketRequestModel")
                                           TicketRequestModel ticket) {
@@ -221,12 +208,12 @@ public class TicketController {
 
         TicketDto requestTicketDto = modelMapper.map(ticket, TicketDto.class);
 
-        ticketService.createTicket(userId, projectName, requestTicketDto, reporter.getId());
-        
+        ticketService.createTicket(creatorId, projectId, requestTicketDto, reporter.getId());
+
         String baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .toUri().toString();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(baseLink);
@@ -234,8 +221,8 @@ public class TicketController {
 
     @RequestMapping(value = "/{ticketId}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String updateTicket(@PathVariable String userId,
-                               @PathVariable String projectName,
+    public String updateTicket(@PathVariable String creatorId,
+                               @PathVariable String projectId,
                                @PathVariable String ticketId,
                                @ModelAttribute("ticketForm") TicketRequestModel ticket,
                                BindingResult bindingResult,
@@ -243,37 +230,37 @@ public class TicketController {
         TicketDto ticketDto = modelMapper.map(ticket, TicketDto.class);
 
         try {
-            ticketService.updateTicket(userId, projectName, ticketId, ticketDto);
+            ticketService.updateTicket(creatorId, projectId, ticketId, ticketDto);
         } catch (ServiceException e) {
             bindingResult.addError(
                     new ObjectError("error", e.getErrorType().getErrorMessage()));
             attr.addFlashAttribute("org.springframework.validation.BindingResult.ticketForm", bindingResult);
             attr.addFlashAttribute("ticketForm", ticket);
 
-            return "redirect:/users/" + userId + "/projects/" + projectName + "/bugs/ticket-edit-form";
+            return "redirect:/users/" + creatorId + "/projects/" + projectId + "/bugs/ticket-edit-form";
         }
 
-        return "redirect:/users/" + userId + "/projects/" + projectName + "/tickets/" + ticketId;
+        return "redirect:/users/" + creatorId + "/projects/" + projectId + "/tickets/" + ticketId;
     }
 
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#creatorId == principal.id")
     @DeleteMapping("/{ticketId}")
-    public ResponseEntity<?> deleteTicket(@PathVariable String userId,
-                                          @PathVariable String projectName,
+    public ResponseEntity<?> deleteTicket(@PathVariable String creatorId,
+                                          @PathVariable String projectId,
                                           @PathVariable String ticketId) {
 
-        ticketService.deleteBug(userId, projectName, ticketId);
+        ticketService.deleteBug(creatorId, projectId, ticketId);
 
         return ResponseEntity.noContent().build();
 
     }
 
 
-    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{ticketId}/records")
-    public String getTicketRecords(@PathVariable String userId,
-                                   @PathVariable String projectName,
+    public String getTicketRecords(@PathVariable String creatorId,
+                                   @PathVariable String projectId,
                                    @PathVariable String ticketId,
                                    @RequestParam(value = "page", defaultValue = "1") int page,
                                    @RequestParam(value = "limit", defaultValue = "8") int limit,
@@ -289,9 +276,9 @@ public class TicketController {
         model.addAttribute("elementsList", ticketRecordResponseModels);
 
         String baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .slash("records")
@@ -303,10 +290,10 @@ public class TicketController {
         return "fragments/list/body/ticket-record-body";
     }
 
-    @PreAuthorize("#userId == principal.id or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{ticketId}/records/{recordId}")
-    public String getTicketRecord(@PathVariable String userId,
-                                  @PathVariable String projectName,
+    public String getTicketRecord(@PathVariable String creatorId,
+                                  @PathVariable String projectId,
                                   @PathVariable String ticketId,
                                   @PathVariable String recordId,
                                   Model model) {
@@ -322,23 +309,23 @@ public class TicketController {
         return "details/ticket-details :: ticket-details";
     }
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#creatorId == principal.id")
     @PostMapping(value = "/{ticketId}/comments",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> createComment(@PathVariable String userId,
-                                                @PathVariable String projectName,
-                                                @PathVariable String ticketId,
-                                                @AuthenticationPrincipal UserPrincipal creator,
-                                                @ModelAttribute("commentForm") CommentRequestModel comment
+    public ResponseEntity<?> createComment(@PathVariable String creatorId,
+                                           @PathVariable String projectId,
+                                           @PathVariable String ticketId,
+                                           @AuthenticationPrincipal UserPrincipal creator,
+                                           @ModelAttribute("commentForm") CommentRequestModel comment
     ) {
 
         CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
         ticketService.createComment(ticketId, creator.getId(), commentDto);
-        
+
         String commentsList = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .slash("comments")
@@ -347,17 +334,17 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(commentsList);
     }
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#creatorId == principal.id")
     @GetMapping("/{ticketId}/comments/body")
-    public String getCommentsBody(@PathVariable String userId,
-                                  @PathVariable String projectName,
-                                  @PathVariable String ticketId, 
-                                  Model model){
+    public String getCommentsBody(@PathVariable String creatorId,
+                                  @PathVariable String projectId,
+                                  @PathVariable String ticketId,
+                                  Model model) {
 
         String baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .slash("comments")
@@ -366,14 +353,14 @@ public class TicketController {
         model.addAttribute("commentsContentLink", baseLink);
         model.addAttribute("commentForm", new CommentRequestModel());
         model.addAttribute("commentPostRequestLink", baseLink);
-        
-         return "fragments/comments/comments-body";
+
+        return "fragments/comments/comments-body";
     }
-    
-    @PreAuthorize("#userId == principal.id")
+
+    @PreAuthorize("#creatorId == principal.id")
     @GetMapping("/{ticketId}/comments")
-    public String getComments(@PathVariable String userId,
-                              @PathVariable String projectName,
+    public String getComments(@PathVariable String creatorId,
+                              @PathVariable String projectId,
                               @PathVariable String ticketId,
                               @RequestParam(value = "page", defaultValue = "1") int page,
                               @RequestParam(value = "limit", defaultValue = "5") int limit,
@@ -384,8 +371,9 @@ public class TicketController {
         Page<CommentDto> pagedCommentsDto =
                 ticketService.getComments(ticketId, page, limit, sortBy, dir);
 
-        List<CommentResponseModel> pagedCommentsResponseModel = 
-                modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentResponseModel>>() {}.getType());
+        List<CommentResponseModel> pagedCommentsResponseModel =
+                modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentResponseModel>>() {
+                }.getType());
 
         model.addAttribute("limit", limit);
         model.addAttribute("currentPage", page);
@@ -394,9 +382,9 @@ public class TicketController {
         model.addAttribute("commentsList", pagedCommentsResponseModel);
 
         String baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .slash("comments")
@@ -408,10 +396,10 @@ public class TicketController {
     }
 
 
-    @PreAuthorize("#userId == principal.id")
+    @PreAuthorize("#creatorId == principal.id")
     @PostMapping("/{ticketId}/assigned-devs")
-    public String addAssignedDev(@PathVariable String userId,
-                                 @PathVariable String projectName,
+    public String addAssignedDev(@PathVariable String creatorId,
+                                 @PathVariable String projectId,
                                  @PathVariable String ticketId,
                                  @ModelAttribute("subscriberRequestModel")
                                  SubscriberRequestModel assignedDev,
@@ -430,11 +418,11 @@ public class TicketController {
         return "forms/subscriber-form :: #subscriber-form-block";
     }
 
-    @PreAuthorize("#userId == principal.id  or principal.isSubscribedTo(#userId, #projectName)")
+    @PreAuthorize("#creatorId == principal.id  or principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{ticketId}/assigned-devs")
     public String getAssignedDevs(
-            @PathVariable String userId,
-            @PathVariable String projectName,
+            @PathVariable String creatorId,
+            @PathVariable String projectId,
             @PathVariable String ticketId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "8") int limit,
@@ -449,9 +437,9 @@ public class TicketController {
                         }.getType());
 
         String baseLink = linkTo(UserController.class)
-                .slash(userId)
+                .slash(creatorId)
                 .slash("projects")
-                .slash(projectName)
+                .slash(projectId)
                 .slash("tickets")
                 .slash(ticketId)
                 .slash("assigned-devs")
@@ -467,10 +455,10 @@ public class TicketController {
         return "fragments/list/body/subscribers-body :: #subscribers-body";
     }
 
-    @PreAuthorize("#userId == principal.id or #fixerId == principal.id")
+    @PreAuthorize("#creatorId == principal.id or #fixerId == principal.id")
     @DeleteMapping("/{ticketId}/assigned-devs/{assignedDevId}")
-    public ResponseEntity<?> removeAssignedDev(@PathVariable String userId,
-                                               @PathVariable String projectName,
+    public ResponseEntity<?> removeAssignedDev(@PathVariable String creatorId,
+                                               @PathVariable String projectId,
                                                @PathVariable String ticketId,
                                                @PathVariable String assignedDevId) {
 

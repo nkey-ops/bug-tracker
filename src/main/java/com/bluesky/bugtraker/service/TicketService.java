@@ -7,8 +7,8 @@ import com.bluesky.bugtraker.shared.dto.TicketRecordDto;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-
-import java.util.Set;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 public interface TicketService {
 
@@ -18,7 +18,7 @@ public interface TicketService {
 
     void updateTicket(String userId, String projectName, String bugId, TicketDto map);
 
-    Set<TicketDto> getTickets(String userId, String projectName, int page, int limit);
+    DataTablesOutput<TicketDto> getTickets(String projectId, DataTablesInput input);
 
     void deleteBug(String userId, String projectName, String bugId);
 

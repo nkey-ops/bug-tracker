@@ -7,19 +7,12 @@
 </head>
 
 <body>
+<div class="card card-body">
+<div class="form-group">
+    <form id="ticket-form" class="forms-sample" th:object="${ticketRequestModel} " th:method="post"
+          th:action="@{${postRequestLink}}">
 
-<div class="form-group"
-     th:fragment="ticket-form(ticketRequestModel, ticketFormPostRequestLink,
-                            statusList, severityList, priorityList)">
-    <form id="ticket-form" class="forms-sample" th:object="${ticketRequestModel} " th:method="POST"
-          th:action="@{${ticketFormPostRequestLink}}">
-
-<!--        <p class="alert alert-danger"-->
-<!--           th:each="error: ${#fields.allErrors()}"-->
-<!--           th:text="${error}">Input is incorrect</p>-->
-<!--        <p th:text="${error}"></p>-->
-        <div id="error"></div>
-
+        <div id="ticket-form-error"></div>
 
         <div class="form-group">
             <label for="description">Bug Short Description</label>
@@ -90,27 +83,6 @@
         </div>
 
     </form>
-<!--        <script type="text/javascript">-->
-<!--            $("#ticket-form").submit(function (e) {-->
-
-<!--                e.preventDefault(); // avoid to execute the actual submit of the form.-->
-
-<!--                var form = $(this);-->
-<!--                var actionUrl = form.attr('action');-->
-<!--                $.ajax({-->
-<!--                    type: "POST",-->
-<!--                    url: actionUrl,-->
-<!--                    data: form.serialize(), // serializes the form's elements.-->
-<!--                    dataType: "json",-->
-<!--                    success: function (data) {-->
-<!--                            window.location.href = data.redirect;-->
-<!--                    },-->
-<!--                    error: function (jqXHR) {-->
-<!--                        $('#error-message').html("<p class='alert alert-danger'>" + jqXHR.responseText + "</p>");-->
-<!--                    },-->
-<!--                });-->
-<!--            });-->
-<!--        </script>-->
     <script th:inline="javascript">
         $("#ticket-form").submit(function (e) {
             e.preventDefault();
@@ -122,13 +94,13 @@
                 data: form.serialize(),
 
                 beforeSend: function (){
-                    $('#error').html('');
+                    $('#ticket-form-error').html('');
                 },
                 success: function (data) {
                     window.location.replace(data);
                 },
                 error: function (jqXHR){
-                    $('#error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                    $('#ticket-form-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
                 }
             });
         });
@@ -138,7 +110,7 @@
                textArea('how-to-reproduce', 'message1');
                textArea('behaviour', 'message2');
     </script>
-
+</div>
 </div>
 
 

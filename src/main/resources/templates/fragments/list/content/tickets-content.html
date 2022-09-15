@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<div class="table-responsive">
+    <table id="tickets-table" class="table nowrap table-bordered  ">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>#</th>
+            <th>Short Description</th>
+            <th>Status</th>
+            <th>Severity</th>
+            <th>Priority</th>
+            <th>Reported By</th>
+            <th>Reported Time</th>
+        </tr>
+        </thead>
+    </table>
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            var oTable = $('#tickets-table').DataTable({
+                serverSide: true,
+                deferRender: true,
+                ajax: [[${dataSource}]],
+                order: [
+                    [6, 'desc']
+                ],
+                columns: [
+                    {
+                        data: 'publicId',
+                        visible: false,
+                    },
+                    {
+                        width: '1%',
+                        data: null,
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {data: 'shortDescription'},
+                    {data: 'status'},
+                    {data: 'severity'},
+                    {data: 'priority'},
+                    {data: 'reporter.username'},
+                    {data: 'reportedTime'}
+                ]
+            });
+            $('.dataTable')
+                .on('click', 'tbody tr', function (e) {
+
+                    var currentRow = $(this).closest("tr").children();
+                    var id = oTable.row(currentRow).data()['publicId'];
+                    //hard code
+                    window.location.href = [[${dataSource}]] + "/" + id;
+                });
+        });
+    </script>
+</div>
+</body>
+</html>

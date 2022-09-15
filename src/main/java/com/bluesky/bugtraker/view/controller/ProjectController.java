@@ -91,7 +91,7 @@ public class ProjectController {
         String subscribersLink = baseLink.slash("subscribers").slash("/body").toUri().toString();
         model.addAttribute("subscribersLink", subscribersLink);
 
-        String ticketsLink = baseLink.slash("tickets").toUri().toString();
+        String ticketsLink = baseLink.slash("tickets").slash("/body").toUri().toString();
         model.addAttribute("ticketsLink", ticketsLink);
 
         String commentsLink =
@@ -103,7 +103,7 @@ public class ProjectController {
 
 
     @PreAuthorize(value = "#creatorId == principal.id")
-    @GetMapping()
+    @GetMapping
     @ResponseBody
     public DataTablesOutput<ProjectResponseModel> getProjects(
             @PathVariable String creatorId,

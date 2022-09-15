@@ -5,6 +5,7 @@ import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface TicketRepository extends CrudRepository<TicketEntity, Long> {
+public interface TicketRepository extends DataTablesRepository<TicketEntity, Long> {
     Optional<TicketEntity> findByPublicId(String id);
     boolean existsByPublicId(String publicId);
 

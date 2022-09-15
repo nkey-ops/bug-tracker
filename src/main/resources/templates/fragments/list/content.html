@@ -8,35 +8,6 @@
 
 <body>
 
-<div class="table-responsive" th:fragment="projects(list, baseLink)">
-
-    <table id="projects-table" data-toggle="bootgrid" class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Subscribers</th>
-            <th>Bugs Reported</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="click-row" th:data-url="${baseLink} + '/' + ${project.name}"
-            th:each="project : ${list}">
-
-            <td th:text="${project.name}"/>
-            <td th:text="${#lists.size(project.subscribers)}"/>
-            <td th:text="${#lists.size(project.bugs)}"/>
-        </tr>
-        </tbody>
-    </table>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('#projects-table').DataTable();
-            $(".click-row").click(function () {
-                window.location = $(this).data("url");
-            })
-        });
-    </script>
-</div>
 
 <div class="table-responsive" th:fragment="tickets(list, baseLink)">
 

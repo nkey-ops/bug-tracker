@@ -38,14 +38,13 @@ public class ProjectViewController {
     @GetMapping("/content-block")
     public String getProjectsContentBlock(@PathVariable String creatorId,
                                           Model model) {
-//       TODO Throws expection because dataTableInput without values
             String dataSource = linkTo(methodOn(ProjectController.class)
                 .getProjects(creatorId, new DataTablesInput()))
                 .toUri().toString();
 
         model.addAttribute("dataSource", dataSource);
 
-        return "fragments/list/content/project-content";
+        return "fragments/list/content/projects-content";
     }
     
     @PreAuthorize(value = "#creatorId == principal.id")

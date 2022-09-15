@@ -48,7 +48,12 @@ public class UserPrincipal implements UserDetails {
     public String getUsername() {
         return user.getEmail();
     }
+    
+    public String getName() {
+        return user.getUsername();
+    }
 
+    
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -72,7 +77,6 @@ public class UserPrincipal implements UserDetails {
     public String getId() {
         return id;
     }
-
 
 
     public boolean isSubscribedTo(String projectCreatorId, String projectName){

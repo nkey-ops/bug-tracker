@@ -42,18 +42,14 @@
                 </div>
                 <div class="row ">
                     <!-- Ticket Form -->
-                    <div class="col-10 grid-margin stretch-card">
-                        <div class="card">
-                            <div class="card-body" th:include="/forms/ticket-form ::
-                                                        ticket-form(
-                                                            ticketRequestModel=${ticketRequestModel},
-                                                            ticketFormPostRequestLink=${ticketFormPostRequestLink},
-                                                            statusList=${statusList},
-                                                            severityList=${severityList},
-                                                            priorityList=${priorityList})">
-                            </div>
-                        </div>
+                    <div id="ticket-form-block" class="col-10 grid-margin stretch-card">
                     </div>
+
+                    <script th:inline="javascript">
+                        window.onload = function () {
+                            $("#ticket-form-block").load([[${ticketFormBlockLink}]]);
+                        }
+                    </script>
                 </div>
                 <!-- content-wrapper ends -->
                 <!-- partial -->
