@@ -46,9 +46,14 @@
                     {data: 'priority'},
                     {data: 'reporter.username'},
                     {data: 'reportedTime'}
-                ]
+                ],
+                // columnDefs: [{
+                //     targets: 7,
+                //     // render: $.fn.dataTable.render.moment('EEE MMM dd HH:mm:ss zzz yyyy', 'Do MMM YY')
+                //     render: $.fn.dataTable.render.moment('Fri Sep 16 10:04:30 GET 2022', 'Do MMM YY')
+                // }]
             });
-            $('.dataTable')
+            $('#tickets-table')
                 .on('click', 'tbody tr', function (e) {
 
                     var currentRow = $(this).closest("tr").children();

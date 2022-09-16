@@ -14,27 +14,25 @@ public interface TicketService {
 
     TicketDto getTicket(String bugId);
 
-    void createTicket(String userId, String projectName, TicketDto map, String reporterId);
-
-    void updateTicket(String userId, String projectName, String bugId, TicketDto map);
+    void createTicket(String projectName, TicketDto ticketDto, String reporterId);
 
     DataTablesOutput<TicketDto> getTickets(String projectId, DataTablesInput input);
 
+    void updateTicket(String ticketId, TicketDto ticketDtoUpdates, String updatedById);
+
     void deleteBug(String userId, String projectName, String bugId);
 
-    void addAssignedDev(String userId, String projectName);
-    Page<UserDto> getAssignedDevs(String ticketId, int page, int limit);
+    void addAssignedDev(String ticketId, String userId);
 
-    void removeAssignedDev(String ticketId, String assignedDevId);
+    DataTablesOutput<UserDto> getAssignedDevs(String ticketId, DataTablesInput input);
 
-    
+    void removeAssignedDev(String ticketId, String userId);
+
     void createComment(String ticketId, String creatorId, CommentDto comment);
 
     Page<CommentDto> getComments(String tickerId, int page, int limit, String sortBy, Sort.Direction dir);
 
-
-    Page<TicketRecordDto> getTicketRecords(String ticketId, int page, int limit);
+    DataTablesOutput<TicketRecordDto> getTicketRecords(String ticketId, DataTablesInput input);
 
     TicketRecordDto getTicketRecord (String recordId);
-
 }

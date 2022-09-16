@@ -1,5 +1,7 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
+import com.bluesky.bugtraker.shared.dto.TicketDto;
+import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
@@ -13,6 +15,7 @@ import java.util.Date;
 @Getter @Setter
 public class TicketRecordResponseModel {
     private String publicId;
+    
     private Status status;
     private Severity severity;
     private Priority priority;
@@ -24,8 +27,8 @@ public class TicketRecordResponseModel {
 
     private Date reportedTime;
     private Date lastUpdateTime;
-    private UserResponseModel reporter;
-
-    private ProjectResponseModel project;
+    
+    private TicketRecordResponseModel mainTicket;
+    private UserResponseModel creator;
 }
 

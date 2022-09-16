@@ -27,7 +27,7 @@ public class TicketResponseModel extends RepresentationModel<TicketResponseModel
     private UserResponseModel reporter;
 
     private ProjectResponseModel project;
-
+            
 
     @Override
     public boolean equals(Object o) {

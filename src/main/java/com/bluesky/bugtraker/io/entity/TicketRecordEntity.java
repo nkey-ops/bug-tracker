@@ -65,10 +65,16 @@ public class TicketRecordEntity implements Serializable {
     private Date lastUpdateTime;
 
     @ManyToOne
-    @JoinColumn(name = "ticket_id", 
-                referencedColumnName = "id", 
-                nullable = false, updatable = false)
+    @JoinColumn(name = "main_ticket_id",
+            referencedColumnName = "id",
+            nullable = false, updatable = false)
     private TicketEntity mainTicket;
 
+    @ManyToOne(optional = false,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id",
+            referencedColumnName = "id",
+            nullable = false, updatable = false)
+    private UserEntity creator;
 }
 

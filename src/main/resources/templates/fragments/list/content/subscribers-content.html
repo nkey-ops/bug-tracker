@@ -35,7 +35,6 @@
                         }
                     },
                     {
-                        
                         data: 'publicId',
                         visible: false,
                     },
@@ -51,23 +50,23 @@
                     }
                 ]
             });
-            $('.dataTable')
+            $('#subscribers-table')
                 .on('click', 'tbody tr', function (e) {
-                    var $link = $(this).find(".btnDelete");
-                    if (e.target === $link[0]) return false;
-
                     var currentRow = $(this).closest("tr").children();
                     var id = oTable.row(currentRow).data()['publicId'];
                     //hard code
                     window.location.href = "/users/" + id
                 })
-                .on('click', '.btnDelete', function () {
+                .on('click', '.btnDelete', function (e) {
+                    e.stopPropagation();
+                    
                     var currentRow = $(this).closest("tr").children();
                     var id = oTable.row(currentRow).data()['publicId'];
-
+                    
                     $.ajax({
                         type: "DELETE",
                         //hard code
+                        
                         url: [[${dataSource}]] + "/" + id,
                         beforeSend: function () {
                             $('#subscriber-form-success').html('');

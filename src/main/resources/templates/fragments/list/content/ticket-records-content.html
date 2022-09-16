@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="table-responsive">
+
+    <table id="ticket-records-table" class="table nowrap table-bordered">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Id</th>
+            <th>By</th>
+            <th>Created</th>
+            
+        </tr>
+        </thead>
+    </table>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            var oTable = $('#ticket-records-table').DataTable({
+                serverSide: true,
+                deferRender: true,
+                ajax: [[${dataSource}]],
+                order: [
+                    [2, 'desc']
+                ],
+                columns: [
+                    {
+                        width: '1%',
+                        data: null,
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {data: 'publicId'},
+                    {
+                        data: 'creator.username',
+                        render: function ( data, type, full, row ) {
+                            var data1 = oTable.row(row).data();
+                            var link =    '/users/' + data1['publicId'];
+                            var creatorName = data1['creator']['username'];
+                            
+                            return '<a href="' + link + '">' + creatorName + '</a>';
+                        }
+                    },
+                    {data: 'lastUpdateTime'}
+                ]
+            });
+            $('#ticket-records-table')
+                .on('click', 'tbody tr', function () {
+                    var currentRow = $(this).closest("tr").children();
+                    var id = oTable.row(currentRow).data()['publicId'];
+
+                    //hard code
+                    $('#ticket-info-block').load([[${dataSource}]] + "/" + id);
+                });
+        });
+    </script>
+
+
+</div>
+
+</body>
+</html>
