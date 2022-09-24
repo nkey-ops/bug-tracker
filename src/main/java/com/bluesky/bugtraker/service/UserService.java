@@ -2,9 +2,7 @@ package com.bluesky.bugtraker.service;
 
 
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.ProjectDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.shared.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -31,4 +29,8 @@ public interface UserService extends UserDetailsService  {
     Page<TicketDto> getWorkingOnTickets(String id, int page, int limit);
 
     Page<ProjectDto> getSubscribedOnProjects(String id, int page, int limit);
+
+    TicketsInfoDTO getTicketsInfo(String userId);
+
+    UserInfoDTO getUserInfo(String userId);
 }

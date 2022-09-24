@@ -3,11 +3,11 @@
 
 <body>
 <div id="comments-content">
-    <div class="text-center" th:if="${#lists.isEmpty(commentsList)} == true">
+    <div class="text-center" th:if="${totalElements == 0}">
         <h5 class="text-muted"> It's Empty Here</h5>
     </div>
     
-    <div th:if="${#lists.isEmpty(commentsList)} == false">
+    <div th:unless="${totalElements == 0}">
         <div style="overflow-y: scroll !important; resize: vertical; overflow-x: hidden;">
             <ul class="card p-2 align-content-center" style="background: #26353e"
                 th:each="comment : ${commentsList}">
@@ -23,7 +23,7 @@
     </div>
     
     <div class="form-group"
-         th:if="${#lists.size(commentsList) > limit}"
+         th:if="${totalElements > limit}"
          th:include="fragments/list/list-parts ::
                             paging (
                                     listRequestLink=${listRequestLink},

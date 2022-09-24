@@ -18,7 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,34 +70,18 @@ public class ProjectController {
 
     @PreAuthorize("#creatorId == principal.id or  principal.isSubscribedTo(#creatorId, #projectId)")
     @GetMapping("/{projectId}")
-    public String getProject(@PathVariable String creatorId,
-                             @PathVariable String projectId,
-                             Model model) {
+    public ResponseEntity<?> getProject(
+            @PathVariable String creatorId,
+            @PathVariable String projectId) {
 
         ProjectDto projectDto = projectService.getProject(projectId);
+
         ProjectResponseModel projectResponseModel =
                 modelMapper.map(projectDto, ProjectResponseModel.class);
 
-        model.addAttribute("project", projectResponseModel);
 
-        WebMvcLinkBuilder baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId);
+        return ResponseEntity.ok(projectResponseModel);
 
-        model.addAttribute("selfLink", baseLink.toUri().toString());
-
-        String subscribersLink = baseLink.slash("subscribers").slash("/body").toUri().toString();
-        model.addAttribute("subscribersLink", subscribersLink);
-
-        String ticketsLink = baseLink.slash("tickets").slash("/body").toUri().toString();
-        model.addAttribute("ticketsLink", ticketsLink);
-
-        String commentsLink =
-                baseLink.slash("comments").slash("body").toUri().toString();
-        model.addAttribute("commentsLink", commentsLink);
-
-        return "pages/project";
     }
 
 
@@ -123,14 +106,17 @@ public class ProjectController {
 
 
     @PreAuthorize("#creatorId == principal.id")
-    @PatchMapping("/{projectId}")
-    public ProjectResponseModel setProjectName(@PathVariable String creatorId,
-                                               @PathVariable String projectId,
-                                               @RequestBody ProjectRequestModel projectRequestBody) {
+    @PatchMapping(value = "/{projectId}",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> updateProject(@PathVariable String creatorId,
+                                           @PathVariable String projectId,
+                                           @Valid @ModelAttribute("projectRequestModel")
+                                           ProjectRequestModel projectRequestBody) {
 
         ProjectDto projectDto = projectService.setProjectName(projectId, projectRequestBody);
+        ProjectResponseModel projectResponseModel = modelMapper.map(projectDto, ProjectResponseModel.class);
 
-        return null;
+        return ResponseEntity.ok().body(projectResponseModel);
     }
 
     @PreAuthorize(value = "#creatorId == principal.id")
@@ -145,7 +131,7 @@ public class ProjectController {
 
     @PreAuthorize("#creatorId == principal.id")
     @PostMapping(value = "/{projectId}/subscribers",
-                 consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> addSubscriber(
             @PathVariable String creatorId,
             @PathVariable String projectId,
@@ -156,7 +142,6 @@ public class ProjectController {
 
         return ResponseEntity.status(HttpStatus.CREATED.value()).build();
     }
-   
 
 
     @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
@@ -201,35 +186,9 @@ public class ProjectController {
         CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
         projectService.createComment(projectId, creator.getId(), commentDto);
 
-        String commentsList = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("comments")
-                .toUri().toString();
-
-        return ResponseEntity.status(HttpStatus.CREATED.value()).body(commentsList);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("#creatorId == principal.id")
-    @GetMapping("/{projectName}/comments/body")
-    public String getCommentsBody(@PathVariable String creatorId,
-                                  @PathVariable String projectName,
-                                  Model model) {
-
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectName)
-                .slash("comments")
-                .toUri().toString();
-
-        model.addAttribute("commentsContentLink", baseLink);
-        model.addAttribute("commentForm", new CommentRequestModel());
-        model.addAttribute("commentPostRequestLink", baseLink);
-
-        return "fragments/comments/comments-body";
-    }
 
     @PreAuthorize("#creatorId == principal.id")
     @GetMapping("/{projectId}/comments")
@@ -248,6 +207,7 @@ public class ProjectController {
                 modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentDto>>() {
                 }.getType());
 
+        model.addAttribute("totalElements", pagedCommentsDto.getTotalElements());
         model.addAttribute("limit", limit);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pagedCommentsDto.getTotalPages());

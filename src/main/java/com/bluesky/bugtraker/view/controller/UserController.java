@@ -4,6 +4,7 @@ import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.TicketDto;
+import com.bluesky.bugtraker.shared.dto.TicketsInfoDTO;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
@@ -152,9 +153,22 @@ public class UserController {
                 subscribedOnProjects.getContent(), new TypeToken<Set<ProjectResponseModel>>() {
                 }.getType());
 
-
         return null;
     }
+
+    @PreAuthorize("#userId == principal.id")
+    @GetMapping("/{userId}/tickets-info")
+    public ResponseEntity<?> getTicketsInfo( @PathVariable String userId) {
+        return ResponseEntity.ok(userService.getTicketsInfo(userId));
+    }
+
+    @PreAuthorize("#userId == principal.id")
+    @GetMapping("/{userId}/info")
+    public ResponseEntity<?> getUserInfo( @PathVariable String userId) {
+        return ResponseEntity.ok(userService.getUserInfo(userId));
+    }
+
+
 }
 
 

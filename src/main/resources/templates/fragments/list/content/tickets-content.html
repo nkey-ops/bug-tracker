@@ -20,11 +20,15 @@
     <script th:inline="javascript">
         $(document).ready(function () {
             var oTable = $('#tickets-table').DataTable({
+                oLanguage: {
+                    sInfoFiltered : ''
+                },
+                
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],
                 order: [
-                    [6, 'desc']
+                    [7, 'desc']
                 ],
                 columns: [
                     {

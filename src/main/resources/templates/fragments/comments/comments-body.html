@@ -11,14 +11,11 @@
             <div id="comments-content-block" class="col-md-12 form-group"></div>
         </div>
 
-        <div class="bg-grey p-2" th:insert="forms/comment-form ::
-                                    comment-form(
-                                                commentForm=${commentForm}, 
-                                                postRequestLink=${commentPostRequestLink})">
-        </div>
+        <div id="comment-form-block" class="bg-grey p-2"></div>
     </div>
     <script th:inline="javascript">
-        $("#comments-content-block").load([[${commentsContentLink}]]);
+        $("#comments-content-block").load([[${commentsContentBlockLink}]]);
+        $("#comment-form-block").load([[${commentFormLink}]]);
     </script>
 </div>
 </body>

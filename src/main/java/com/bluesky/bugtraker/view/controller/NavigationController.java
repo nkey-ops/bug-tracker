@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 public class NavigationController {
@@ -43,46 +44,28 @@ public class NavigationController {
                 .slash("projects")
                 .slash("body")
                 .toUri().toString();
-
+        
         model.addAttribute("user", user);
         model.addAttribute("projectsLink", myProjectsLink);
 
+        String ticketsInfoLink = 
+                linkTo(methodOn(UserController.class)
+                        .getTicketsInfo(user.getPublicId()))
+                        .toUri().toString();
+        model.addAttribute("ticketsInfoLink", ticketsInfoLink);
+
+        String userInfo = 
+                linkTo(methodOn(UserController.class)
+                        .getUserInfo(user.getPublicId()))
+                        .toUri().toString();
+        model.addAttribute("userInfoLink", userInfo);
+            
+        
         return "index";
     }
 
 
-    @RequestMapping(value = "/project-form")
-    public ModelAndView showProjectForm() {
-
-        ModelAndView mav = new ModelAndView("project-form2");
-
-        return mav.addObject("user", getCurrentUser());
-    }
 
 
 
-    @GetMapping(value = "/my-projects")
-    public String showProjectList(@ModelAttribute("user") UserResponseModel user,
-                                  Model model,
-                                  @RequestParam(value = "page", defaultValue = "1") int page,
-                                  @RequestParam(value = "limit", defaultValue = "5") int limit) {
-
-
-        model.addAttribute("user", user);
-//        projectController.getProjects(model, user.getPublicId(),  page, limit);
-
-        return "/list/my-projects";
-    }
-
-
-    @RequestMapping("/test")
-    public  String test(){
-        return "/test";
-    }
-    @RequestMapping("/test-replace")
-    public  String testReplace(Model model){
-        model.addAttribute("customName", "My Name");
-
-        return "test-part :: part";
-    }
 }

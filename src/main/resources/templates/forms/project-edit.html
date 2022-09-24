@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+<div id="project-edit-block">
+    <form id="project-edit" class="forms-sample"
+          th:object="${projectRequestModel}" method="post" th:action="@{${postRequestLink}}">
+
+        <div id="project-edit-error"></div>
+
+        <div class="row">
+            <div class="input-group col-xs-12">
+                <input id="project-name" type="text" class="form-control" placeholder="New Project Name" autofocus
+                       th:field="*{name}"/>
+                <span class="input-group-append">
+                                <button id="submit-project" type="submit"
+                                        class="btn btn-primary mr-2 float-right">Update</button>
+                                <button class="btn cancel btn-dark float-right">Cancel</button>
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

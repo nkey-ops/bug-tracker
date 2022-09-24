@@ -1,11 +1,15 @@
-package com.bluesky.bugtraker.view.controller;
+package com.bluesky.bugtraker.view.controller.view;
 
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
+import com.bluesky.bugtraker.view.controller.TicketController;
+import com.bluesky.bugtraker.view.controller.UserController;
+import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import com.bluesky.bugtraker.view.model.request.TicketRequestModel;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,7 +37,7 @@ public class TicketViewController {
                                  Model model) {
 
         String baseLink =
-                linkTo(methodOn(TicketController.class)
+                WebMvcLinkBuilder.linkTo(methodOn(TicketController.class)
                         .getTickets(creatorId, projectId, new DataTablesInput()))
                         .toUri().toString();
 
@@ -180,6 +184,50 @@ public class TicketViewController {
 
         return "fragments/list/content/subscribers-content";
     }
-    
+
+    @PreAuthorize("#creatorId == principal.id")
+    @GetMapping("/{ticketId}/comments/body")
+    public String getCommentsBody(@PathVariable String creatorId,
+                                  @PathVariable String projectId,
+                                  @PathVariable String ticketId,
+                                  Model model) {
+
+        String baseLink = linkTo(UserController.class)
+                .slash(creatorId)
+                .slash("projects")
+                .slash(projectId)
+                .slash("tickets")
+                .slash(ticketId)
+                .slash("comments")
+                .toUri().toString();
+
+        model.addAttribute("commentsContentBlockLink", baseLink);
+        model.addAttribute("commentFormLink", baseLink + "/form");
+        
+        return "fragments/comments/comments-body";
+    }
+
+    @PreAuthorize("#creatorId == principal.id")
+    @GetMapping("/{ticketId}/comments/form")
+    public String getCommentForm(@PathVariable String creatorId,
+                                  @PathVariable String projectId,
+                                  @PathVariable String ticketId,
+                                  Model model) {
+
+        String baseLink = linkTo(UserController.class)
+                .slash(creatorId)
+                .slash("projects")
+                .slash(projectId)
+                .slash("tickets")
+                .slash(ticketId)
+                .slash("comments")
+                .toUri().toString();
+
+        model.addAttribute("commentsContentBlockLink", baseLink);
+        model.addAttribute("postRequestLink", baseLink);
+        model.addAttribute("commentRequestModel", new CommentRequestModel());
+
+        return "forms/comment-form";
+    }
 
 }

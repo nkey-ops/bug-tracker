@@ -36,15 +36,15 @@ public class TicketEntity implements Serializable {
     private String shortDescription;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     private Status status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     private Severity severity;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     private Priority priority;
 
     @Lob
@@ -56,7 +56,7 @@ public class TicketEntity implements Serializable {
     private String erroneousProgramBehaviour;
 
     @Lob
-    @Column(columnDefinition = "varchar(250) default 'Solution is not found.'")
+    @Column
     private String howToSolve;
 
     @Column(nullable = false, updatable = false)

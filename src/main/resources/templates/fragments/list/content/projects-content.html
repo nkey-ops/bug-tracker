@@ -14,6 +14,10 @@
         <script th:inline="javascript">
             $(document).ready(function () {
                 var oTable = $('#projects-table').DataTable({
+                    oLanguage: {
+                        sInfoFiltered : ''
+                    },
+                    
                     serverSide: true,
                     deferRender: true,
                    
@@ -39,7 +43,7 @@
                     var currentRow = $(this).closest("tr").children();
                     var id = oTable.row(currentRow).data()['publicId'];
                     //hard code
-                    window.location.href = [[${dataSource}]]  + "/" + id;
+                    window.location.href = [[${dataSource}]]  + "/" + id + "/page";
                 });
             });
         </script>

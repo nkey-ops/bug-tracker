@@ -17,6 +17,10 @@
     <script th:inline="javascript">
         $(document).ready(function () {
             var oTable = $('#ticket-records-table').DataTable({
+                oLanguage: {
+                    sInfoFiltered : ''
+                },
+                
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],

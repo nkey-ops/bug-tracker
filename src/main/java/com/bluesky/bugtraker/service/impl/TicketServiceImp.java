@@ -82,7 +82,7 @@ public class TicketServiceImp implements TicketService {
         Long id = projectService.getProject(projectId).getId();
 
         DataTablesOutput<TicketEntity> all =
-                ticketRepo.findAll(input, findAllByProjectId(id));
+                ticketRepo.findAll(input, byProjectId(id));
 
         DataTablesOutput<TicketDto> result = new DataTablesOutput<>();
 
@@ -134,10 +134,15 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public void deleteBug(String userId, String projectId, String ticketId) {
-        TicketDto ticketDto = getTicket(ticketId);
+    public void deleteTicket(String ticketId) {
+        TicketEntity ticketEntity = this.getTicketEntity(ticketId);
 
-        projectService.removeTicket(projectId, ticketDto);
+        boolean isRemoved = ticketEntity.getProject().removeTicket(ticketEntity);
+
+        if (!isRemoved)
+            throw new ProjectServiceException(NO_RECORD_FOUND, ticketId);
+    
+        ticketRepo.delete(ticketEntity);
     }
 
     private void createTicketRecord(TicketEntity mainTicketEntity, String updatedByUser) {
@@ -231,18 +236,18 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public void createComment(String ticketId, String creatorId, CommentDto comment) {
+    public void createComment(String ticketId, String commentCreatorId, CommentDto comment) {
         CommentEntity commentEntity = modelMapper.map(comment, CommentEntity.class);
 
         commentEntity.setPublicId(utils.generateCommentId(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        UserEntity creator = modelMapper.map(userService.getUserById(creatorId), UserEntity.class);
+        UserEntity creator = modelMapper.map(userService.getUserById(commentCreatorId), UserEntity.class);
         TicketEntity ticketEntity = this.getTicketEntity(ticketId);
 
         boolean isCreatorAdded = commentEntity.addCreator(creator);
         if (!isCreatorAdded)
-            throw new TicketServiceException(RECORD_ALREADY_ADDED, creatorId);
+            throw new TicketServiceException(RECORD_ALREADY_ADDED, commentCreatorId);
 
         boolean isTicketAdded = commentEntity.addTicket(ticketEntity);
         if (!isTicketAdded)

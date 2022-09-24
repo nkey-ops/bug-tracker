@@ -20,7 +20,7 @@ public interface TicketService {
 
     void updateTicket(String ticketId, TicketDto ticketDtoUpdates, String updatedById);
 
-    void deleteBug(String userId, String projectName, String bugId);
+    void deleteTicket(String ticketId);
 
     void addAssignedDev(String ticketId, String userId);
 

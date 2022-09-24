@@ -50,14 +50,14 @@ public class Utils {
 
     public <T> DataTablesOutput<T> convert(DataTablesOutput<?> source, Class<T> clazz) {
         ModelMapper modelMapper = new ModelMapper();
-       
+
         DataTablesOutput<T> result = new DataTablesOutput<>();
-       
+
         modelMapper.map(source, result);
 
         result.setData(modelMapper.map(source.getData(), new TypeToken<List<UserResponseModel>>() {
-                    }.getType()));
-        
+        }.getType()));
+
         return result;
     }
 }

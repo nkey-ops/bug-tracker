@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div id="project-body">
+    <div class="page-header group">
+        <h3 id="project-name" class="page-title"></h3>
+
+    </div>
+    <div class="row ">
+        <div id="tickets-block" class="col-12 grid-margin"></div>
+        <div id="subscribers-block" class="col-6 grid-margin"></div>
+        <div id="comments-block" class="col-6 grid-margin"></div>
+    </div>
+
+    <div class="form-group text-center">
+        <button id="delete-project" type="button" class="btn btn-outline-danger btn-sm">
+            <i class="mdi mdi-delete-forever"></i>Delete Project
+        </button>
+    </div>
+    <script th:inline="javascript">
+        var projectName;
+        function loadName() {
+            $.ajax({
+                url: [[${selfLink}]],
+                success: function (project) {
+                    projectName = project['name']
+                    document.getElementById("project-name").innerHTML =
+                        projectName + ' <button type="button" class="edit-button btn btn-outline-warning btn-sm btn-rounded">\n' +
+                        '            <i class="mdi mdi-pencil"></i>\n' +
+                        '        </button>';
+                },
+            });
+        }
+        
+        loadName();
+        $("#tickets-block").load([[${ticketsLink}]]);
+        $("#subscribers-block").load([[${subscribersLink}]]);
+        $("#comments-block").load([[${commentsLink}]]);
+
+        $("#delete-project").click(function () {
+            $.ajax({
+                type: "DELETE",
+                url: [[${selfLink}]],
+                success: function () {
+                    alert(projectName + ' has been deleted')
+                    window.location.href = [[${#request.contextPath}]] + '/home'
+                }
+            })
+        });
+        $('#project-name').on('click', 'edit-button', function () {
+            $('#project-name').load([[${projectEditFormLink}]]);
+            
+        });
+        $("#project-edit").submit(function (e) {
+
+            e.preventDefault();
+            var form = $(this);
+
+            $.ajax({
+                type: 'PATCH',
+                url: form.attr('action'),
+                data: form.serialize(),
+
+                beforeSend: function () {
+                    $('#error').html('');
+                },
+                success: function () {
+                    loadName()
+                },
+                error: function (jqXHR) {
+                    $('#project-edit-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                }
+            });
+        });
+            
+        $('#project-edit').on('click', 'cancel', function (){
+            loadName();  
+        })
+        
+    </script>
+</div>
+</body>
+</html>

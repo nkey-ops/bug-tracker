@@ -3,6 +3,7 @@ package com.bluesky.bugtraker.io.repository;
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
@@ -25,4 +26,4 @@ public interface TicketRepository extends DataTablesRepository<TicketEntity, Lon
     Set<TicketEntity> findAllByProject(ProjectEntity projectEntity);
 
     Page<TicketEntity> findAllByAssignedDevsIn(Collection<UserEntity> assignedDevs, Pageable pageable);
-}
+}   

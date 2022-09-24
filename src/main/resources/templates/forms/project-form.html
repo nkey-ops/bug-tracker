@@ -1,22 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-</head>
 <body>
-<div id="project-form-block" class="form-group"
-     th:fragment="project-form(projectRequestModel, postRequestLink, projectContentBlockLink)">
+<div id="project-form-block" class="form-group">
     <form id="project-form" class="forms-sample"
           th:object="${projectRequestModel}" method="post"
           th:action="@{${postRequestLink}}">
 
         <div id="error"></div>
         <div id="success"></div>
-
-        <p class="alert alert-danger"
-           th:each="error: ${#fields.allErrors()}"
-           th:text="${error}">Input is incorrect</p>
-        <p class="alert alert-success"
-           th:if="${isCreated}">Project has been created</p>
 
         <div class="form-group row">
             <div class="input-group col-xs-12">

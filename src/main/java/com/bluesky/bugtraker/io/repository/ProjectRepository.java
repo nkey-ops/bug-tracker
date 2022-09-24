@@ -26,4 +26,4 @@ public interface ProjectRepository extends DataTablesRepository<ProjectEntity, L
     Page<ProjectEntity> findAllBySubscribersIn(Set<UserEntity> userEntity, Pageable pageable);
     
     Optional<ProjectEntity> findByPublicId(String projectId);
-}
+    }
