@@ -4,11 +4,11 @@ import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.shared.dto.ProjectDto;
 import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.TicketsInfoDTO;
 import com.bluesky.bugtraker.shared.dto.UserDto;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
+import com.bluesky.bugtraker.view.model.request.UserRegisterModel;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
@@ -50,37 +50,36 @@ public class UserController {
 
         UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
 
-        return getUser(userPrincipal.getId());
+        return (UserResponseModel) getUser(userPrincipal.getId()).getBody();
     }
 
     @PreAuthorize("#id == principal.getId()")
     @GetMapping("/{id}")
-    public UserResponseModel getUser(@PathVariable String id) {
-        return
-                modelMapper.map(
-                        userService.getUserById(id), UserResponseModel.class);
+    public ResponseEntity<?> getUser(@PathVariable String id) {
+
+        UserDto userById = userService.getUserById(id);
+        UserResponseModel userResponseModel = modelMapper.map(userById, UserResponseModel.class);
+        
+        return ResponseEntity.ok(userResponseModel);
     }
 
 
-    @PreAuthorize("#id == principal.getId()")
-    @PutMapping(value = "/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserResponseModel updateUser(@PathVariable String id,
-                                        @RequestBody UserRequestModel userRequestModel) {
-
+    @PreAuthorize("#userId == principal.getId()")
+    @PatchMapping(value = "/{userId}",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> updateUser( @PathVariable String userId,
+                                         @Valid @ModelAttribute("userResponseModel")
+                                         UserRequestModel userRequestModel){
         UserDto userDto =
                 modelMapper.map(userRequestModel, UserDto.class);
+        userService.updateUser(userId, userDto);
 
-        return
-                modelMapper.map(userService.updateUser(id, userDto),
-                        UserResponseModel.class);
-
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ModelAndView createUser(@Valid @ModelAttribute
-                                   UserRequestModel userRequestModel,
+                                       UserRegisterModel userRegisterModel,
                                    BindingResult bindingResult) {
 
         ModelAndView mav = new ModelAndView("register");
@@ -90,7 +89,7 @@ public class UserController {
         }
 
         UserDto userDto = userService.createUser(
-                modelMapper.map(userRequestModel, UserDto.class));
+                modelMapper.map(userRegisterModel, UserDto.class));
 
         return new ModelAndView("redirect:/home");
     }

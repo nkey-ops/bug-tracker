@@ -28,6 +28,9 @@ public class UserDto implements Serializable {
     private String email;
     private String password;
 
+    private String address;
+    private String phoneNumber;
+    private String status;
 
     private Set<ProjectDto> projects = new HashSet<>();
     private Set<TicketDto> reportedTickets = new HashSet<>();

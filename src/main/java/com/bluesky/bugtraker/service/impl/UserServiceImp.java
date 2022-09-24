@@ -15,6 +15,7 @@ import com.bluesky.bugtraker.service.UserService;
 import com.bluesky.bugtraker.service.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.bluesky.bugtraker.shared.dto.*;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +57,11 @@ public class UserServiceImp implements UserService {
         this.ticketRepo = ticketRepo;
         this.projectRepo = projectRepo;
 
-
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.utils = utils;
         this.modelMapper = modelMapper;
+
+        this.modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
 
@@ -122,11 +124,12 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserDto updateUser(String id, UserDto userDto) {
+    public void updateUser(String id, UserDto userDto) {
         UserEntity userEntity = getUserEntity(id);
-        userEntity.setUsername(userDto.getUsername());
-
-        return modelMapper.map(userRepo.save(userEntity), UserDto.class);
+        
+        modelMapper.map(userDto, userEntity);
+        
+        userRepo.save(userEntity);
     }
 
     @Transactional

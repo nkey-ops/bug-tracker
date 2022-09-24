@@ -20,7 +20,7 @@ public interface UserService extends UserDetailsService  {
     boolean isUserExistsByEmail(String email);
 
 
-    UserDto updateUser(String id, UserDto userDto);
+    void updateUser(String id, UserDto userDto);
 
     void deleteUser(String id);
 

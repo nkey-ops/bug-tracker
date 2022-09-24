@@ -280,10 +280,8 @@ class UserServiceImpTest {
         when(modelMapper.map(any(UserEntity.class), eq(UserDto.class)))
                 .thenReturn(outputUserDto);
 
-        UserDto resultUserDto =
-                userServiceImp.updateUser(userPublicId, inputUserDto);
+        userServiceImp.updateUser(userPublicId, inputUserDto);
 
-        assertEqualsUserDto(outputUserDto, resultUserDto);
     }
 
     @Test
@@ -343,7 +341,8 @@ class UserServiceImpTest {
                 .thenReturn(pagedTicketEntities);
         when(modelMapper.map(
                 ArgumentMatchers.<Page<TicketEntity>>any(),
-                eq(new TypeToken<Page<TicketDto>>() {}.getType())))
+                eq(new TypeToken<Page<TicketDto>>() {
+                }.getType())))
                 .thenReturn(outputPagedTicketDtos);
 
 
@@ -395,7 +394,8 @@ class UserServiceImpTest {
                 .thenReturn(pagedTicketEntities);
         when(modelMapper.map(
                 ArgumentMatchers.<Page<TicketEntity>>any(),
-                eq(new TypeToken<Page<TicketDto>>() {}.getType())))
+                eq(new TypeToken<Page<TicketDto>>() {
+                }.getType())))
                 .thenReturn(outputPagedTicketDtos);
 
         Page<TicketDto> workingOnTickets =
@@ -445,7 +445,8 @@ class UserServiceImpTest {
                 .thenReturn(pagedProjectEntities);
         when(modelMapper.map(
                 ArgumentMatchers.<Page<ProjectEntity>>any(),
-                eq(new TypeToken<Page<ProjectDto>>() {}.getType())))
+                eq(new TypeToken<Page<ProjectDto>>() {
+                }.getType())))
                 .thenReturn(outputPagedProjectDtos);
 
 

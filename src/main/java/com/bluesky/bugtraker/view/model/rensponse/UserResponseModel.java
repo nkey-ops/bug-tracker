@@ -15,7 +15,11 @@ public class UserResponseModel  {
     private String publicId;
     private String username;
     private String email;
-
+    
+    private String address;
+    private String phoneNumber;
+    private String status;
+    
     public UserResponseModel(String username) {
         this.username = username;
     }

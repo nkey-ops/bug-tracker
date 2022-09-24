@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Edit</h4>
+        <form id="user-edit" class="forms-sample"
+              th:object="${userModel}" method="post" th:action="@{${postRequestLink}}">
+
+            <div id="user-edit-error"></div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Username"
+                       th:field="${userModel.username}">
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone</label>
+                <input type="text" class="form-control" id="phoneNumber" placeholder="Phone number"
+                       th:field="${userModel.phoneNumber}">
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" class="form-control" id="address" placeholder="Address"
+                       th:field="${userModel.address}">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <input type="text" class="form-control" id="status" placeholder="Status"
+                       th:field="${userModel.status}">
+            </div>
+            <button type="submit" class="btn btn-primary me-2">Submit</button>
+            <button type="reset" class="btn btn-dark">Cancel</button>
+        </form>
+        
+        <script th:inline="javascript">
+            $.get([[${userLink}]], function (user) {
+                document.getElementById("username").value = user['username'];
+                document.getElementById("phoneNumber").value = user['phoneNumber'];
+                document.getElementById("address").value = user['address'];
+                document.getElementById("status").value = user['status'];
+            });
+
+            const form = document.getElementById('user-edit');
+            form.addEventListener('reset', function (){
+                window.location.replace([[${userLink}]] + '/profile');
+            });
+            
+            $("#user-edit").submit(function (e) {
+                e.preventDefault();
+                    
+                var form = $(this);
+                $.ajax({
+                    type: 'PATCH',
+                    url: form.attr('action'),
+                    data: form.serialize(),
+
+                    beforeSend: function () {
+                        $('#user-edit-error').html('');
+                    },
+                    success: function () {
+                        window.location.replace([[${userLink}]] + '/profile');
+                    },
+                    error: function (jqXHR) {
+                        $('#user-edit-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                    }
+                });
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

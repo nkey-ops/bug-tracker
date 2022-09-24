@@ -19,9 +19,9 @@
         $(document).ready(function () {
             var oTable = $('#subscribers-table').DataTable({
                 oLanguage: {
-                    sInfoFiltered : ''
+                    sInfoFiltered: ''
                 },
-                
+
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],
@@ -44,6 +44,13 @@
                     },
                     {
                         data: 'username',
+                        render: function (data, type, full, row) {
+                            var data1 = oTable.row(row).data();
+                            var link = '/bugtracker/users/' + data1['publicId'] + '/profile';
+                            var username = data1['username'];
+
+                            return '<a href="' + link + '">' + username + '</a>';
+                        }
                     },
                     {
                         width: '1%',
@@ -63,14 +70,14 @@
                 })
                 .on('click', '.btnDelete', function (e) {
                     e.stopPropagation();
-                    
+
                     var currentRow = $(this).closest("tr").children();
                     var id = oTable.row(currentRow).data()['publicId'];
-                    
+
                     $.ajax({
                         type: "DELETE",
                         //hard code
-                        
+
                         url: [[${dataSource}]] + "/" + id,
                         beforeSend: function () {
                             $('#subscriber-form-success').html('');

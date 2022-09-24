@@ -25,7 +25,6 @@ public class UserEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false, length = 30, unique = true)
     private String publicId;
 
@@ -33,6 +32,13 @@ public class UserEntity implements Serializable {
     private String username;
     @Column(nullable = false, length = 320)
     private String email;
+    
+    @Column(nullable = false, length = 60)
+    private String address;
+    @Column(nullable = false, length = 12)
+    private String phoneNumber;
+    @Column(nullable = false, length = 80)
+    private String status;
 
     @Column(nullable = false, length = 60)
     private String encryptedPassword;

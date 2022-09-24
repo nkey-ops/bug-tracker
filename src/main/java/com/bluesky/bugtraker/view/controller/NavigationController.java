@@ -1,11 +1,12 @@
 package com.bluesky.bugtraker.view.controller;
 
+import com.bluesky.bugtraker.view.controller.view.UserViewController;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -24,16 +25,16 @@ public class NavigationController {
     }
 
     @ModelAttribute("user")
-    public UserResponseModel getCurrentUser(){
+    public UserResponseModel getCurrentUser() {
         return userController.getCurrentUser();
     }
 
 
     /**
      * If the user try to load other page than /home after login or registration
-     *  the user model won't be in the session and that page if it requires
-     *  user model will throw an Exception like:
-     *  ServletRequestBindingException: Missing session attribute user.
+     * the user model won't be in the session and that page if it requires
+     * user model will throw an Exception like:
+     * ServletRequestBindingException: Missing session attribute user.
      */
     @RequestMapping(value = {"/home", "/"})
     public String home(@ModelAttribute("user") UserResponseModel user,
@@ -44,28 +45,32 @@ public class NavigationController {
                 .slash("projects")
                 .slash("body")
                 .toUri().toString();
-        
+
         model.addAttribute("user", user);
         model.addAttribute("projectsLink", myProjectsLink);
 
-        String ticketsInfoLink = 
+        String ticketsInfoLink =
                 linkTo(methodOn(UserController.class)
                         .getTicketsInfo(user.getPublicId()))
                         .toUri().toString();
         model.addAttribute("ticketsInfoLink", ticketsInfoLink);
 
-        String userInfo = 
+        String userInfo =
                 linkTo(methodOn(UserController.class)
                         .getUserInfo(user.getPublicId()))
                         .toUri().toString();
         model.addAttribute("userInfoLink", userInfo);
-            
-        
+
+
+        String userPageLink =
+                linkTo(methodOn(UserViewController.class)
+                        .getUserPage(user.getPublicId()))
+                        .toUri().toString();
+
+        model.addAttribute("userPageLink", userPageLink);
+
         return "index";
     }
-
-
-
 
 
 }
