@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div class="card">
     <div class="card-body">
         <div class="d-flex flex-row justify-content-between">
-            <h4 class="card-title mb-1">Details
+            <h4 class="card-title mb-1">Record Details #
             </h4>
-            <p class="text-muted mb-1">Created: [[${#dates.format(ticket.lastUpdateTime, 'dd-MM-yyyy HH:mm')}]]</p>
+            <p class="text-muted mb-1"></p>
         </div>
         <div class="row">
             <div class="col-12">
@@ -20,8 +20,8 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">Status</h6>
-                                <p class="text-muted mb-0">[[${ticket.status.name}]]</p>
+                                <h6 class="preview-subject"></h6>
+                                <p id="status" class="text-muted mb-0"></p>
                             </div>
                         </div>
                         <!-- end Status -->
@@ -33,8 +33,8 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">Priority</h6>
-                                <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
+                                <h6 class="preview-subject"></h6>
+                                <p id="priority" class="text-muted mb-0"></p>
                             </div>
                         </div>
                         <!-- end Priority-->
@@ -46,8 +46,8 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">Severity</h6>
-                                <p class="text-muted mb-0">[[${ticket.priority.name}]]</p>
+                                <h6 class="preview-subject"></h6>
+                                <p id="severity" class="text-muted mb-0"></p>
                             </div>
                         </div>
                         <!-- end Severity-->
@@ -61,10 +61,10 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">Description</h6>
+                                <h6 class="preview-subject"></h6>
                                 <div style="resize:vertical; overflow:auto; ">
-                                    <p class="text-muted mb-0" style="white-space: pre-wrap"
-                                    >[[${ticket.shortDescription}]]</p>
+                                    <p id="description" class="text-muted mb-0" style="white-space: pre-wrap"
+                                    ></p>
                                 </div>
                             </div>
                         </div>
@@ -78,10 +78,10 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">How to Reproduce</h6>
+                                <h6 class="preview-subject"></h6>
                                 <div style="resize:vertical; overflow:auto; ">
-                                    <p class="text-muted mb-0" style="white-space: pre-wrap"
-                                    >[[${ticket.howToReproduce}]]</p>
+                                    <p id="how-to-reproduce" class="text-muted mb-0" style="white-space: pre-wrap"
+                                    ></p>
                                 </div>
                             </div>
                         </div>
@@ -95,10 +95,10 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">Erroneous Program Behaviour</h6>
+                                <h6 class="preview-subject"></h6>
                                 <div style="resize:vertical; overflow:auto;">
-                                    <p class="text-muted mb-0" style="white-space: pre-wrap"
-                                    >[[${ticket.erroneousProgramBehaviour}]]</p>
+                                    <p id="behaviour" class="text-muted mb-0" style="white-space: pre-wrap"
+                                    ></p>
                                 </div>
                             </div>
                         </div>
@@ -112,10 +112,10 @@
                         </div>
                         <div class="preview-item-content d-sm-flex flex-grow">
                             <div class="flex-grow">
-                                <h6 class="preview-subject">How to Solve</h6>
+                                <h6 class="preview-subject"></h6>
                                 <div style="resize:vertical; overflow:auto; ">
-                                    <p class="text-muted mb-0" style="white-space: pre-wrap"
-                                    >[[${ticket.howToSolve}]]</p>
+                                    <p id="how-to-solve" class="text-muted mb-0" style="white-space: pre-wrap"
+                                    ></p>
                                 </div>
                             </div>
                         </div>
@@ -123,6 +123,19 @@
                 </div>
             </div>
         </div>
+        <script th:inline="javascript">
+            $.get([[${ticketRecordLink}]], function (ticket) {
+                
+                document.getElementById('description').innerHTML = ticket['shortDescription'];
+                document.getElementById('status').innerHTML = ticket['status']['text'];
+                document.getElementById('priority').innerHTML = ticket['priority']['text'];
+                document.getElementById('severity').innerHTML = ticket['severity']['text'];
+                document.getElementById('behaviour').innerHTML = ticket['erroneousProgramBehaviour'];
+                document.getElementById('how-to-reproduce').innerHTML = ticket['howToReproduce'];
+                document.getElementById('how-to-solve').innerHTML = ticket['howToSolve'];
+            });
+            
+        </script>
     </div>
 </div>
 </body>

@@ -2,9 +2,6 @@ function ticketsInfo(id, name, quantity, quantityADayAgo) {
     var iconSuccess = '<div class="icon icon-box-success ">\n' +
         '                        <span class="mdi mdi-arrow-top-right icon-item"></span>\n' +
         '                    </div>';
-    var iconDanger = '<div class="icon icon-box-danger">\n' +
-        '                         <span class="mdi mdi-arrow-bottom-left icon-item"></span>\n' +
-        '                    </div>';
 
     var percentageClass;
     var icon;
@@ -21,7 +18,7 @@ function ticketsInfo(id, name, quantity, quantityADayAgo) {
     document.getElementById(id).innerHTML =
         ' <div class="card">\n' +
         '        <div class="card-body">\n' +
-        '         <h5>My Projects</h5>\n' +
+        '         <h5 id="name" >' + name + ' </h5>\n' +
         '            <div class="row">\n' +
         '                <div class="col-9">\n' +
         '                    <div class="d-flex align-items-center align-self-start">\n' +
@@ -33,7 +30,6 @@ function ticketsInfo(id, name, quantity, quantityADayAgo) {
         '                    ' + icon + '\n' +
         '                </div>\n' +
         '            </div>\n' +
-        '            <h6 id="name" class="text-muted font-weight-normal">'+ name + '</h6>\n' +
         '        </div>\n' +
         '    </div>';
 }

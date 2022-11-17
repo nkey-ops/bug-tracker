@@ -1,30 +1,37 @@
 package com.bluesky.bugtraker.exceptions.serviceexception;
 
-import com.bluesky.bugtraker.exceptions.ErrorMessages;
+import com.bluesky.bugtraker.exceptions.ErrorType;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 
 public abstract class ServiceException extends RuntimeException {
 
     @Serial
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private static final long serialVersionUID = 1181223944376197491L;
 
     @Getter
-    private ErrorMessages errorType;
+    private ErrorType errorType;
+    @Getter
+    private String errorMessage;
 
     public ServiceException(String message) {
         super(message);
     }
 
-    public ServiceException(ErrorMessages message) {
-        super(message.toString());
-        this.errorType = message;
+    public ServiceException(ErrorType errorType) {
+        super(errorType.getText());
+        this.errorType = errorType;
     }
 
-    public ServiceException(ErrorMessages message, String identifier) {
-        super(message.toString() + ": " + identifier);
-        this.errorType = message;
+    public ServiceException(ErrorType errorType, String errorMessage) {
+        super(errorType.toString() + ": " + errorMessage);
+        this.errorType = errorType;
+        this.errorMessage = errorMessage;
     }
 
 }

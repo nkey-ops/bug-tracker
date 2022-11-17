@@ -1,5 +1,7 @@
 package com.bluesky.bugtraker.shared.ticketstatus;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
 *  Bug severity is the measure of impact a defect (or bug)
 *  can have on the development or functioning.
@@ -12,6 +14,7 @@ package com.bluesky.bugtraker.shared.ticketstatus;
 *  {@link #CRITICAL}
  *
 */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Severity {
     /**
      * Won’t result in any noticeable breakdown of the system
@@ -31,12 +34,20 @@ public enum Severity {
     */
     CRITICAL("Critical");
 
-    private final String name;
-    Severity(String name) {
-        this.name = name;
+    private final String text;
+    Severity(String text) {
+        this.text = text;
     }
 
+    public String getText() {
+        return text;
+    }
     public String getName() {
-        return name;
+        return name();
+    }
+
+    @Override
+    public String toString() {
+        return text;
     }
 }

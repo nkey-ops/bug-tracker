@@ -1,24 +1,15 @@
 package com.bluesky.bugtraker.exceptions;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ServiceExceptionAdvice {
@@ -35,13 +26,7 @@ public class ServiceExceptionAdvice {
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", new Date());
-        body.put("status", httpStatus.value());
-        body.put("error", ex.getMessage());
-
-        return new ResponseEntity<>(ex.getErrorType().getErrorMessage(), httpStatus);
-
+        return new ResponseEntity<> (ex.getErrorType().getText() + ": " +  ex.getErrorMessage(), httpStatus);
     }
 
     @ResponseBody

@@ -8,7 +8,7 @@
         <div id="subscribers-content-block" class="form-group"></div>
         
         <!-- Subscriber Form -->
-        <div id="subscriber-form-block" class="form-group"></div>
+        <div id="subscriber-form-block" th:if="${isCreator}" class="form-group"></div>
     </div>
     
     <script th:inline="javascript">

@@ -1,6 +1,6 @@
 package com.bluesky.bugtraker.exceptions.serviceexception;
 
-import com.bluesky.bugtraker.exceptions.ErrorMessages;
+import com.bluesky.bugtraker.exceptions.ErrorType;
 
 import java.io.Serial;
 
@@ -12,11 +12,11 @@ public class ProjectServiceException extends ServiceException {
         super(message);
     }
 
-    public ProjectServiceException(ErrorMessages message) {
+    public ProjectServiceException(ErrorType message) {
         super(message);
     }
 
-    public ProjectServiceException(ErrorMessages message, String identifier) {
+    public ProjectServiceException(ErrorType message, String identifier) {
         super(message, identifier);
     }
 }

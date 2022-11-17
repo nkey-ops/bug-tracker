@@ -13,10 +13,10 @@
                 th:each="comment : ${commentsList}">
                 <li th:replace="fragments/comments/comment ::
                         comment(
+                                avatarURL=${comment.creator.avatarURL},
                                 username=${comment.creator.username},
                                 userComment=${comment.content},
-                                uploadTime=${comment.uploadTime}
-                                )">
+                                uploadTime=${comment.uploadTime})">
                 </li>
             </ul>
         </div>

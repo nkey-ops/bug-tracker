@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Form</title>
+
+    <!-- Js script -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
+    <!-- end Js script -->
+
+    <!-- plugins:css -->
+    <link href="https://cdn.jsdelivr.net/webjars/bootstrap/5.1.3/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen"/>
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet"
+          th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- endinject -->
+
+    <!-- Layout styles -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+</head>
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <div th:replace="fragments/sidebar"></div>
+    <!-- partial:partials/_sidebar.html ends -->
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <div th:replace="fragments/navbar"></div>
+        <!-- partial:partials/_navbar.html  ends-->
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h3 class="page-title"> Ticket Edit </h3>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a id="ticket-link" href="">Ticket</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="row ">
+                    <!-- Ticket Form -->
+                    <div id="ticket-form-block" class="col-10 grid-margin stretch-card"></div>
+
+                    <script th:inline="javascript">
+                        document.getElementById('ticket-link').href = ([[${ticketPageLink}]]);
+                        
+                        window.onload = function () {
+                            $("#ticket-form-block").load([[${ticketFormBlockLink}]]);
+                        }
+                    </script>
+                </div>
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+
+<!-- endinject -->
+<!-- Plugin js for this page -->
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"
+        src="/assets/js/off-canvas.js"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"
+        src="/assets/js/hoverable-collapse.js"></script>
+<script th:src="@{/assets/js/misc.js}"
+        src="/assets/js/misc.js"></script>
+<script th:src="@{/assets/js/settings.js}"
+        src="/assets/js/settings.js"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<script th:src="@{/assets/js/test/text-area.js}"></script>
+<script th:src="@{/assets/js/test/get-link.js}"></script>
+<!-- End custom js for this page -->
+</body>
+</html>

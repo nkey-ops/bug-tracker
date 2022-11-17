@@ -61,7 +61,7 @@ public class TicketEntity implements Serializable {
 
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date reportedTime;
+    private Date createdTime;
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -77,7 +77,6 @@ public class TicketEntity implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
     private UserEntity reporter;
-
     @ManyToOne
     @JoinColumn(name="project_id", 
                 referencedColumnName = "id",
@@ -92,8 +91,10 @@ public class TicketEntity implements Serializable {
     @JoinTable(name = "tickets_users",
             joinColumns = {@JoinColumn(name = "ticket_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")})
-    private Set<UserEntity> assignedDevs;
+    private Set<UserEntity> subscribers = new HashSet<>();
   
+    
+    
     public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
         boolean isTicketRecordEntityAdded =
                 ticketRecords.add(ticketRecordEntity);
@@ -103,37 +104,34 @@ public class TicketEntity implements Serializable {
         return isTicketRecordEntityAdded;
     }
     
-    public boolean addAssignedDev(UserEntity bugFixer) {
-        boolean isAddedBugFixer =
-                assignedDevs.add(bugFixer);
-        boolean isAddedBug =
-                bugFixer.getWorkingOnTickets().add(this);
+    public boolean addSubscriber(UserEntity subscriber) {
+        boolean isAddedSubscriber =
+                subscribers.add(subscriber);
+        boolean isAddedTicket =
+                subscriber.getSubscribedToTickets().add(this);
 
-        return isAddedBugFixer && isAddedBug;
+        return isAddedSubscriber && isAddedTicket;
     }
 
-    public boolean removeAssignedDev(UserEntity bugFixer) {
-        boolean isRemovedBugFixer =
-                assignedDevs.remove(bugFixer);
-        boolean isRemovedBug =
-                bugFixer.getWorkingOnTickets().remove(this);
+    public boolean removeSubscriber(UserEntity subscriber) {
+        boolean isRemovedSubscriber =
+                subscribers.remove(subscriber);
+        boolean isRemovedTicket =
+                subscriber.getSubscribedToTickets().remove(this);
 
-        return isRemovedBugFixer && isRemovedBug;
+        return isRemovedSubscriber && isRemovedTicket;
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TicketEntity ticketEntity = (TicketEntity) o;
-        return Objects.equals(id, ticketEntity.id) && Objects.equals(publicId, ticketEntity.publicId) && Objects.equals(shortDescription, ticketEntity.shortDescription) && status == ticketEntity.status && severity == ticketEntity.severity && priority == ticketEntity.priority && Objects.equals(reportedTime, ticketEntity.reportedTime) && Objects.equals(reporter, ticketEntity.reporter) && Objects.equals(howToReproduce, ticketEntity.howToReproduce) && Objects.equals(erroneousProgramBehaviour, ticketEntity.erroneousProgramBehaviour) && Objects.equals(howToSolve, ticketEntity.howToSolve);
+        TicketEntity that = (TicketEntity) o;
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, shortDescription, status, severity, priority, reportedTime, reporter, howToReproduce, erroneousProgramBehaviour, howToSolve);
+        return Objects.hash(id);
     }
-
-    
 }

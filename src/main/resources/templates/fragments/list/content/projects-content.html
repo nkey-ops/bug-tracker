@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div class="table-responsive" th:fragment="project-content(dataSource)">
-
+<div class="table-responsive">
     <table id="projects-table" class="table table-bordered">
         <thead>
         <tr>
@@ -17,7 +16,7 @@
                     oLanguage: {
                         sInfoFiltered : ''
                     },
-                    
+                    pageLength: 5,
                     serverSide: true,
                     deferRender: true,
                    
@@ -41,9 +40,9 @@
                 });
                 $('.dataTable').on('click', 'tbody tr', function() {
                     var currentRow = $(this).closest("tr").children();
-                    var id = oTable.row(currentRow).data()['publicId'];
-                    //hard code
-                    window.location.href = [[${dataSource}]]  + "/" + id + "/page";
+                    let links = oTable.row(currentRow).data()['links'];
+
+                    window.location.href = getLink(links, 'page');
                 });
             });
         </script>

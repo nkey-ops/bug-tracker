@@ -1,6 +1,6 @@
 package com.bluesky.bugtraker.exceptions.serviceexception;
 
-import com.bluesky.bugtraker.exceptions.ErrorMessages;
+import com.bluesky.bugtraker.exceptions.ErrorType;
 
 import java.io.Serial;
 
@@ -12,11 +12,11 @@ public class UserServiceException extends ServiceException {
         super(message);
     }
 
-    public UserServiceException(ErrorMessages message) {
+    public UserServiceException(ErrorType message) {
         super(message);
     }
 
-    public UserServiceException(ErrorMessages message, String identifier) {
+    public UserServiceException(ErrorType message, String identifier) {
         super(message, identifier);
     }
 }

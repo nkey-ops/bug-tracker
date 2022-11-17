@@ -1,10 +1,10 @@
 package com.bluesky.bugtraker.service;
 
 
-import com.bluesky.bugtraker.shared.dto.CommentDto;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.TicketRecordDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.TicketDTO;
+import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -12,27 +12,29 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 public interface TicketService {
 
-    TicketDto getTicket(String bugId);
+    TicketDTO getTicket(String bugId);
 
-    void createTicket(String projectName, TicketDto ticketDto, String reporterId);
+    void createTicket(String projectName, TicketDTO ticketDto, String reporterId);
 
-    DataTablesOutput<TicketDto> getTickets(String projectId, DataTablesInput input);
+    DataTablesOutput<TicketDTO> getTickets(String projectId, DataTablesInput input);
 
-    void updateTicket(String ticketId, TicketDto ticketDtoUpdates, String updatedById);
+    void updateTicket(String ticketId, TicketDTO ticketDTOUpdates, String updatedById);
 
     void deleteTicket(String ticketId);
 
-    void addAssignedDev(String ticketId, String userId);
+    void addSubscriber(String ticketId, String userId);
 
-    DataTablesOutput<UserDto> getAssignedDevs(String ticketId, DataTablesInput input);
+    DataTablesOutput<UserDTO> getSubscribers(String ticketId, DataTablesInput input);
 
-    void removeAssignedDev(String ticketId, String userId);
+    void removeSubscriber(String ticketId, String userId);
 
-    void createComment(String ticketId, String creatorId, CommentDto comment);
+    void createComment(String ticketId, String creatorId, CommentDTO comment);
 
-    Page<CommentDto> getComments(String tickerId, int page, int limit, String sortBy, Sort.Direction dir);
+    Page<CommentDTO> getComments(String tickerId, int page, int limit, String sortBy, Sort.Direction dir);
 
-    DataTablesOutput<TicketRecordDto> getTicketRecords(String ticketId, DataTablesInput input);
+    DataTablesOutput<TicketRecordDTO> getTicketRecords(String ticketId, DataTablesInput input);
 
-    TicketRecordDto getTicketRecord (String recordId);
+    TicketRecordDTO getTicketRecord (String recordId);
+
+    DataTablesOutput<TicketDTO> getTicketsUserSubscribedTo(String userId, DataTablesInput input);
 }

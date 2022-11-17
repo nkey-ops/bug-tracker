@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-</head>
 <body>
-<div id="project-edit-block">
+<div>
     <form id="project-edit" class="forms-sample"
-          th:object="${projectRequestModel}" method="post" th:action="@{${postRequestLink}}">
+          th:object="${projectRequestModel}" th:action="@{${postRequestLink}}">
 
         <div id="project-edit-error"></div>
 
         <div class="row">
             <div class="input-group col-xs-12">
-                <input id="project-name" type="text" class="form-control" placeholder="New Project Name" autofocus
+                <input id="project-name" type="text" class="form-control" placeholder="New Project Name" required
+                       autofocus
                        th:field="*{name}"/>
                 <span class="input-group-append">
-                                <button id="submit-project" type="submit"
-                                        class="btn btn-primary mr-2 float-right">Update</button>
-                                <button class="btn cancel btn-dark float-right">Cancel</button>
+                                <button type="submit" class="btn btn-primary mr-2 float-right">Update</button>
+                                <button type="button" class="btn btn-dark float-right" onclick="loadName()">Cancel</button>
                 </span>
             </div>
         </div>
     </form>
+
+    <script th:inline="javascript">
+        $("#project-edit")
+            .submit(function (e) {
+                e.preventDefault();
+                var form = $(this);
+
+                $.ajax({
+                    type: 'PATCH',
+                    url: form.attr('action'),
+                    data: form.serialize(),
+
+                    beforeSend: function () {
+                        $('#project-edit-error').html('');
+                    },
+                    success: function () {
+                        loadName()
+                    },
+                    error: function (jqXHR) {
+                        $('#project-edit-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                    }
+                });
+            })
+    </script>
 </div>
 </body>
 </html>

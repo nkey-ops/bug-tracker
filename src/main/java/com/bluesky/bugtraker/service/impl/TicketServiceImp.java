@@ -7,12 +7,13 @@ import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.ProjectService;
 import com.bluesky.bugtraker.service.TicketService;
-import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.service.Utils;
-import com.bluesky.bugtraker.shared.dto.*;
-import org.modelmapper.Conditions;
+import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.Utils;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.TicketDTO;
+import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,12 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
-import static com.bluesky.bugtraker.exceptions.ErrorMessages.NO_RECORD_FOUND;
-import static com.bluesky.bugtraker.exceptions.ErrorMessages.RECORD_ALREADY_ADDED;
+import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
 import static com.bluesky.bugtraker.service.specifications.Specs.*;
 
 @Service
@@ -37,79 +38,58 @@ public class TicketServiceImp implements TicketService {
     private final TicketRecordsRepository ticketRecordRepo;
     private final CommentRepository commentRepo;
     private final UserRepository userRepo;
-
-    private final UserService userService;
-    private final ProjectService projectService;
+    private final ServiceUtils serviceUtils;
     private final Utils utils;
-
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper;
 
     @Autowired
     public TicketServiceImp(TicketRepository ticketRepo,
                             TicketRecordsRepository ticketRecordRepo,
                             CommentRepository commentRepo,
-                            UserRepository userRepo, UserService userService,
+                            UserRepository userRepo,
+                            ServiceUtils serviceUtils,
                             Utils utils,
-                            ProjectService projectService) {
+                            ModelMapper modelMapper) {
         this.ticketRepo = ticketRepo;
         this.ticketRecordRepo = ticketRecordRepo;
         this.commentRepo = commentRepo;
         this.userRepo = userRepo;
-        this.userService = userService;
+        this.serviceUtils = serviceUtils;
         this.utils = utils;
-        this.projectService = projectService;
 
-        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-    }
-
-    //  TODO make ticketId unique in bounds of the project  and change this method
-    private TicketEntity getTicketEntity(String ticketId) {
-
-        return ticketRepo.findByPublicId(ticketId)
-                .orElseThrow(() -> new TicketServiceException(NO_RECORD_FOUND, ticketId));
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public TicketDto getTicket(String bugId) {
+    @NotNull
+    public TicketDTO getTicket(@NotNull String ticketId) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
-        TicketEntity ticketEntity = getTicketEntity(bugId);
-
-        return modelMapper.map(ticketEntity, TicketDto.class);
+        return modelMapper.map(ticketEntity, TicketDTO.class);
     }
 
     @Override
-    public DataTablesOutput<TicketDto> getTickets(String projectId, DataTablesInput input) {
-        Long id = projectService.getProject(projectId).getId();
+    @NotNull
+    public DataTablesOutput<TicketDTO> getTickets(@NotNull String projectId, @NotNull DataTablesInput input) {
+        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
 
-        DataTablesOutput<TicketEntity> all =
-                ticketRepo.findAll(input, byProjectId(id));
-
-        DataTablesOutput<TicketDto> result = new DataTablesOutput<>();
-
-        modelMapper.map(all, result);
-        result.setData(modelMapper.map(all.getData(), new TypeToken<List<TicketDto>>() {
-        }.getType()));
-
-        return result;
+        DataTablesOutput<TicketEntity> projectTickets =
+                ticketRepo.findAll(input, ticketByProject(projectEntity));
+        return utils.map(projectTickets, new TypeToken<>() {
+        });
     }
 
     @Override
-    public void createTicket(String projectId, TicketDto ticketDto, String reporterId) {
-        ProjectEntity projectEntity =
-                modelMapper.map(
-                        projectService.getProject(projectId),
-                        ProjectEntity.class);
-
+    public void createTicket(@NotNull String projectId, @NotNull TicketDTO ticketDto, @NotNull String reporterId) {
+        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
-        ticketEntity.setPublicId(utils.generateTicketId(10));
-        ticketEntity.setReportedTime(Date.from(Instant.now()));
+        ticketEntity.setPublicId(utils.generateRandomString(10));
+        ticketEntity.setCreatedTime(Date.from(Instant.now()));
         ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
         ticketEntity.setHowToSolve("Solution is not found");
 
-        ticketEntity.setReporter(
-                modelMapper.map(
-                        userService.getUserById(reporterId), UserEntity.class));
+        ticketEntity.setReporter(serviceUtils.getUserEntity(reporterId));
 
         boolean isAdded = projectEntity.addTicket(ticketEntity);
         if (!isAdded)
@@ -117,48 +97,47 @@ public class TicketServiceImp implements TicketService {
 
         TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
 
-        createTicketRecord(savedTicketEntity, reporterId);
+        createTicketRecord(savedTicketEntity.getPublicId(), reporterId);
     }
 
 
     @Override
-    public void updateTicket(String ticketId, TicketDto ticketDtoUpdates, String updatedByUser) {
-        TicketEntity ticketEntity = getTicketEntity(ticketId);
+    public void updateTicket(@NotNull String ticketId, @NotNull TicketDTO ticketDTOUpdates, @NotNull String updatedByUserWithId) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
-        modelMapper.map(ticketDtoUpdates, ticketEntity);
+        modelMapper.map(ticketDTOUpdates, ticketEntity);
         ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
 
         TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
 
-        createTicketRecord(savedTicketEntity, updatedByUser);
+        createTicketRecord(savedTicketEntity.getPublicId(), updatedByUserWithId);
     }
 
     @Override
-    public void deleteTicket(String ticketId) {
-        TicketEntity ticketEntity = this.getTicketEntity(ticketId);
+    public void deleteTicket(@NotNull String ticketId) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
         boolean isRemoved = ticketEntity.getProject().removeTicket(ticketEntity);
 
         if (!isRemoved)
             throw new ProjectServiceException(NO_RECORD_FOUND, ticketId);
-    
+
         ticketRepo.delete(ticketEntity);
     }
 
-    private void createTicketRecord(TicketEntity mainTicketEntity, String updatedByUser) {
+    public void createTicketRecord(@NotNull String mainTicketEntityId, @NotNull String creatorId) {
+        TicketEntity mainTicketEntity =
+                serviceUtils.getTicketEntity(mainTicketEntityId);
         TicketRecordEntity ticketRecordEntity =
                 modelMapper.map(mainTicketEntity, TicketRecordEntity.class);
 
         ticketRecordEntity.setId(null);
-        ticketRecordEntity.setPublicId(utils.generateTicketRecordId(15));
+        ticketRecordEntity.setPublicId(utils.generateRandomString(15));
+        ticketRecordEntity.setCreatedTime(Date.from(Instant.now()));
         ticketRecordEntity.setMainTicket(mainTicketEntity);
-        ticketRecordEntity.setCreator(
-                modelMapper.map(
-                        userService.getUserById(updatedByUser), UserEntity.class));
-
+        ticketRecordEntity.setCreator(serviceUtils.getUserEntity(creatorId));
 
         boolean isAdded = mainTicketEntity.addTicketRecord(ticketRecordEntity);
-
         if (!isAdded)
             throw new TicketServiceException(RECORD_ALREADY_ADDED, mainTicketEntity.getPublicId());
 
@@ -166,37 +145,30 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public DataTablesOutput<TicketRecordDto> getTicketRecords(String ticketId, DataTablesInput input) {
-        Long id = this.getTicketEntity(ticketId).getId();
+    @NotNull
+    public DataTablesOutput<TicketRecordDTO> getTicketRecords(@NotNull String ticketId, @NotNull DataTablesInput input) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
-        DataTablesOutput<TicketRecordEntity> all =
-                ticketRecordRepo.findAll(input, findAllTicketRecordsByTicketId(id));
-
-        DataTablesOutput<TicketRecordDto> result = new DataTablesOutput<>();
-
-        modelMapper.map(all, result);
-        result.setData(modelMapper.map(all.getData(), new TypeToken<List<TicketRecordDto>>() {
-        }.getType()));
-
-        return result;
+        DataTablesOutput<TicketRecordEntity> ticketRecords =
+                ticketRecordRepo.findAll(input, allTicketRecordsByTicket(ticketEntity));
+        return utils.map(ticketRecords, new TypeToken<>() {
+        });
     }
 
 
     @Override
-    public TicketRecordDto getTicketRecord(String recordId) {
+    @NotNull
+    public TicketRecordDTO getTicketRecord(@NotNull String recordId) {
         TicketRecordEntity ticketRecordEntity = ticketRecordRepo.findByPublicId(recordId);
-
-        return modelMapper.map(ticketRecordEntity, TicketRecordDto.class);
+        return modelMapper.map(ticketRecordEntity, TicketRecordDTO.class);
     }
 
     @Override
-    public void addAssignedDev(String ticketId, String userId) {
+    public void addSubscriber(String ticketId, String userId) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
 
-        TicketEntity ticketEntity = getTicketEntity(ticketId);
-        UserDto subscriberDto = userService.getUserById(userId);
-
-        boolean isAdded = ticketEntity.addAssignedDev(
-                modelMapper.map(subscriberDto, UserEntity.class));
+        boolean isAdded = ticketEntity.addSubscriber(userEntity);
 
         if (!isAdded)
             throw new ProjectServiceException(RECORD_ALREADY_ADDED, ticketId);
@@ -205,47 +177,39 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public DataTablesOutput<UserDto> getAssignedDevs(String ticketId, DataTablesInput input) {
-        Long id = getTicketEntity(ticketId).getId();
+    public DataTablesOutput<UserDTO> getSubscribers(String ticketId, DataTablesInput input) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
-        DataTablesOutput<UserEntity> all =
-                userRepo.findAll(input, findAllUsersSubscribedToTicket(id));
-
-        DataTablesOutput<UserDto> result = new DataTablesOutput<>();
-
-        modelMapper.map(all, result);
-        result.setData(modelMapper.map(all.getData(), new TypeToken<List<UserDto>>() {
-        }.getType()));
-
-        return result;
-
+        DataTablesOutput<UserEntity> subscribersEntities =
+                userRepo.findAll(input, ticketSubscribersByTicket(ticketEntity));
+        return utils.map(subscribersEntities, new TypeToken<>() {
+        });
     }
 
     @Override
-    public void removeAssignedDev(String ticketId, String userId) {
-        TicketEntity ticketEntity = getTicketEntity(ticketId);
-        UserDto subscriberEntity = userService.getUserById(userId);
+    public void removeSubscriber(String ticketId, String userId) {
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        UserEntity subscriberEntity = serviceUtils.getUserEntity(userId);
 
-        boolean isRemoved = ticketEntity.removeAssignedDev(
-                modelMapper.map(subscriberEntity, UserEntity.class));
+        boolean isRemoved = ticketEntity.removeSubscriber(subscriberEntity);
 
         if (!isRemoved)
             throw new ProjectServiceException(NO_RECORD_FOUND, userId);
-
-        ticketRepo.save(ticketEntity);
+        else
+            ticketRepo.save(ticketEntity);
     }
 
     @Override
-    public void createComment(String ticketId, String commentCreatorId, CommentDto comment) {
+    public void createComment(String ticketId, String commentCreatorId, CommentDTO comment) {
         CommentEntity commentEntity = modelMapper.map(comment, CommentEntity.class);
 
-        commentEntity.setPublicId(utils.generateCommentId(10));
+        commentEntity.setPublicId(utils.generateRandomString(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        UserEntity creator = modelMapper.map(userService.getUserById(commentCreatorId), UserEntity.class);
-        TicketEntity ticketEntity = this.getTicketEntity(ticketId);
+        UserEntity creator = serviceUtils.getUserEntity(commentCreatorId);
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
-        boolean isCreatorAdded = commentEntity.addCreator(creator);
+        boolean isCreatorAdded = commentEntity.setCreator(creator);
         if (!isCreatorAdded)
             throw new TicketServiceException(RECORD_ALREADY_ADDED, commentCreatorId);
 
@@ -258,12 +222,12 @@ public class TicketServiceImp implements TicketService {
 
 
     @Override
-    public Page<CommentDto> getComments(String ticketId,
+    public Page<CommentDTO> getComments(String ticketId,
                                         int page, int limit,
                                         String sortBy, Sort.Direction dir) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        TicketEntity ticketEntity = getTicketEntity(ticketId);
+        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
 
         PageRequest pageRequest =
                 PageRequest.of(page - 1, limit, dir, sortBy);
@@ -272,7 +236,19 @@ public class TicketServiceImp implements TicketService {
         Page<CommentEntity> commentEntities =
                 commentRepo.findAllByTicket(ticketEntity, pageRequest);
 
-        return modelMapper.map(commentEntities, new TypeToken<Page<CommentDto>>() {
+        return modelMapper.map(commentEntities, new TypeToken<Page<CommentDTO>>() {
         }.getType());
     }
+
+    @Override
+    public DataTablesOutput<TicketDTO> getTicketsUserSubscribedTo(String userId, DataTablesInput input) {
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+
+        DataTablesOutput<TicketEntity> subscribedToTickets =
+                ticketRepo.findAll(input, ticketsUserSubscribedTo(userEntity));
+        return utils.map(subscribedToTickets, new TypeToken<>() {
+        });
+    }
+
+
 }

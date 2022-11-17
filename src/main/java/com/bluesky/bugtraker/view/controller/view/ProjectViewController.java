@@ -1,18 +1,21 @@
 package com.bluesky.bugtraker.view.controller.view;
 
+import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.UserController;
+import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
 import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -20,29 +23,26 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Controller
 @RequestMapping("/users/{creatorId}/projects")
 public class ProjectViewController {
-
     private final UserController userController;
-
     public ProjectViewController(UserController userController) {
         this.userController = userController;
     }
 
-    @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/{projectId}/page")
-    public String getProjectPage(@PathVariable String creatorId,
-                                 @PathVariable String projectId,
-                                 Model model ) {
+    public ModelAndView getProjectPage(@PathVariable String creatorId,
+                                 @PathVariable String projectId) {
 
-        WebMvcLinkBuilder baseLink = WebMvcLinkBuilder.linkTo(methodOn(ProjectController.class)
-                .getProject(creatorId, projectId));
+        WebMvcLinkBuilder baseLink = linkTo(methodOn(ProjectController.class).getProject(creatorId, projectId));
+        String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(creatorId)).toString();
 
-        model.addAttribute("user", userController.getCurrentUser());    
-        model.addAttribute("projectBlockLink", baseLink.slash("/body").toUri().toString());
+        ModelAndView model = new ModelAndView("pages/project");
+        model.addObject("user", userController.getCurrentUser());
+        model.addObject("userPageLink", userPageLink);
+        model.addObject("projectBlockLink", baseLink.slash("/body").toString());
         
-        return "pages/project";
+        return model;
     }
 
-    @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/{projectId}/body")
     public String getProjectBody(@PathVariable String creatorId,
                                  @PathVariable String projectId,
@@ -51,63 +51,64 @@ public class ProjectViewController {
         WebMvcLinkBuilder baseLink = linkTo(methodOn(ProjectController.class)
                 .getProject(creatorId, projectId));
 
-        model.addAttribute("selfLink", baseLink.toUri().toString());
+        model.addAttribute("selfLink", baseLink.toString());
 
-        String subscribersLink = baseLink.slash("subscribers").slash("body").toUri().toString();
+        String subscribersSourceLink = 
+                linkTo(methodOn(ProjectController.class).getSubscribers(creatorId, projectId, null)).toString();
+        model.addAttribute("subscriberSourceLink", subscribersSourceLink);
+        
+        String subscribersLink = baseLink.slash("subscribers").slash("body").toString();
         model.addAttribute("subscribersLink", subscribersLink);
 
-        String ticketsLink = baseLink.slash("tickets").slash("body").toUri().toString();
+        String ticketsLink = baseLink.slash("tickets").slash("body").toString();
         model.addAttribute("ticketsLink", ticketsLink);
 
-        String commentsLink = baseLink.slash("comments").slash("body").toUri().toString();
+        String commentsLink = baseLink.slash("comments").slash("body").toString();
         model.addAttribute("commentsLink", commentsLink);
 
-        String editFormLink = baseLink.slash("edit").toUri().toString();
+        String editFormLink = baseLink.slash("edit").toString();
         model.addAttribute("projectEditFormLink", editFormLink);
-        
+
+        UserResponseModel currentUser = userController.getCurrentUser();
+        model.addAttribute("user", currentUser);
+        model.addAttribute("isCreator", currentUser.getPublicId().equals(creatorId));
         
         return "fragments/list/body/project-body";
     }
 
-
-
-    @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/body")
-    public String getProjectsBody(@PathVariable String creatorId,
-                                  Model model) {
+    public ModelAndView getProjectsBody(@PathVariable String creatorId) {
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .toUri().toString();
+        String projectFormLink = 
+                linkTo(UserController.class).slash(creatorId).slash("projects").slash("form").toString();
+        String projectsContentLink = 
+                linkTo(methodOn(ProjectViewController.class).getProjectsContent(creatorId)).toString();
 
-        model.addAttribute("baseLink", baseLink);
+        ModelAndView model = new ModelAndView("fragments/list/body/projects-body");
+        model.addObject("baseLink", projectFormLink);
+        model.addObject("projectContentBlockLink", projectsContentLink);
+        model.addObject("projectFormBlockLink", projectFormLink);
 
-        model.addAttribute("projectContentBlockLink", baseLink + "/content-block");
-        model.addAttribute("projectFormBlockLink", baseLink + "/form");
-
-        return "fragments/list/body/projects-body";
+        return model;
     }
 
     @GetMapping("/content-block")
-    public String getProjectsContentBlock(@PathVariable String creatorId,
-                                          Model model) {
+    public ModelAndView getProjectsContent(@PathVariable String creatorId) {
         String dataSource = linkTo(methodOn(ProjectController.class)
-                .getProjects(creatorId, new DataTablesInput()))
-                .toUri().toString();
+                .getProjects(creatorId, new DataTablesInput())).toString();
 
-        model.addAttribute("dataSource", dataSource);
+        ModelAndView model = new ModelAndView("fragments/list/content/projects-content");
+        model.addObject("dataSource", dataSource);
 
-        return "fragments/list/content/projects-content";
+        return model;
     }
 
-    @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/form")
     public String getProjectForm(@PathVariable String creatorId,
                                  Model model) {
         String baseLink = linkTo(methodOn(ProjectController.class)
                 .getProjects(creatorId, new DataTablesInput()))
-                .toUri().toString();
+                .toString();
 
         model.addAttribute("projectRequestModel", new ProjectRequestModel());
 
@@ -118,33 +119,62 @@ public class ProjectViewController {
         return "forms/project-form";
     }
 
-    @PreAuthorize(value = "#creatorId == principal.id")
     @GetMapping("/{projectId}/edit")
     public String getProjectEditForm(@PathVariable String creatorId,
                                      @PathVariable String projectId,
                                      Model model) {
 
-        String baseLink = 
-                linkTo(methodOn(ProjectController.class)
-                .getProject(creatorId, projectId))
-                        .toUri().toString();
+        String baseLink = linkTo(methodOn(ProjectController.class).getProject(creatorId, projectId)).toString();
         
         model.addAttribute("projectRequestModel", new ProjectRequestModel());
-
         model.addAttribute("postRequestLink", baseLink);
 
         return "forms/project-edit";
     }
 
+    @GetMapping("/{projectId}/subscribers/body")
+    public String getSubscribersBody(@PathVariable String creatorId,
+                                     @PathVariable String projectId,
+                                     @AuthenticationPrincipal UserPrincipal principal,
+                                     Model model) {
+        String baseLink = linkTo(UserController.class)
+                .slash(creatorId)
+                .slash("projects")
+                .slash(projectId)
+                .slash("subscribers").toString();
 
-    @PreAuthorize(value = "#creatorId == principal.id")
+        model.addAttribute("subscribersContentBlockLink", baseLink + "/content-block");
+        model.addAttribute("subscriberFormBlockLink", baseLink + "/form");
+        model.addAttribute("isCreator", creatorId.equals(principal.getId()));
+                
+        return "fragments/list/body/subscribers-body";
+    }
+
+    @GetMapping("/{projectId}/subscribers/content-block")
+    public String getSubscribersContentBlock(@PathVariable String creatorId,
+                                             @PathVariable String projectId,
+                                             @AuthenticationPrincipal UserPrincipal principal,
+                                             Model model) {
+
+        String dataSource =
+                linkTo(methodOn(ProjectController.class)
+                        .getSubscribers(creatorId, projectId, new DataTablesInput()))
+                        .toString();
+
+        model.addAttribute("dataSource", dataSource);
+        model.addAttribute("subscribersContentBlockLink", dataSource + "/content-block");
+        model.addAttribute("isCreator", creatorId.equals(principal.getId()));
+        
+        return "fragments/list/content/subscribers-content";
+    }
+
     @GetMapping("/{projectId}/subscribers/form")
     public String getSubscriberForm(@PathVariable String creatorId,
                                     @PathVariable String projectId,
                                     Model model) {
         String baseLink = linkTo(methodOn(ProjectController.class)
                 .addSubscriber(creatorId, projectId, new SubscriberRequestModel()))
-                .toUri().toString();
+                .toString();
 
         model.addAttribute("subscriberRequestModel", new SubscriberRequestModel());
         model.addAttribute("postRequestLink", baseLink);
@@ -152,42 +182,6 @@ public class ProjectViewController {
 
         return "forms/subscriber-form";
     }
-
-
-    @PreAuthorize(value = "#creatorId == principal.id")
-    @GetMapping("/{projectId}/subscribers/body")
-    public String getSubscribersBody(@PathVariable String creatorId,
-                                     @PathVariable String projectId,
-                                     Model model) {
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("subscribers").toUri().toString();
-
-        model.addAttribute("subscribersContentBlockLink", baseLink + "/content-block");
-        model.addAttribute("subscriberFormBlockLink", baseLink + "/form");
-
-        return "fragments/list/body/subscribers-body";
-    }
-
-    @GetMapping("/{projectId}/subscribers/content-block")
-    public String getSubscribersContentBlock(@PathVariable String creatorId,
-                                             @PathVariable String projectId,
-                                             Model model) {
-
-        String dataSource =
-                linkTo(methodOn(ProjectController.class)
-                        .getSubscribers(creatorId, projectId, new DataTablesInput()))
-                        .toUri().toString();
-
-        model.addAttribute("dataSource", dataSource);
-        model.addAttribute("subscribersContentBlockLink", dataSource + "/content-block");
-
-        return "fragments/list/content/subscribers-content";
-    }
-
-    @PreAuthorize("#creatorId == principal.id")
     @GetMapping("/{projectId}/comments/body")
     public String getCommentsBody(@PathVariable String creatorId,
                                   @PathVariable String projectId,
@@ -198,7 +192,7 @@ public class ProjectViewController {
                 .slash("projects")
                 .slash(projectId)
                 .slash("comments")
-                .toUri().toString();
+                .toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("commentFormLink", baseLink + "/form");
@@ -206,7 +200,6 @@ public class ProjectViewController {
         return "fragments/comments/comments-body";
     }
 
-    @PreAuthorize("#creatorId == principal.id")
     @GetMapping("/{projectId}/comments/form")
     public String getCommentForm(@PathVariable String creatorId,
                                  @PathVariable String projectId,
@@ -217,11 +210,14 @@ public class ProjectViewController {
                 .slash("projects")
                 .slash(projectId)
                 .slash("comments")
-                .toUri().toString();
+                .toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("postRequestLink", baseLink);
         model.addAttribute("commentRequestModel", new CommentRequestModel());
+
+        String userLink = linkTo(methodOn(UserController.class).getUser(creatorId)).toString();
+        model.addAttribute("userLink", userLink);
 
         return "forms/comment-form";
     }

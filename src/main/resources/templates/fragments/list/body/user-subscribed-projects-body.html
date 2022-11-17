@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div id="my-projects" class="card">
+    <div class="card-body">  
+        <h4 class="card-title">Project Subscriptions</h4>
+        <!-- List Content        -->
+        <div id="subscribed-to-content" class="form-group"></div>
+    </div>
+    <script th:inline="javascript">
+        $("#subscribed-to-content").load([[${subscribedToContent}]]);
+    </script>
+</div>
+
+</body>
+</html>

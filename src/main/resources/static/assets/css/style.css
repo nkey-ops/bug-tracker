@@ -16091,7 +16091,8 @@ code {
   /* Buttons with only icons */
   /* Buttons with icon and text */ }
   .btn i, .fc button i, .ajax-upload-dragdrop .ajax-file-upload i, .swal2-modal .swal2-buttonswrapper .swal2-styled i, .swal2-modal .swal2-buttonswrapper .swal2-styled.swal2-confirm i, .swal2-modal .swal2-buttonswrapper .swal2-styled.swal2-cancel i, .wizard > .actions a i {
-    margin-right: .3125rem; }
+    margin-right: 0rem; }
+/*margin-right: .3125rem; }*/
   .btn.btn-rounded, .fc button.btn-rounded, .ajax-upload-dragdrop .btn-rounded.ajax-file-upload, .swal2-modal .swal2-buttonswrapper .btn-rounded.swal2-styled, .wizard > .actions a.btn-rounded {
     border-radius: 50px; }
   .btn.btn-fw, .fc button.btn-fw, .ajax-upload-dragdrop .btn-fw.ajax-file-upload, .swal2-modal .swal2-buttonswrapper .btn-fw.swal2-styled, .wizard > .actions a.btn-fw {
@@ -20394,7 +20395,7 @@ div.tagsinput {
       .navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini {
         display: none; }
         .navbar .navbar-brand-wrapper .navbar-brand.brand-logo-mini img {
-          width: calc(70px - 50px);
+          width: calc(70px - 40px);
           max-width: 100%;
           height: 28px;
           margin: auto; }
@@ -20669,7 +20670,7 @@ div.tagsinput {
       .sidebar .sidebar-brand-wrapper .sidebar-brand:active, .sidebar .sidebar-brand-wrapper .sidebar-brand:focus, .sidebar .sidebar-brand-wrapper .sidebar-brand:hover {
         color: #252b3e; }
       .sidebar .sidebar-brand-wrapper .sidebar-brand img {
-        width: calc(244px - 120px);
+        width: calc(244px - 40px);
         max-width: 100%;
         height: 28px;
         margin: auto;
@@ -20677,7 +20678,7 @@ div.tagsinput {
       .sidebar .sidebar-brand-wrapper .sidebar-brand.brand-logo-mini {
         display: none; }
         .sidebar .sidebar-brand-wrapper .sidebar-brand.brand-logo-mini img {
-          width: calc(70px - 50px);
+          width: calc(70px - 40px);
           max-width: 100%;
           height: 28px;
           margin: auto; }
@@ -20738,7 +20739,7 @@ div.tagsinput {
               margin-left: 0;
               margin-right: auto; }
             .sidebar .nav .nav-item .nav-link i.menu-arrow:before {
-              content: "\F035D";
+              content: "\F140";
               font-size: inherit;
               color: inherit; }
         .sidebar .nav .nav-item .nav-link .menu-title {

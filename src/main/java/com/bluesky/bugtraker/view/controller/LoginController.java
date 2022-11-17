@@ -13,7 +13,7 @@ public class LoginController {
     @RequestMapping("/signup")
     public ModelAndView signUp() {
         return new ModelAndView("register",
-                "user", new UserRegisterModel());
+                "userRegisterModel", new UserRegisterModel());
     }
 
     @GetMapping("/login")

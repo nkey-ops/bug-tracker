@@ -4,21 +4,20 @@ package com.bluesky.bugtraker.view.controller;
 import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.TicketService;
-import com.bluesky.bugtraker.shared.dto.CommentDto;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.TicketRecordDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
-import com.bluesky.bugtraker.shared.ticketstatus.Priority;
-import com.bluesky.bugtraker.shared.ticketstatus.Severity;
-import com.bluesky.bugtraker.shared.ticketstatus.Status;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.TicketDTO;
+import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
 import com.bluesky.bugtraker.view.model.rensponse.CommentResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketRecordResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.assambler.TicketModelAssembler;
+import com.bluesky.bugtraker.view.model.rensponse.assambler.TicketRecordModelAssembler;
+import com.bluesky.bugtraker.view.model.rensponse.assambler.UserModelAssembler;
 import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import com.bluesky.bugtraker.view.model.request.TicketRequestModel;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,161 +46,60 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @Controller
 @RequestMapping("/users/{creatorId}/projects/{projectId}/tickets")
 public class TicketController {
-
-    private final UserController userController;
     private final TicketService ticketService;
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final TicketModelAssembler ticketModelAssembler;
+    private final TicketRecordModelAssembler ticketRecordModelAssembler;
+    private final UserModelAssembler userModelAssembler;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public TicketController(UserController userController, TicketService ticketService) {
-        this.userController = userController;
+    public TicketController(TicketService ticketService,
+                            TicketModelAssembler ticketModelAssembler,
+                            TicketRecordModelAssembler ticketRecordModelAssembler, 
+                            UserModelAssembler userModelAssembler,
+                            ModelMapper modelMapper) {
+
         this.ticketService = ticketService;
-
-        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
-    }
-
-    @ModelAttribute("user")
-    public UserResponseModel getCurrentUser() {
-        return userController.getCurrentUser();
+        this.ticketModelAssembler = ticketModelAssembler;
+        this.ticketRecordModelAssembler = ticketRecordModelAssembler;
+        this.userModelAssembler = userModelAssembler;
+        this.modelMapper = modelMapper;
     }
 
 
-    @GetMapping("/ticket-form")
-    public String showTicketForm(@PathVariable String creatorId,
-                                 @PathVariable String projectId,
-                                 @ModelAttribute("user") UserResponseModel user,
-                                 Model model) {
-        model.addAttribute("user", user);
-
-        if (!model.containsAttribute("ticketRequestModel")) {
-            model.addAttribute("ticketRequestModel", new TicketRequestModel());
-        }
-
-        model.addAttribute("projectCreatorId", creatorId);
-        model.addAttribute("projectName", projectId);
-
-        model.addAttribute("statusList", Status.values());
-        model.addAttribute("severityList", Severity.values());
-        model.addAttribute("priorityList", Priority.values());
-
-        String ticketFormPostRequestLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets").toUri().toString();
-
-        model.addAttribute("ticketFormPostRequestLink", ticketFormPostRequestLink);
-
-        return "pages/ticket-creation";
-    }
-
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
-    @GetMapping("/{ticketId}/edit")
-    public String showTicketEditForm(@PathVariable String creatorId,
-                                     @PathVariable String projectId,
-                                     @PathVariable String ticketId,
-                                     @ModelAttribute("user") UserResponseModel user,
-                                     Model model) {
-        TicketDto ticketDto = ticketService.getTicket(ticketId);
-        TicketResponseModel ticketResponseModel = modelMapper.map(ticketDto, TicketResponseModel.class);
-
-        model.addAttribute("user", user);
-
-        if (!model.containsAttribute("ticketForm")) {
-            model.addAttribute("ticketForm", new TicketRequestModel());
-        }
-
-        model.addAttribute("ticket", ticketResponseModel);
-
-        model.addAttribute("statusList", Status.values());
-        model.addAttribute("severityList", Severity.values());
-        model.addAttribute("priorityList", Priority.values());
-
-        String ticketEditionPostRequestLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets")
-                .slash(ticketId)
-                .toUri().toString();
-
-        model.addAttribute("ticketEditionPostRequestLink", ticketEditionPostRequestLink);
-
-        return "pages/ticket-edition";
-    }
-
-
-    @PreAuthorize("#creatorId == principal.id or  principal.isSubscribedTo(#creatorId, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}")
-    public String getTicket(@PathVariable String creatorId,
-                            @PathVariable String projectId,
-                            @PathVariable String ticketId,
-                            Model model) {
-        TicketDto ticketDto = ticketService.getTicket(ticketId);
+    public ResponseEntity<TicketResponseModel> getTicket(
+                                                        @PathVariable String creatorId,
+                                                        @PathVariable String projectId,
+                                                        @PathVariable String ticketId) {
 
+        TicketDTO ticketDto = ticketService.getTicket(ticketId);
         TicketResponseModel ticketResponseModel = modelMapper.map(ticketDto, TicketResponseModel.class);
 
-        model.addAttribute("ticket", ticketResponseModel);
-
-        WebMvcLinkBuilder baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets")
-                .slash(ticketId);
-
-        model.addAttribute("projectLink",
-                linkTo(UserController.class)
-                        .slash(creatorId)
-                        .slash("projects")
-                        .slash(projectId)
-                        .slash("/page").toUri().toString());
-
-        model.addAttribute("selfLink", baseLink.toUri().toString());
-
-        String ticketEditForm =
-                baseLink.slash("edit").toUri().toString();
-        model.addAttribute("ticketEditFormLink", ticketEditForm);
-
-        String ticketCommentsLink =
-                baseLink.slash("comments").slash("body").toUri().toString();
-        model.addAttribute("ticketCommentsLink", ticketCommentsLink);
-
-        String ticketRecordsLink =
-                baseLink.slash("records").slash("body").toUri().toString();
-        model.addAttribute("ticketRecordsLink", ticketRecordsLink);
-
-        String ticketAssignedDevsLink =
-                baseLink.slash("assigned-devs").slash("/body").toUri().toString();
-        model.addAttribute("ticketAssignedDevsLink", ticketAssignedDevsLink);
-
-        model.addAttribute("isMainTicket", true);
-
-        return "pages/ticket";
+        return ResponseEntity.ok(ticketModelAssembler.toModel(ticketResponseModel));
     }
 
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping
     @ResponseBody
-    public DataTablesOutput<TicketResponseModel> getTickets(
+    public ResponseEntity<DataTablesOutput<TicketResponseModel>> getTickets(
             @PathVariable String creatorId,
             @PathVariable String projectId,
             @Valid DataTablesInput input) {
 
-        DataTablesOutput<TicketDto> pagedTicketsDtos =
+        DataTablesOutput<TicketDTO> pagedTicketsDtos =
                 ticketService.getTickets(projectId, input);
 
+        DataTablesOutput<TicketResponseModel> pagedTickets =
+                ticketModelAssembler.toDataTablesOutputModel(pagedTicketsDtos);
 
-        DataTablesOutput<TicketResponseModel> result = new DataTablesOutput<>();
-        modelMapper.map(pagedTicketsDtos, result);
-        result.setData(modelMapper.map(pagedTicketsDtos.getData(), new TypeToken<List<TicketResponseModel>>() {
-        }.getType()));
-
-        return result;
+        return ResponseEntity.ok(pagedTickets);
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @PostMapping(
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> createTicket(@PathVariable String creatorId,
@@ -212,9 +109,9 @@ public class TicketController {
                                           TicketRequestModel ticket) {
 
 
-        TicketDto requestTicketDto = modelMapper.map(ticket, TicketDto.class);
+        TicketDTO requestTicketDTO = modelMapper.map(ticket, TicketDTO.class);
 
-        ticketService.createTicket(projectId, requestTicketDto, reporter.getId());
+        ticketService.createTicket(projectId, requestTicketDTO, reporter.getId());
 
         String projectPageLink = linkTo(UserController.class)
                 .slash(creatorId)
@@ -226,6 +123,8 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectPageLink);
     }
 
+    @PreAuthorize("#creatorId == principal.id or " +
+                    "@userServiceImp.isSubscribedToTicket(principal.id, #creatorId)")
     @RequestMapping(value = "/{ticketId}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String updateTicket(@PathVariable String creatorId,
@@ -235,13 +134,13 @@ public class TicketController {
                                BindingResult bindingResult,
                                RedirectAttributes attr,
                                @AuthenticationPrincipal UserPrincipal reporter) {
-        TicketDto ticketDto = modelMapper.map(ticket, TicketDto.class);
+        TicketDTO ticketDto = modelMapper.map(ticket, TicketDTO.class);
 
         try {
             ticketService.updateTicket(ticketId, ticketDto, reporter.getId());
         } catch (ServiceException e) {
             bindingResult.addError(
-                    new ObjectError("error", e.getErrorType().getErrorMessage()));
+                    new ObjectError("error", e.getErrorType().getText()));
             attr.addFlashAttribute("org.springframework.validation.BindingResult.ticketForm", bindingResult);
             attr.addFlashAttribute("ticketForm", ticket);
 
@@ -265,46 +164,42 @@ public class TicketController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/records")
     @ResponseBody
-    public DataTablesOutput<TicketRecordResponseModel> getTicketRecords(@PathVariable String creatorId,
-                                                                        @PathVariable String projectId,
-                                                                        @PathVariable String ticketId,
-                                                                        DataTablesInput input) {
-
-        DataTablesOutput<TicketRecordDto> ticketRecordsDtos =
+    public ResponseEntity<DataTablesOutput<TicketRecordResponseModel>> getTicketRecords(@PathVariable String creatorId,
+                                                                                        @PathVariable String projectId,
+                                                                                        @PathVariable String ticketId,
+                                                                                        DataTablesInput input) {
+        DataTablesOutput<TicketRecordDTO> ticketRecordsDTOs =
                 ticketService.getTicketRecords(ticketId, input);
 
-        DataTablesOutput<TicketRecordResponseModel> result = new DataTablesOutput<>();
-        modelMapper.map(ticketRecordsDtos, result);
-        result.setData(modelMapper.map(ticketRecordsDtos.getData(), new TypeToken<List<TicketRecordResponseModel>>() {
-        }.getType()));
+        DataTablesOutput<TicketRecordResponseModel> ticketRecords =
+                ticketRecordModelAssembler.toDataTablesOutputModel(ticketRecordsDTOs);
 
-        return result;
+        return ResponseEntity.ok(ticketRecords);
     }
 
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/records/{recordId}")
-    public String getTicketRecord(@PathVariable String creatorId,
-                                  @PathVariable String projectId,
-                                  @PathVariable String ticketId,
-                                  @PathVariable String recordId,
-                                  Model model) {
+    public ResponseEntity<TicketRecordResponseModel> getTicketRecord(@PathVariable String creatorId,
+                                                                     @PathVariable String projectId,
+                                                                     @PathVariable String ticketId,
+                                                                     @PathVariable String recordId) {
 
-        TicketRecordDto ticketRecord =
+        TicketRecordDTO ticketRecord =
                 ticketService.getTicketRecord(recordId);
 
         TicketRecordResponseModel ticketRecordResponseModel =
                 modelMapper.map(ticketRecord, TicketRecordResponseModel.class);
 
-        model.addAttribute("ticket", ticketRecordResponseModel);
-        model.addAttribute("isMainTicket", false);
+        TicketRecordResponseModel assembledTicketRecord = 
+                ticketRecordModelAssembler.toModel(ticketRecordResponseModel);
 
-        return "details/ticket-details :: ticket-details";
+        return ResponseEntity.ok(assembledTicketRecord);
     }
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToTicket(principal.id, #ticketId)")
     @PostMapping(value = "/{ticketId}/comments",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
@@ -314,13 +209,13 @@ public class TicketController {
                                            @AuthenticationPrincipal UserPrincipal creator,
                                            @ModelAttribute("commentForm") CommentRequestModel comment) {
 
-        CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
+        CommentDTO commentDto = modelMapper.map(comment, CommentDTO.class);
         ticketService.createComment(ticketId, creator.getId(), commentDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("@ticketAccessEvaluator.areCommentsAllowed(principal.id, #creatorId, #ticketId)")
     @GetMapping("/{ticketId}/comments")
     public String getComments(@PathVariable String creatorId,
                               @PathVariable String projectId,
@@ -331,7 +226,7 @@ public class TicketController {
                               @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir,
                               Model model) {
 
-        Page<CommentDto> pagedCommentsDto =
+        Page<CommentDTO> pagedCommentsDto =
                 ticketService.getComments(ticketId, page, limit, sortBy, dir);
 
         List<CommentResponseModel> pagedCommentsResponseModel =
@@ -359,51 +254,47 @@ public class TicketController {
     }
 
     @PreAuthorize("#creatorId == principal.id")
-    @PostMapping(value = "/{ticketId}/assigned-devs",
+    @PostMapping(value = "/{ticketId}/subscribers",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> addAssignedDev(
+    public ResponseEntity<?> addSubscriber(
             @PathVariable String creatorId,
             @PathVariable String projectId,
             @PathVariable String ticketId,
             @ModelAttribute("subscriberRequestModel")
             SubscriberRequestModel subscriber) {
 
-        ticketService.addAssignedDev(ticketId, subscriber.getPublicId());
+        ticketService.addSubscriber(ticketId, subscriber.getPublicId());
 
         return ResponseEntity.status(HttpStatus.CREATED.value()).build();
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or principal.isSubscribedTo(#creatorId, #projectId)")
-    @GetMapping("/{ticketId}/assigned-devs")
+    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @GetMapping("/{ticketId}/subscribers")
     @ResponseBody
-    public DataTablesOutput<UserResponseModel> getAssignedDevs(
+    public ResponseEntity<DataTablesOutput<UserResponseModel>> getSubscribers(
             @PathVariable String creatorId,
             @PathVariable String projectId,
             @PathVariable String ticketId,
             @Valid DataTablesInput input) {
 
-        DataTablesOutput<UserDto> pagedAssignedDevsDto =
-                ticketService.getAssignedDevs(ticketId, input);
-
-
-        DataTablesOutput<UserResponseModel> result = new DataTablesOutput<>();
-        modelMapper.map(pagedAssignedDevsDto, result);
-        result.setData(modelMapper.map(pagedAssignedDevsDto.getData(), new TypeToken<List<UserResponseModel>>() {
-        }.getType()));
-
-        return result;
+        DataTablesOutput<UserDTO> pagedSubscribersDto =
+                ticketService.getSubscribers(ticketId, input);
+        DataTablesOutput<UserResponseModel> assembledSubscribers = 
+                userModelAssembler.toDataTablesOutputModel(pagedSubscribersDto);
+       
+        return ResponseEntity.ok(assembledSubscribers);
     }
 
     @PreAuthorize("#creatorId == principal.id or #subscriberId == principal.id")
-    @DeleteMapping("/{ticketId}/assigned-devs/{assignedDevId}")
-    public ResponseEntity<?> removeAssignedDev(@PathVariable String creatorId,
-                                               @PathVariable String projectId,
-                                               @PathVariable String ticketId,
-                                               @PathVariable String assignedDevId) {
+    @DeleteMapping("/{ticketId}/subscribers/{subscriberId}")
+    public ResponseEntity<?> removeSubscriber(@PathVariable String creatorId,
+                                              @PathVariable String projectId,
+                                              @PathVariable String ticketId,
+                                              @PathVariable String subscriberId) {
 
-        ticketService.removeAssignedDev(ticketId, assignedDevId);
+        ticketService.removeSubscriber(ticketId, subscriberId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 }

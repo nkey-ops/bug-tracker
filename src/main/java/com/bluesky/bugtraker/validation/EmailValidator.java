@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.lang.annotation.Annotation;
-import java.util.regex.Pattern;
 
 public class EmailValidator
         implements ConstraintValidator<ValidEmail, String> {

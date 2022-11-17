@@ -1,103 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
-  <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-    <a class="sidebar-brand brand-logo" th:href="@{/home}"><img th:src="@{/assets/images/logo.svg}" alt="logo"/></a>
-    <a class="sidebar-brand brand-logo-mini" th:href="@{/home}"><img th:src="@{/assets/images/red-bug.svg}"
-                                                                     alt="logo"/></a>
-  </div>
-  <ul class="nav">
-    <li class="nav-item profile">
-      <div class="profile-desc">
-        <div class="profile-pic">
-          <div class="count-indicator">
-            <img class="img-xs rounded-circle " th:src="@{/assets/images/faces/face15.jpg}" alt="">
-            <span class="count bg-success"></span>
-          </div>
-          <div class="profile-name">
-            <h5 class="mb-0 font-weight-normal " th:text="${user.username}"></h5>
-            <span>Gold Member</span>
-          </div>
-        </div>
-        <a href="#" id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
-        <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list"
-             aria-labelledby="profile-dropdown">
-          <a href="#" class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-account-cog text-primary"></i>
-              </div>
+    <div  class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" th:href="@{/home}">
+            <img sec:authorize="hasRole('USER')" th:src="@{/assets/images/logo.svg}" alt="logo"/>
+            <img sec:authorize="hasAnyRole('SUPER_ADMIN','ADMIN')" th:src="@{/assets/images/logo-admin.svg}" alt="logo"/>
+        </a>
+        <a class="sidebar-brand brand-logo-mini" th:href="@{/home}"><img th:src="@{/assets/images/red-bug.svg}"
+                                                                         alt="logo"/></a>
+    </div>
+    <ul class="nav">
+        <li class="nav-item profile">
+            <div class="profile-desc">
+                <a th:href="@{${userPageLink}}" style="text-decoration:none;">
+                    <div class="profile-pic">
+                        <div class="count-indicator">
+                            <img class="img-xs rounded-circle " th:src="${user.avatarURL}" alt="avatar">
+                            <span class="count bg-success"></span>
+                        </div>
+
+                        <div class="profile-name">
+                            <h5 class="mb-0 font-weight-normal " th:text="${user.username}"></h5>
+                            <span th:text="${user.status}"></span>
+                        </div>
+                    </div>
+                </a>
             </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-onepassword  text-info"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-calendar-today text-success"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1 text-small">To-do list</p>
-            </div>
-          </a>
-        </div>
-      </div>
-    </li>
-    <li class="nav-item nav-category">
-      <span class="nav-link">Navigation</span>
-    </li>
-    <li class="nav-item menu-items">
-      <a class="nav-link" th:href="@{/home}">
+        </li>
+        <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" th:href="@{/home}">
               <span class="menu-icon">
                 <i class="mdi mdi-speedometer"></i>
               </span>
-        <span class="menu-title">Dashboard</span>
-      </a>
-    </li>
-    <li class="nav-item menu-items">
-      <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false"
-         aria-controls="ui-basic">
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')" class="nav-item menu-items">
+            <a class="nav-link" th:href="@{/users-management}">
               <span class="menu-icon">
-                <i class="mdi mdi-text-box"></i>
+                <i class="mdi mdi-account-multiple"></i>
               </span>
-        <span class="menu-title">Forms</span>
-        <i class="menu-arrow"></i>
-      </a>
-      <div class="collapse" id="ui-basic">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"><a class="nav-link" th:href="@{/project-form}">Create Project</a>
-          </li>
-        </ul>
-      </div>
-    </li>
-    <li class="nav-item menu-items">
-      <a class="nav-link" data-toggle="collapse" href="#list" aria-expanded="false"
-         aria-controls="list">
-              <span class="menu-icon">
-                <i class="mdi mdi-text-box"></i>
-              </span>
-        <span class="menu-title">Lists</span>
-        <i class="menu-arrow"></i>
-      </a>
-      <div class="collapse" id="list">
-        <ul class="nav flex-column sub-menu">
-          <li class="nav-item"><a class="nav-link" th:href="@{/my-projects}">My Projects</a>
-          </li>
-        </ul>
-      </div>
-    </li>
+                <span class="menu-title">Users Management</span>
+            </a>
+        </li>
 
-  </ul>
+        <li class="nav-item menu-items">
+            <a class="nav-link" th:href="@{/my-projects}">
+              <span class="menu-icon">
+                <i class="mdi mdi-format-list-bulleted-type"></i>
+              </span>
+                <span class="menu-title">My Projects</span>
+            </a>
+        </li>
+
+        <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#subscriptions" aria-expanded="false" aria-controls="list">
+              <span class="menu-icon">
+                <i class="mdi mdi-format-list-bulleted-type"></i>
+              </span>
+                <span class="menu-title">Subscriptions</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="subscriptions">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-projects}">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-tickets}">Tickets</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
 </nav>
+</body>

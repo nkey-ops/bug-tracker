@@ -1,25 +1,25 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 
 @Getter @Setter
-public class UserResponseModel  {
+public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     private String publicId;
     private String username;
     private String email;
     
+    private String avatarURL;
     private String address;
     private String phoneNumber;
     private String status;
-    
+    private Role role; 
+            
     public UserResponseModel(String username) {
         this.username = username;
     }

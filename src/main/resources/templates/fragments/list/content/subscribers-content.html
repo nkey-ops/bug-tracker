@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div class="table-responsive">
     <div id="subscribers-content-success"></div>
@@ -11,7 +11,7 @@
             <th>#</th>
             <th>ID</th>
             <th>Username</th>
-            <th>Action</th>
+            <th>Delete</th>
         </tr>
         </thead>
     </table>
@@ -21,7 +21,7 @@
                 oLanguage: {
                     sInfoFiltered: ''
                 },
-
+                pageLength: 5, 
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],
@@ -44,29 +44,27 @@
                     },
                     {
                         data: 'username',
-                        render: function (data, type, full, row) {
-                            var data1 = oTable.row(row).data();
-                            var link = '/bugtracker/users/' + data1['publicId'] + '/profile';
-                            var username = data1['username'];
-
-                            return '<a href="' + link + '">' + username + '</a>';
+                        render: function (data, type, row, meta) {
+                            return '<img src="' + row['avatarURL'] + '" class="img-xs rounded-circle">\n' +
+                                '                    <h7 class="font-weight-bold text-primary">' + row['username'] + '</h7>';
                         }
                     },
                     {
                         width: '1%',
                         searchable: false,
                         orderable: false,
+                        visible: [[${isCreator}]],
                         defaultContent: '<button type="button" class="btn btnDelete btn-outline-danger btn-sm">\n' +
                             '               <i class="mdi mdi-account-remove"></i></button>'
                     }
                 ]
             });
             $('#subscribers-table')
-                .on('click', 'tbody tr', function (e) {
+                .on('click', 'tbody tr', function () {
                     var currentRow = $(this).closest("tr").children();
-                    var id = oTable.row(currentRow).data()['publicId'];
-                    //hard code
-                    window.location.href = "/users/" + id
+                    var links = oTable.row(currentRow).data()['links'];
+
+                    window.location.href = getLink(links, 'page');
                 })
                 .on('click', '.btnDelete', function (e) {
                     e.stopPropagation();
@@ -77,7 +75,6 @@
                     $.ajax({
                         type: "DELETE",
                         //hard code
-
                         url: [[${dataSource}]] + "/" + id,
                         beforeSend: function () {
                             $('#subscriber-form-success').html('');

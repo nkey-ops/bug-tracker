@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="table-responsive" style="overflow: visible !important;">
+    <div id="users-success"></div>
+    <div id="users-error"></div>
+
+    <table id="users-content" class="table nowrap table-bordered">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+    </table>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            var oTable = $('#users-content').DataTable({
+                oLanguage: {
+                    sInfoFiltered: ''
+                },
+                
+                pageLength: 5,
+                serverSide: true,
+                deferRender: true,
+                ajax: [[${dataSource}]],
+                order: [
+                    [2, 'desc']
+                ],
+                columns: [
+                    {
+                        width: '1%',
+                        data: null,
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {
+                        width: '1%',
+                        data: 'publicId',
+                    },
+                    {
+                        data: 'username',
+                        render: function (data, type, row) {
+                            return '<img src="' + row['avatarURL'] + '" alt="avatar" class="img-xs rounded-circle">\n' +
+                                '                    <h7 class="font-weight-bold text-primary">' + row['username'] + '</h7>';
+                        }
+                    },
+                    {
+                        data: 'role',
+                        width: '200px',
+                        searchable: false,
+                        orderable: false,
+
+                        render: function (data, type, row) {
+                            return buildDropdown([[${roles}]], data);
+                        }
+                    },
+                    {
+                        width: '1%',
+                        searchable: false,
+                        orderable: false,
+                        render: function () {
+                            return '<button type="button" class="btn btnDelete btn-outline-danger btn-sm">\n' +
+                                '               <i class="mdi mdi-account-remove"></i>' +
+                                '            </button>'
+                        }
+                    }
+                ]
+            });
+            $('#users-content')
+                .on('click', 'tbody tr', function () {
+                    var currentRow = $(this).closest("tr").children();
+                    let links = oTable.row(currentRow).data()['links'];
+
+                    window.location.href = getLink(links, 'page');
+                })
+                .on('click', '.dropdown', function (e) {
+                    e.stopPropagation();
+                })
+                .on('click', '.btnDelete', function (e) {
+                    e.stopPropagation();
+
+                    var currentRow = $(this).closest("tr").children();
+                    let id = oTable.row(currentRow).data()['publicId'];
+                    let links = oTable.row(currentRow).data()['links'];
+
+                    var userLink = getLink(links, 'self');
+                    if (confirm('Are you sure you want to delete this account')) {
+                        $.ajax({
+                            type: "DELETE",
+                            url: userLink,
+                            beforeSend: function () {
+                                $('#users-success').html('');
+                                $('#users-error').html('');
+                            },
+                            success: function () {
+                                $('#users-content-block').load([[${userContentLink}]], function () {
+                                    $('#users-success').html('<p class="alert alert-success">' + 'User has been removed' + '</p>');
+                                });
+                            },
+                            error: function (jqXHR) {
+                                $('#users-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                            },
+                            statusCode: {
+                                403: function () {
+                                    $('#users-error').html('<p class="alert alert-danger">' + 'You don\'t have enough rights' + '</p>')
+                                },
+                            }
+                        })
+                    }
+                })
+                .on('click', '.btn-role', function (e) {
+                    e.stopPropagation();
+
+                    var currentRow = $(this).closest("tr").children();
+                    let links = oTable.row(currentRow).data()['links'];
+
+                    var userLink = getLink(links, 'self');
+                    $.ajax({
+                        type: "PATCH",
+                        url: userLink,
+                        data: 'role=' + $(this).val(),
+                        beforeSend: function () {
+                            $('#users-success').html('');
+                            $('#users-error').html('');
+                        },
+                        success: function () {
+                            $('#users-content-block').load([[${userContentLink}]], function () {
+                                $('#users-success').html('<p class="alert alert-success">' + 'User\'s role has been changed' + '</p>');
+                            });
+                        },
+                        error: function (jqXHR) {
+                            $('#users-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                        },
+                        statusCode: {
+                            403: function () {
+                                $('#users-error').html('<p class="alert alert-danger">' + 'You don\'t have enough rights' + '</p>')
+                            },
+                        }
+                    })
+                });
+        });
+
+        function buildDropdown(data, select) {
+            var dropdown = "<select class='dropdown'>";
+            for (var i = 0; i < data.length; i++) {
+                var option;
+                var element = data[i];
+                
+                if (element['name'] === select['name'])
+                    option = "<option selected class='dropdown-item btn-role' value=\"" + element['name'] + "\">" + element['text'] + "</option>";
+                else
+                    option = "<option  class='dropdown-item btn-role' value=\"" + element['name'] + "\">" + element['text'] + "</option>";
+
+                dropdown = dropdown + option;
+            }
+            return  dropdown + "</select>";
+        }
+    </script>
+</div>
+</body>
+</html>

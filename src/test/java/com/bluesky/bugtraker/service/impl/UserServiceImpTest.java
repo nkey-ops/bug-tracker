@@ -2,34 +2,31 @@ package com.bluesky.bugtraker.service.impl;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.RoleServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.TicketEntity;
+import com.bluesky.bugtraker.io.entity.RoleEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
-import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.Utils;
+import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.bluesky.bugtraker.shared.dto.ProjectDto;
-import com.bluesky.bugtraker.shared.dto.TicketDto;
-import com.bluesky.bugtraker.shared.dto.UserDto;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -41,63 +38,55 @@ class UserServiceImpTest {
 
     @InjectMocks
     private UserServiceImp userServiceImp;
+
     @Mock
-    private UserRepository userRepository;
+    private ServiceUtils serviceUtils;
+
+    @Mock
+    private UserRepository userRepo;
     @Mock
     private RoleRepository roleRepository;
     @Mock
-    private TicketRepository bugRepo;
+    private TicketRepository ticketRepo;
     @Mock
-    private ProjectRepository projectRepository;
-    @Mock
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private ProjectRepository projectRepo;
     @Mock
     private Utils utils;
     @Mock
     private ModelMapper modelMapper;
 
-    UserEntity outputUserEntity;
-    UserDto inputUserDto;
-    UserDto outputUserDto;
-    String userEmail;
-    Long userId;
-    String userPublicId;
-    String userName;
-    String userPassword;
-    String userEncryptedPassword;
-
+    private UserEntity userEntity;
+    private UserDTO userDTO;
+    private DataTablesInput dataTablesInput;
 
     @BeforeEach
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        userEmail = "email@sample";
-        userId = 12525252352L;
-        userPublicId = "adadasdas";
-        userName = "Name";
-        userPassword = "adasdasda";
-        userEncryptedPassword = "asdasdad1121d";
+        userDTO = new UserDTO();
+        userDTO.setPublicId("1");
+        userDTO.setEmail("email@sample");
+        userDTO.setUsername("Username");
+        userDTO.setPassword("password");
+        userDTO.setAvatarURL("avatarURL");
+        userDTO.setRole(Role.ROLE_USER);
 
-        inputUserDto = new UserDto();
-        inputUserDto.setEmail(userEmail);
-        inputUserDto.setUsername(userName);
-        inputUserDto.setPassword(userPassword);
+        userEntity = new UserEntity();
+        userEntity.setEmail(userDTO.getEmail());
+        userEntity.setPublicId(userDTO.getPublicId());
+        userEntity.setUsername(userDTO.getUsername());
+        userEntity.setId(1L);
+        userEntity.setPublicId(userDTO.getPublicId());
+        userEntity.setEncryptedPassword("encryptedPassword");
 
-        outputUserDto = inputUserDto;
-        outputUserDto.setRoles(getSetOfRoleEntities());
-        outputUserDto.setPublicId(userPublicId);
-        outputUserDto.setId(userId);
-        outputUserDto.setPassword(userEncryptedPassword);
-
-        outputUserEntity = new UserEntity();
-        outputUserEntity.setEmail(userEmail);
-        outputUserEntity.setPublicId(userPublicId);
-        outputUserEntity.setUsername(userName);
-        outputUserEntity.setId(userId);
-        outputUserEntity.setEncryptedPassword(userEncryptedPassword);
+        RoleEntity role = new RoleEntity(userDTO.getRole());
+        role.setId(1L);
+        userEntity.setRoleEntity(role);
 
 
-        outputUserEntity.setRoles(getSetOfRoleEntities());
+        dataTablesInput = new DataTablesInput();
+        dataTablesInput.setLength(1);
+        dataTablesInput.setStart(1);
     }
 
     @AfterEach
@@ -105,28 +94,28 @@ class UserServiceImpTest {
         closeable.close();
     }
 
-    private Set<RoleEntity> getSetOfRoleEntities() {
-        RoleEntity roleEntity = new RoleEntity(Role.ROLE_USER);
-        return Set.of(roleEntity);
-    }
-
     @Test
     void isUserExistsByEmail() {
-        when(userRepository.existsByEmail(anyString())).thenReturn(true);
-        assertTrue(userServiceImp.isUserExistsByEmail(userEmail));
+        when(userRepo.existsByEmail(anyString())).thenReturn(true);
+        assertTrue(userServiceImp.isUserExistsByEmail(userDTO.getEmail()));
 
 
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        assertFalse(userServiceImp.isUserExistsByEmail(userEmail));
+        when(userRepo.existsByEmail(anyString())).thenReturn(false);
+        assertFalse(userServiceImp.isUserExistsByEmail(userDTO.getEmail()));
     }
+
 
     @Test
     void getUserById() {
-        when(userRepository.findByPublicId(anyString())).thenReturn(Optional.of(outputUserEntity));
-        when(modelMapper.map(any(UserEntity.class), eq(UserDto.class))).thenReturn(outputUserDto);
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(modelMapper.map(any(UserEntity.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-        UserDto userById = userServiceImp.getUserById(outputUserEntity.getPublicId());
-        assertEqualsUserDto(outputUserDto, userById);
+        UserDTO actualUserDTO = userServiceImp.getUserById(userEntity.getPublicId());
+
+        verify(serviceUtils).getUserEntity(anyString());
+
+        assertNotNull(actualUserDTO);
+        assertEquals(userDTO, actualUserDTO);
     }
 
     @Test
@@ -136,95 +125,106 @@ class UserServiceImpTest {
     }
 
     @Test
-    void getUserById_DoesntThrow() {
-        when(userRepository.findByPublicId(anyString())).thenReturn(Optional.of(outputUserEntity));
-        assertDoesNotThrow(() -> userServiceImp.getUserById(userPublicId));
-    }
-
-
-    @Test
-    void getUserById_UserServiceException() {
-        when(userRepository.findByPublicId(anyString())).thenReturn(Optional.empty());
-
-        assertThrows(UserServiceException.class,
-                () -> userServiceImp.getUserById("id"));
-    }
-
-    @Test
     void getUserByEmail() {
-        when(userRepository.findByEmail(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
-        when(modelMapper.map(any(UserEntity.class), eq(UserDto.class)))
-                .thenReturn(outputUserDto);
+        when(userRepo.findByEmail(anyString()))
+                .thenReturn(Optional.of(userEntity));
+        when(modelMapper.map(any(UserEntity.class), eq(UserDTO.class)))
+                .thenReturn(userDTO);
 
+        UserDTO actualUserDTO = userServiceImp.getUserByEmail(userDTO.getEmail());
 
-        UserDto userByEmail = userServiceImp.getUserByEmail(userEmail);
-
-        assertEqualsUserDto(outputUserDto, userByEmail);
+        assertNotNull(actualUserDTO);
+        assertEquals(userDTO, actualUserDTO);
     }
 
     @Test
     void getUserByEmail_UserServiceException() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepo.findByEmail(anyString())).thenReturn(Optional.empty());
 
         assertThrows(UserServiceException.class,
-                () -> userServiceImp.getUserByEmail(userEmail));
+                () -> userServiceImp.getUserByEmail(userDTO.getEmail()));
     }
 
     @Test
-    void getUserByEmail_NullPointerException() {
-        assertThrows(NullPointerException.class,
-                () -> userServiceImp.getUserByEmail(null));
+    void getUsers() {
+        DataTablesInput dataTablesInput = new DataTablesInput();
+        dataTablesInput.setLength(1);
+        dataTablesInput.setStart(1);
+
+        DataTablesOutput<UserEntity> dataUserEntity = new DataTablesOutput<>();
+        dataUserEntity.setRecordsTotal(1);
+        dataUserEntity.setData(List.of(userEntity));
+
+        DataTablesOutput<UserDTO> dataUserDTO = new DataTablesOutput<>();
+        dataUserEntity.setRecordsTotal(1);
+        dataUserDTO.setData(List.of(userDTO));
+
+        when(userRepo.findAll(any(DataTablesInput.class))).thenReturn(dataUserEntity);
+        when(utils.map(
+                (DataTablesOutput<UserEntity>) any(DataTablesOutput.class),
+                (TypeToken<List<UserDTO>>) any(TypeToken.class))).thenReturn(dataUserDTO);
+
+
+        DataTablesOutput<UserDTO> actualDataTablesOutput = userServiceImp.getUsers(dataTablesInput);
+        verify(userRepo).findAll(any(DataTablesInput.class));
+        verify(utils).map(
+                (DataTablesOutput<UserEntity>) any(DataTablesOutput.class),
+                (TypeToken<List<UserDTO>>) any(TypeToken.class));
+
+        assertNotNull(actualDataTablesOutput);
+        assertEquals(dataUserDTO, actualDataTablesOutput);
+
     }
+
 
     @Test
     void createUserWithRoles() {
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(utils.generateUserId(anyInt())).thenReturn(userPublicId);
-        when(bCryptPasswordEncoder.encode(anyString())).thenReturn(userEncryptedPassword);
+        when(userRepo.existsByEmail(anyString())).thenReturn(false);
 
-        when(modelMapper.map(any(UserDto.class), eq(UserEntity.class)))
-                .thenReturn(outputUserEntity);
+        when(utils.generateUserId()).thenReturn(userDTO.getPublicId());
+        when(utils.encode(anyString())).thenReturn(userEntity.getEncryptedPassword());
 
-        when(roleRepository.findAllByRoleIn(anySet()))
-                .thenReturn(Optional.of(getSetOfRoleEntities()));
-        when(userRepository.save(any(UserEntity.class)))
-                .thenReturn(outputUserEntity);
-        when(modelMapper.map(any(UserEntity.class), eq(UserDto.class)))
-                .thenReturn(outputUserDto);
+        when(modelMapper.map(any(UserDTO.class), eq(UserEntity.class))).thenReturn(userEntity);
+        when(roleRepository.findByRole(any(Role.class))).thenReturn(Optional.of(userEntity.getRoleEntity()));
+        when(userRepo.save(any(UserEntity.class))).thenReturn(userEntity);
+        when(modelMapper.map(any(UserEntity.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-        UserDto userResult = userServiceImp.createUserWithRoles(inputUserDto, Set.of(Role.ROLE_USER));
+        UserDTO actualUserDTO = userServiceImp.createUserWithRole(userDTO);
 
-        assertEqualsUserDto(outputUserDto, userResult);
+        verify(userRepo).existsByEmail(anyString());
+        verify(utils).generateUserId();
+        verify(utils).encode(anyString());
+        verify(modelMapper).map(any(UserDTO.class), eq(UserEntity.class));
+        verify(roleRepository).findByRole(any(Role.class));
+        verify(userRepo).save(any(UserEntity.class));
+        verify(modelMapper).map(any(UserEntity.class), eq(UserDTO.class));
 
-        verify(utils, times(1)).generateUserId(anyInt());
-        verify(bCryptPasswordEncoder, times(1)).encode(anyString());
-        verify(roleRepository, times(1)).findAllByRoleIn(anySet());
-        verify(userRepository, times(1)).save(any(UserEntity.class));
+        assertNotNull(actualUserDTO);
+        assertEquals(userDTO, actualUserDTO);
     }
 
     @Test
     void createUserWithRoles_UserServiceException() {
-        when(userRepository.existsByEmail(anyString()))
+        when(userRepo.existsByEmail(anyString()))
                 .thenReturn(true);
-        when(modelMapper.map(any(UserDto.class), eq(UserEntity.class)))
-                .thenReturn(outputUserEntity);
+        when(modelMapper.map(any(UserDTO.class), eq(UserEntity.class)))
+                .thenReturn(userEntity);
 
         assertThrows(UserServiceException.class,
-                () -> userServiceImp.createUserWithRoles(inputUserDto, Set.of(Role.ROLE_USER)));
+                () -> userServiceImp.createUserWithRole(userDTO));
     }
 
     @Test
     void createUserWithRoles_RoleServiceException() {
-        when(userRepository.existsByEmail(anyString()))
+        when(userRepo.existsByEmail(anyString()))
                 .thenReturn(false);
-        when(modelMapper.map(any(UserDto.class), eq(UserEntity.class)))
-                .thenReturn(outputUserEntity);
-        when(roleRepository.findAllByRoleIn(anySet()))
+        when(modelMapper.map(any(UserDTO.class), eq(UserEntity.class)))
+                .thenReturn(userEntity);
+        when(roleRepository.findByRole(any(Role.class)))
                 .thenReturn(Optional.empty());
 
         assertThrows(RoleServiceException.class, () -> {
-            userServiceImp.createUserWithRoles(inputUserDto, Set.of(Role.ROLE_USER));
+            userServiceImp.createUserWithRole(userDTO);
         });
     }
 
@@ -232,260 +232,103 @@ class UserServiceImpTest {
     void createUserWithRoles_NullPointerException() {
         assertAll(
                 () -> assertThrows(NullPointerException.class, () ->
-                        userServiceImp.createUserWithRoles(null, Set.of(Role.ROLE_USER))),
-                () -> assertThrows(NullPointerException.class, () ->
-                        userServiceImp.createUserWithRoles(inputUserDto, null))
+                        userServiceImp.createUserWithRole(null))
         );
-    }
-
-    private void assertEqualsUserDto(UserDto expected, UserDto result) {
-        assertAll(
-                () -> assertNotNull(result),
-                () -> assertNotNull(result.getId()),
-                () -> assertNotNull(result.getPublicId()),
-                () -> assertNotNull(result.getRoles()),
-
-                () -> assertTrue(result.getProjects().isEmpty()),
-                () -> assertTrue(result.getReportedTickets().isEmpty()),
-                () -> assertTrue(result.getWorkingOnTickets().isEmpty()),
-                () -> assertTrue(result.getSubscribedToProjects().isEmpty()),
-
-                () -> assertEquals(expected.getRoles(), result.getRoles()),
-                () -> assertEquals(expected.getEmail(), result.getEmail()),
-                () -> assertEquals(expected.getUsername(), result.getUsername()),
-                () -> assertEquals(expected.getPassword(), result.getPassword()));
     }
 
     @Test
     void createUser() {
         UserServiceImp spy = spy(userServiceImp);
 
-        Mockito.doReturn(outputUserDto)
+        Mockito.doReturn(userDTO)
                 .when(spy)
-                .createUserWithRoles(any(UserDto.class), anySet());
+                .createUserWithRole(any(UserDTO.class));
 
-        UserDto resultUserDto =
-                spy.createUser(inputUserDto);
+        UserDTO actualUserDTO =
+                spy.createUser(userDTO);
 
-        assertEqualsUserDto(outputUserDto, resultUserDto);
+        assertNotNull(actualUserDTO);
+        assertEquals(userDTO, actualUserDTO);
 
     }
 
     @Test
-    void updateUser() {
-        when(userRepository.findByPublicId(anyString()))
-                .thenReturn(Optional.ofNullable(outputUserEntity));
-        when(userRepository.save(any(UserEntity.class)))
-                .thenReturn(outputUserEntity);
-        when(modelMapper.map(any(UserEntity.class), eq(UserDto.class)))
-                .thenReturn(outputUserDto);
+    void updateUserWhenNoRoleIsSet() {
+        userDTO.setRole(null);
 
-        userServiceImp.updateUser(userPublicId, inputUserDto);
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(userRepo.save(any(UserEntity.class))).thenReturn(userEntity);
 
+        userServiceImp.updateUser(userDTO.getPublicId(), userDTO);
+
+        verify(serviceUtils).getUserEntity(anyString());
+        verify(userRepo).save(any(UserEntity.class));
+        verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
     }
+
+    @Test
+    void updateUserWhenRoleIsSet() {
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(serviceUtils.getRoleEntityToBeSet(any(Role.class), any(Role.class))).thenReturn(userEntity.getRoleEntity());
+        when(userRepo.save(any(UserEntity.class))).thenReturn(userEntity);
+
+        userServiceImp.updateUser(userDTO.getPublicId(), userDTO);
+
+        verify(serviceUtils).getUserEntity(anyString());
+        verify(serviceUtils).getRoleEntityToBeSet(any(Role.class), any(Role.class));
+        verify(userRepo).save(any(UserEntity.class));
+        verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
+    }
+
 
     @Test
     void deleteUser() {
-        when(userRepository.existsByPublicId(anyString()))
-                .thenReturn(true);
-        when(userRepository.findByPublicId(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
 
-        assertDoesNotThrow(() ->
-                userServiceImp.deleteUser(userPublicId));
+        userServiceImp.deleteUser(userDTO.getPublicId());
 
-        verify(userRepository, times(1)).existsByPublicId(anyString());
-        verify(userRepository, times(1)).delete(any(UserEntity.class));
-    }
-
-    @Test
-    void deleteUser_UserServiceException() {
-        when(userRepository.existsByPublicId(anyString()))
-                .thenReturn(false);
-
-
-        assertThrows(UserServiceException.class, () -> {
-            userServiceImp.deleteUser(userPublicId);
-        });
-    }
-
-    @Test
-    void deleteUser_NullPointerException() {
-        assertThrows(NullPointerException.class,
-                () -> userServiceImp.deleteUser(null));
-
+        verify(serviceUtils).getUserEntity(anyString());
+        verify(userRepo).delete(any(UserEntity.class));
     }
 
 
     @Test
-    void getReportedTickets() {
-        int page = 1;
-        int limit = 1;
-
-        List<TicketEntity> ticketEntities = List.of(new TicketEntity());
-
-        PageImpl<TicketEntity> pagedTicketEntities =
-                new PageImpl<>(ticketEntities,
-                        Pageable.ofSize(page), limit);
-
-        List<TicketDto> ticketDtos = List.of(new TicketDto());
-
-        PageImpl<TicketDto> outputPagedTicketDtos =
-                new PageImpl<>(ticketDtos,
-                        Pageable.ofSize(page), limit);
+    void isSubscribedToProject() {
+        when(projectRepo.existsByPublicId(anyString())).thenReturn(true);
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(projectRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
 
 
-        when(userRepository.findByPublicId(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
-        when(bugRepo.findAllByReporter(any(UserEntity.class), any(Pageable.class)))
-                .thenReturn(pagedTicketEntities);
-        when(modelMapper.map(
-                ArgumentMatchers.<Page<TicketEntity>>any(),
-                eq(new TypeToken<Page<TicketDto>>() {
-                }.getType())))
-                .thenReturn(outputPagedTicketDtos);
+        boolean isSubscribedToTicket = userServiceImp.isSubscribedToProject(userDTO.getPublicId(), "projectId");
 
-
-        Page<TicketDto> reportedTickets =
-                userServiceImp.getReportedTickets(userPublicId, page, limit);
-
-
-        assertNotNull(reportedTickets);
-
-        assertEquals(ticketEntities.size(), reportedTickets.getTotalElements());
-        assertEquals(0, reportedTickets.getNumber());
-        assertEquals(limit, reportedTickets.getSize());
+        assertTrue(isSubscribedToTicket);
     }
 
     @Test
-    void getReportedTickets_Exceptions() {
-        assertAll(
-                () -> assertThrows(NullPointerException.class, () ->
-                        userServiceImp.getReportedTickets(null, 1, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getReportedTickets(userPublicId, 0, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getReportedTickets(userPublicId, 1, 0))
-        );
+    void isSubscribedToTicket() {
+        when(ticketRepo.existsByPublicId(anyString())).thenReturn(true);
+        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(ticketRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
+
+        boolean isSubscribedToTicket = userServiceImp.isSubscribedToTicket(userDTO.getPublicId(), "ticketId");
+
+        assertTrue(isSubscribedToTicket);
     }
 
-
-    @Test
-    void getWorkingOnTickets() {
-        int page = 1;
-        int limit = 1;
-
-        List<TicketEntity> ticketEntities = List.of(new TicketEntity());
-
-        PageImpl<TicketEntity> pagedTicketEntities =
-                new PageImpl<>(ticketEntities,
-                        Pageable.ofSize(page), limit);
-
-        List<TicketDto> ticketDtos = List.of(new TicketDto());
-
-        PageImpl<TicketDto> outputPagedTicketDtos =
-                new PageImpl<>(ticketDtos,
-                        Pageable.ofSize(page), limit);
-
-
-        when(userRepository.findByPublicId(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
-        when(bugRepo.findAllByAssignedDevsIn(anySet(), any(Pageable.class)))
-                .thenReturn(pagedTicketEntities);
-        when(modelMapper.map(
-                ArgumentMatchers.<Page<TicketEntity>>any(),
-                eq(new TypeToken<Page<TicketDto>>() {
-                }.getType())))
-                .thenReturn(outputPagedTicketDtos);
-
-        Page<TicketDto> workingOnTickets =
-                userServiceImp.getWorkingOnTickets(userPublicId, page, limit);
-
-
-        assertNotNull(workingOnTickets);
-
-        assertEquals(ticketEntities.size(), workingOnTickets.getTotalElements());
-        assertEquals(0, workingOnTickets.getNumber());
-        assertEquals(limit, workingOnTickets.getSize());
-    }
-
-    @Test
-    void getWorkingOnTickets_Exceptions() {
-        assertAll(
-                () -> assertThrows(NullPointerException.class, () ->
-                        userServiceImp.getWorkingOnTickets(null, 1, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getWorkingOnTickets(userPublicId, 0, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getWorkingOnTickets(userPublicId, 1, 0))
-        );
-    }
-
-
-    @Test
-    void getSubscribedOnProjects() {
-        int page = 1;
-        int limit = 1;
-
-        List<ProjectEntity> projectEntities = List.of(new ProjectEntity());
-
-        PageImpl<ProjectEntity> pagedProjectEntities =
-                new PageImpl<>(projectEntities,
-                        Pageable.ofSize(page), limit);
-
-        List<ProjectDto> projectDtos = List.of(new ProjectDto());
-
-        PageImpl<ProjectDto> outputPagedProjectDtos =
-                new PageImpl<>(projectDtos,
-                        Pageable.ofSize(page), limit);
-
-        when(userRepository.findByPublicId(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
-        when(projectRepository.findAllBySubscribersIn(anySet(), any(Pageable.class)))
-                .thenReturn(pagedProjectEntities);
-        when(modelMapper.map(
-                ArgumentMatchers.<Page<ProjectEntity>>any(),
-                eq(new TypeToken<Page<ProjectDto>>() {
-                }.getType())))
-                .thenReturn(outputPagedProjectDtos);
-
-
-        Page<ProjectDto> pagedProjectDtos =
-                userServiceImp.getSubscribedOnProjects(userPublicId, page, limit);
-
-
-        assertNotNull(pagedProjectDtos);
-
-        assertEquals(outputPagedProjectDtos.getTotalElements(), pagedProjectDtos.getTotalElements());
-        assertEquals(0, pagedProjectDtos.getNumber());
-        assertEquals(limit, pagedProjectDtos.getSize());
-
-    }
-
-    @Test
-    void getSubscribedOnProjects_Exceptions() {
-        assertAll(
-                () -> assertThrows(NullPointerException.class, () ->
-                        userServiceImp.getSubscribedOnProjects(null, 1, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getSubscribedOnProjects(userPublicId, 0, 1)),
-                () -> assertThrows(IllegalArgumentException.class, () ->
-                        userServiceImp.getSubscribedOnProjects(userPublicId, 1, 0))
-        );
-    }
 
     @Test
     void loadUserByUsername() {
-        when(userRepository.findByEmail(anyString()))
-                .thenReturn(Optional.of(outputUserEntity));
-        when(modelMapper.map(any(UserEntity.class), eq(UserDto.class)))
-                .thenReturn(outputUserDto);
+        userDTO.setPassword(userEntity.getEncryptedPassword());
 
-        UserDetails userDetails = userServiceImp.loadUserByUsername(userEmail);
+        when(userRepo.findByEmail(anyString())).thenReturn(Optional.of(userEntity));
+        when(modelMapper.map(any(UserEntity.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-        assertNotNull(userDetails);
+        UserDetails actualUserDetails = userServiceImp.loadUserByUsername(userDTO.getEmail());
 
-        assertEquals(outputUserDto.getEmail(), userDetails.getUsername());
+        assertNotNull(actualUserDetails);
+
+        assertEquals(userDTO.getEmail(), actualUserDetails.getUsername());
+        assertEquals(userEntity.getEncryptedPassword(), actualUserDetails.getPassword());
     }
 
 

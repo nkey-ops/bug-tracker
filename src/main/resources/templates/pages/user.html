@@ -29,7 +29,6 @@
     <!-- Layout styles -->
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <!-- End layout styles -->
-    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
 </head>
 <body>
 <div class="container-scroller">
@@ -52,11 +51,11 @@
                         <div class="col-lg-4">
                             <div class="card mb-4">
                                 <div class="card-body text-center">
-                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
-                                         alt="avatar"
+                                    <img id="head-avatar" src="" alt="avatar"
                                          class="rounded-circle img-fluid" style="width: 150px;">
-                                    <h5 class="my-3">[[${user.username}]]</h5>
-                                    <p class="text-muted mb-4">[[${user.status}]]</p>
+
+                                    <h5 id="head-username"  class="my-3"></h5>
+                                    <p  id="head-status" class="text-muted mb-4"></p>
                                     <div class="d-flex justify-content-center mb-2">
                                         <button type="button" class="btn btn-outline-primary ms-1">Message</button>
                                     </div>
@@ -66,7 +65,7 @@
                         <div id="user-info" class="col-lg-8">
                             <div class="card mb-4">
                                 <div class="card-body">
-                                    <div class="row">
+                                    <div th:if="${isCurrentUser}" class="row">
                                         <div class="right">
                                             <button id="edit-button" type="button"
                                                     class="edit-button btn btn-outline-warning btn-sm btn-rounded">
@@ -79,7 +78,7 @@
                                             <p class="mb-0">Username</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.username}]]</p>
+                                            <p id="username" class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                     <hr>
@@ -88,7 +87,7 @@
                                             <p class="mb-0">ID</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.publicId}]]</p>
+                                            <p id="publicId" class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                     <hr>
@@ -97,7 +96,7 @@
                                             <p class="mb-0">Email</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.email}]]</p>
+                                            <p id="email" class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                     <hr>
@@ -106,7 +105,7 @@
                                             <p class="mb-0">Phone</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.phoneNumber}]]</p>
+                                            <p id="phone-number" class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                     <hr>
@@ -115,7 +114,7 @@
                                             <p class="mb-0">Address</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.address}]]</p>
+                                            <p id="address"class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                     <hr>
@@ -124,7 +123,7 @@
                                             <p class="mb-0">Status</p>
                                         </div>
                                         <div class="col-sm-9">
-                                            <p class="text-muted mb-0">[[${user.status}]]</p>
+                                            <p id="status" class="text-muted mb-0"></p>
                                         </div>
                                     </div>
                                 </div>
@@ -133,9 +132,40 @@
                     </div>
                 </div>
 
+                <div th:if="${isCurrentUser}" class="form-group text-center">
+                    <button id="delete-user" type="button" class="btn btn-outline-danger btn-sm">
+                        <i class="mdi mdi-delete-forever"></i>Delete Account
+                    </button>
+                </div>
+
                 <script th:inline="javascript">
-                    $('#edit-button').click(function (){
-                     $('#user-info').load([[${userEditFormLink}]]);   
+                    $.get([[${userLink}]], function (user) {
+                        $("#head-username").html(user['username']).change();
+                        $("#head-status").html(user['status']).change();
+                        $("#head-avatar").attr('src', user['avatarURL']);
+                        
+                        $("#username").html(user['username']).change();
+                        $("#publicId").html(user['publicId']).change();
+                        $("#email").html(user['email']).change();
+                        $("#phone-number").html(user['phoneNumber']).change();
+                        $("#address").html(user['address']).change();
+                        $("#status").html(user['status']).change();
+                    });
+                    
+                    $('#edit-button').click(function () {
+                        $('#user-info').load([[${userEditFormLink}]]);
+                    });
+
+                    $("#delete-user").click(function () {
+                        if (confirm('Are you sure you want to delete this account')) {
+                            $.ajax({
+                                type: "DELETE",
+                                url: [[${userLink}]],
+                                success: function () {
+                                    window.location.href = [[${#request.contextPath}]] + '/logout';
+                                }
+                            })
+                        }
                     });
                 </script>
             </div>
@@ -153,10 +183,8 @@
 <!-- Plugin js for this page -->
 <script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
 <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
-<script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
 <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
 <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
-<script th:src="@{/webjars/chart.js/3.8.0/dist/chart.min.js}"></script>
 <script th:src="@{/assets/vendors/perfect-scrollbar/dist/perfect-scrollbar.min.js}"></script>
 
 <script th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>

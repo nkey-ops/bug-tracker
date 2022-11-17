@@ -1,67 +1,76 @@
 package com.bluesky.bugtraker.service.impl;
 
+import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.RoleServiceException;
+import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.UserServiceException;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.TicketEntity;
+import com.bluesky.bugtraker.io.entity.RoleEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
-import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.service.Utils;
+import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.bluesky.bugtraker.shared.dto.*;
-import org.modelmapper.Conditions;
+import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
+import com.bluesky.bugtraker.shared.ticketstatus.Severity;
+import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import javax.validation.constraints.NotNull;
+import java.time.Instant;
+import java.time.Period;
+import java.util.*;
 
-import static com.bluesky.bugtraker.exceptions.ErrorMessages.NO_RECORD_FOUND;
-import static com.bluesky.bugtraker.exceptions.ErrorMessages.RECORD_ALREADY_EXISTS;
+import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_EXISTS;
 import static com.bluesky.bugtraker.service.specifications.Specs.*;
-import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 public class UserServiceImp implements UserService {
-    //TODO make a constant values for user id length;
+    @Value("${user-avatar-url}")
+    private String avatarURL;
+
+    private final ServiceUtils serviceUtils;
     private final UserRepository userRepo;
     private final RoleRepository roleRepo;
     private final TicketRepository ticketRepo;
     private final ProjectRepository projectRepo;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final Utils utils;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public UserServiceImp(UserRepository userRepo, RoleRepository roleRepo,
+    public UserServiceImp(ServiceUtils serviceUtils,
+                          UserRepository userRepo,
+                          RoleRepository roleRepo,
                           TicketRepository ticketRepo,
-                          ProjectRepository projectRepo, BCryptPasswordEncoder bCryptPasswordEncoder,
-                          Utils utils, ModelMapper modelMapper) {
+                          ProjectRepository projectRepo,
+                          Utils utils,
+                          ModelMapper modelMapper) {
+        this.serviceUtils = serviceUtils;
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.ticketRepo = ticketRepo;
         this.projectRepo = projectRepo;
 
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.utils = utils;
         this.modelMapper = modelMapper;
-
-        this.modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
     }
 
 
@@ -70,194 +79,180 @@ public class UserServiceImp implements UserService {
         return userRepo.existsByEmail(email);
     }
 
-    private UserEntity getUserEntity(String id) {
-        if (id == null) throw new NullPointerException("Id cannot be null");
 
-        return userRepo.findByPublicId(id)
-                .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, id));
+    @Override
+    @NotNull
+    public boolean existsUserByEmail(@NotNull String email) {
+        return userRepo.existsByEmail(email);
     }
 
     @Override
-    public UserDto getUserById(String id) {
-        UserEntity userEntity = getUserEntity(id);
-        return modelMapper.map(userEntity, UserDto.class);
+    @NotNull
+    public UserDTO getUserById(@NotNull String id) {
+        UserEntity userEntity = serviceUtils.getUserEntity(id);
+        UserDTO userDTO = modelMapper.map(userEntity, UserDTO.class);
+        userDTO.setRole(userEntity.getRoleEntity().getRole());
+
+        return userDTO;
     }
 
-    @Transactional
     @Override
-    public UserDto getUserByEmail(String email) {
-        if (email == null)
-            throw new NullPointerException("Email cannot be null");
-
+    @NotNull
+    public UserDTO getUserByEmail(@NotNull String email) {
         UserEntity userEntity = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UserServiceException(NO_RECORD_FOUND, email));
 
-        return modelMapper.map(userEntity, UserDto.class);
+        UserDTO userDTO = modelMapper.map(userEntity, UserDTO.class);
+        userDTO.setRole(userEntity.getRoleEntity().getRole());
+
+        return userDTO;
+    }
+
+    @Override
+    @NotNull
+    public DataTablesOutput<UserDTO> getUsers(DataTablesInput input) {
+
+        DataTablesOutput<UserEntity> userEntities = userRepo.findAll(input);
+
+        return utils.map(userEntities, new TypeToken<List<UserDTO>>() {
+        });
     }
 
 
-    public UserDto createUserWithRoles(UserDto userDto, Set<Role> roles) {
+    @Transactional
+    public UserDTO createUserWithRole(@NotNull UserDTO userDto) {
         if (userRepo.existsByEmail(userDto.getEmail()))
             throw new UserServiceException(RECORD_ALREADY_EXISTS, userDto.getEmail());
 
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
-
-        userEntity.setPublicId(utils.generateUserId(30));
-        userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
+        userEntity.setPublicId(utils.generateUserId());
+        userEntity.setEncryptedPassword(utils.encode(userDto.getPassword()));
+        userEntity.setAvatarURL(avatarURL);
         userEntity.setEmailVerificationToken("mock");
-        //        TODO after testing change to false;
-        userEntity.setEmailVerificationStatus(true);
+        userEntity.setEmailVerificationStatus(true);   // TODO after testing change to false;
 
-        Set<RoleEntity> roleEntities = roleRepo.findAllByRoleIn(roles)
+        RoleEntity roleEntity = roleRepo.findByRole(userDto.getRole())
                 .orElseThrow(() ->
-                        new RoleServiceException(NO_RECORD_FOUND, roles.toString()));
-        userEntity.setRoles(roleEntities);
+                        new RoleServiceException(NO_RECORD_FOUND, userDto.getRole().toString()));
+        userEntity.setRoleEntity(roleEntity);
 
         UserEntity savedEntity = userRepo.save(userEntity);
 
-        return modelMapper.map(savedEntity, UserDto.class);
+        return modelMapper.map(savedEntity, UserDTO.class);
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        return createUserWithRoles(userDto, Set.of(Role.ROLE_USER));
+    public UserDTO createUser(UserDTO userDto) {
+        userDto.setRole(Role.ROLE_USER);
+        return createUserWithRole(userDto);
     }
 
     @Override
-    public void updateUser(String id, UserDto userDto) {
-        UserEntity userEntity = getUserEntity(id);
-        
+    public void updateUser(String userId, UserDTO userDto) {
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+
+        if (userDto.getRole() != null) {
+            RoleEntity roleEntity =
+                    serviceUtils.getRoleEntityToBeSet(userDto.getRole(), userEntity.getRoleEntity().getRole());
+            userEntity.setRoleEntity(roleEntity);
+        }
+
+        String avatarURL = userDto.getAvatarURL();
+        if (avatarURL == null || avatarURL.isBlank())
+            userDto.setAvatarURL(this.avatarURL);
+
         modelMapper.map(userDto, userEntity);
-        
         userRepo.save(userEntity);
     }
 
-    @Transactional
     @Override
-    public void deleteUser(String id) {
-        if (id == null)
-            throw new NullPointerException("Id cannot be null");
+    public void deleteUser(@NotNull String userId) {
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+        userRepo.delete(userEntity);
+    }
 
-        if (!userRepo.existsByPublicId(id)) {
-            throw new UserServiceException(NO_RECORD_FOUND, id);
+    @Override
+    @NotNull
+    public ProjectsInfoDTO getProjectsInfo(String userId) {
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+
+        Date dayAgo =  Date.from(Instant.now().minus(Period.ofDays(1)));
+        ProjectsInfoDTO projectsInfoDTO = new ProjectsInfoDTO();
+
+        projectsInfoDTO.setTicketsReported(
+                ticketRepo.countAllByProjectCreator(userEntity));
+        projectsInfoDTO.setTicketsReportedADayAgo(
+                ticketRepo.countAllByProjectCreatorAndLastUpdateTimeAfter(userEntity, dayAgo));
+
+        projectsInfoDTO.setCriticalTickets(
+                ticketRepo.countAllByProjectCreatorAndSeverity(userEntity, Severity.CRITICAL));
+        projectsInfoDTO.setCriticalTicketsADayAgo(
+                ticketRepo.countAllByProjectCreatorAndSeverityAndLastUpdateTimeAfter(userEntity, Severity.CRITICAL, dayAgo));
+
+        projectsInfoDTO.setCompletedTickets(
+                ticketRepo.countAllByProjectCreatorAndStatus(userEntity, Status.COMPLETED));
+        projectsInfoDTO.setCompletedTicketsADayAgo(
+                ticketRepo.countAllByProjectCreatorAndStatusAndLastUpdateTime(userEntity, Status.COMPLETED, dayAgo));
+
+        projectsInfoDTO.setTicketsInProgress(
+                ticketRepo.countAllByProjectCreatorAndStatus(userEntity, Status.IN_PROGRESS));
+        projectsInfoDTO.setTicketInProgressADayAgo(
+                ticketRepo.countAllByProjectCreatorAndStatusAndLastUpdateTime(userEntity, Status.IN_PROGRESS, dayAgo));
+
+
+        Map<Status, List<Long>> ticketsPerWeek = new EnumMap<>(Status.class);
+        projectsInfoDTO.setTicketsPerWeek(ticketsPerWeek);
+
+        for (int i = 0; i < 5; i++) {
+            long countToFix = ticketRepo.count(ticketByProjectCreator(userEntity).and(statusIs(Status.TO_FIX).and(lastUpdatedWeeksAgo(i))));
+            long countInProgress = ticketRepo.count(ticketByProjectCreator(userEntity).and(statusIs(Status.IN_PROGRESS).and(lastUpdatedWeeksAgo(i))));
+            long countCompleted = ticketRepo.count(ticketByProjectCreator(userEntity).and(statusIs(Status.COMPLETED).and(lastUpdatedWeeksAgo(i))));
+
+            ticketsPerWeek.putIfAbsent(Status.TO_FIX, new ArrayList<>());
+            ticketsPerWeek.putIfAbsent(Status.IN_PROGRESS, new ArrayList<>());
+            ticketsPerWeek.putIfAbsent(Status.COMPLETED, new ArrayList<>());
+
+            ticketsPerWeek.get(Status.TO_FIX).add(countToFix);
+            ticketsPerWeek.get(Status.IN_PROGRESS).add(countInProgress);
+            ticketsPerWeek.get(Status.COMPLETED).add(countCompleted);
         }
 
-        userRepo.delete(getUserEntity(id));
+        Map<Status, Long> tickets = new EnumMap<>(Status.class);
+        projectsInfoDTO.setTickets(tickets);
+
+        tickets.put(Status.TO_FIX, ticketRepo.countAllByProjectCreatorAndStatus(userEntity, Status.TO_FIX));
+        tickets.put(Status.IN_PROGRESS, ticketRepo.countAllByProjectCreatorAndStatus(userEntity, Status.IN_PROGRESS));
+        tickets.put(Status.COMPLETED, ticketRepo.countAllByProjectCreatorAndStatus(userEntity, Status.COMPLETED));
+
+        return projectsInfoDTO;
     }
 
     @Override
-    public Page<TicketDto> getReportedTickets(String userId, int page, int limit) {
-        if (page < 1 || limit < 1) throw new IllegalArgumentException();
-
-        Page<TicketEntity> bugs =
-                ticketRepo.findAllByReporter(
-                        getUserEntity(userId), PageRequest.of(page - 1, limit));
-        return modelMapper.map(bugs, new TypeToken<Page<TicketDto>>() {
-        }.getType());
-    }
-
-    @Override
-    public Page<TicketDto> getWorkingOnTickets(String userId, int page, int limit) {
-        if (page < 1 || limit < 1) throw new IllegalArgumentException();
-
-        Page<TicketEntity> ticketFixers = ticketRepo.findAllByAssignedDevsIn(
-                Set.of(getUserEntity(userId)), PageRequest.of(page - 1, limit));
-        return modelMapper.map(ticketFixers, new TypeToken<Page<TicketDto>>() {
-        }.getType());
-    }
-
-
-    @Override
-    public Page<ProjectDto> getSubscribedOnProjects(String userId, int page, int limit) {
-        if (page < 1 || limit < 1) throw new IllegalArgumentException();
-
-        Page<ProjectEntity> projectEntities = projectRepo.findAllBySubscribersIn(
-                Set.of(getUserEntity(userId)), PageRequest.of(page - 1, limit));
-        return modelMapper.map(projectEntities, new TypeToken<Page<ProjectDto>>() {
-        }.getType());
-
-    }
-
-    @Override
-    public TicketsInfoDTO getTicketsInfo(String userId) {
-        TicketsInfoDTO ticketsInfoDTO = new TicketsInfoDTO();
-
-        Set<ProjectEntity> allCreatedProjects =
-                projectRepo.findAllByCreator(getUserEntity(userId));
-
-        long ticketsReported = 0;
-        long ticketsReportedADayAgo = 0;
-
-        long criticalTickets = 0;
-        long criticalTicketsADayAgo = 0;
-
-        long completedTickets = 0;
-        long completedTicketsADayAgo = 0;
-
-        long inProgressTickets = 0;
-        long inProgressTicketsADayAgo = 0;
-
-        for (ProjectEntity projectEntity : allCreatedProjects) {
-            Long projectId = projectEntity.getId();
-
-            Specification<TicketEntity> byProjectIdAndADayAgo =
-                    where(byProjectId(projectId).and(reportedADayAgo()));
-
-            ticketsReported += ticketRepo.count(byProjectId(projectId));
-            ticketsReportedADayAgo += ticketRepo.count(byProjectIdAndADayAgo);
-
-            criticalTickets += ticketRepo.count(byProjectId(projectId).and(severityIsCritical()));
-            criticalTicketsADayAgo += ticketRepo.count(byProjectIdAndADayAgo.and(severityIsCritical()));
-
-            completedTickets += ticketRepo.count(byProjectId(projectId).and(statusIsCompleted()));
-            completedTicketsADayAgo += ticketRepo.count(byProjectIdAndADayAgo.and(statusIsCompleted()));
-
-            inProgressTickets += ticketRepo.count(byProjectId(projectId).and(statusIsInProgress()));
-            inProgressTicketsADayAgo += ticketRepo.count(byProjectIdAndADayAgo.and(statusIsInProgress()));
-        }
-
-
-        ticketsInfoDTO.setTicketsReported(ticketsReported);
-        ticketsInfoDTO.setTicketsReportedADayAgo(ticketsReportedADayAgo);
-
-        ticketsInfoDTO.setCriticalTickets(criticalTickets);
-        ticketsInfoDTO.setCriticalTicketsADayAgo(criticalTicketsADayAgo);
-
-        ticketsInfoDTO.setCompletedTickets(completedTickets);
-        ticketsInfoDTO.setCompletedTicketsADayAgo(completedTicketsADayAgo);
-
-        ticketsInfoDTO.setTicketsInProgress(inProgressTickets);
-        ticketsInfoDTO.setTicketInProgressADayAgo(inProgressTicketsADayAgo);
-
-
-        return ticketsInfoDTO;
-    }
-
-    @Override
+    @NotNull
     public UserInfoDTO getUserInfo(String userId) {
-        UserEntity userEntity = getUserEntity(userId);
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
 
         long ticketsReported = ticketRepo.count(byReporter(userEntity));
         long ticketsReportedADayAgo = ticketRepo.count(byReporter(userEntity).and(reportedADayAgo()));
         long ticketsReportedAMonthAgo = ticketRepo.count(byReporter(userEntity).and(reportedAMonthAgo()));
 
-        long ticketsCompleted = ticketRepo.count(byAssigndedDev(userEntity).and(statusIsCompleted()));
-        long ticketsCompletedADayAgo = ticketRepo.count(byAssigndedDev(userEntity).and(statusIsCompleted()).and(reportedADayAgo()));
-        long ticketsCompletedAMonthAgo = ticketRepo.count(byAssigndedDev(userEntity).and(statusIsCompleted()).and(reportedAMonthAgo()));
-        
-        long ticketsSubscribedTo = ticketRepo.count(byAssigndedDev(userEntity));
-        long ticketsSubscribedToADayAgo = ticketRepo.count(byAssigndedDev(userEntity).and(reportedADayAgo()));
-        long ticketsSubscribedToAMonthAgo = ticketRepo.count(byAssigndedDev(userEntity).and(reportedAMonthAgo()));
-        
+        long ticketsCompleted = ticketRepo.count(bySubscriber(userEntity).and(statusIsCompleted()));
+        long ticketsCompletedADayAgo = ticketRepo.count(bySubscriber(userEntity).and(statusIsCompleted()).and(reportedADayAgo()));
+        long ticketsCompletedAMonthAgo = ticketRepo.count(bySubscriber(userEntity).and(statusIsCompleted()).and(reportedAMonthAgo()));
+
+        long ticketsSubscribedTo = ticketRepo.count(bySubscriber(userEntity));
+        long ticketsSubscribedToADayAgo = ticketRepo.count(bySubscriber(userEntity).and(reportedADayAgo()));
+        long ticketsSubscribedToAMonthAgo = ticketRepo.count(bySubscriber(userEntity).and(reportedAMonthAgo()));
+
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setTicketsReported(ticketsReported);
         userInfoDTO.setTicketsReportedADayAgo(ticketsReportedADayAgo);
         userInfoDTO.setTicketsReportedAMonthAgo(ticketsReportedAMonthAgo);
-        
+
         userInfoDTO.setTicketsCompleted(ticketsCompleted);
         userInfoDTO.setTicketsCompletedADayAgo(ticketsCompletedADayAgo);
         userInfoDTO.setTicketsCompletedAMonthAgo(ticketsCompletedAMonthAgo);
-        
+
         userInfoDTO.setTicketsSubscribedTo(ticketsSubscribedTo);
         userInfoDTO.setTicketsSubscribedToADayAgo(ticketsSubscribedToADayAgo);
         userInfoDTO.setTicketsSubscribedToAMonthAgo(ticketsSubscribedToAMonthAgo);
@@ -265,13 +260,36 @@ public class UserServiceImp implements UserService {
         return userInfoDTO;
     }
 
+    public boolean isSubscribedToProject(@NotNull String userId, @NotNull String projectId) {
+        if (!projectRepo.existsByPublicId(projectId))
+            throw new ProjectServiceException(NO_RECORD_FOUND, projectId);
+        
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+
+        return projectRepo.existsByPublicIdAndSubscribersIn(projectId, Set.of(userEntity));
+    }
+
+    public boolean isSubscribedToTicket(@NotNull String userId, @NotNull String ticketId) {
+        if (!ticketRepo.existsByPublicId(ticketId))
+            throw new TicketServiceException(NO_RECORD_FOUND, ticketId);
+        
+        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+
+        return ticketRepo.existsByPublicIdAndSubscribersIn(ticketId, Set.of(userEntity));
+    }
+
+    public boolean isSuperAdmin(@NotNull String userId) {
+        return serviceUtils.getUserEntity(userId).getRoleEntity().getRole() == Role.ROLE_SUPER_ADMIN;
+    }
+
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(NO_RECORD_FOUND + " with : " + email));
 
-        UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+        UserDTO userDto = modelMapper.map(userEntity, UserDTO.class);
 
         return new UserPrincipal(userDto);
     }

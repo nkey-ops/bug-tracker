@@ -15,6 +15,11 @@
                        th:field="${userModel.username}">
             </div>
             <div class="form-group">
+                <label for="avatar-url">Avatar URL</label>
+                <input type="text" class="form-control" id="avatar-url" placeholder="From: https://i.imgur.com"
+                       th:field="${userModel.avatarURL}">
+            </div>
+            <div class="form-group">
                 <label for="phoneNumber">Phone</label>
                 <input type="text" class="form-control" id="phoneNumber" placeholder="Phone number"
                        th:field="${userModel.phoneNumber}">
@@ -36,6 +41,7 @@
         <script th:inline="javascript">
             $.get([[${userLink}]], function (user) {
                 document.getElementById("username").value = user['username'];
+                document.getElementById("avatar-url").value = user['avatarURL'];
                 document.getElementById("phoneNumber").value = user['phoneNumber'];
                 document.getElementById("address").value = user['address'];
                 document.getElementById("status").value = user['status'];

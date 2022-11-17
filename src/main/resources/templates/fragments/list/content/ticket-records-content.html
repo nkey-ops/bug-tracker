@@ -10,7 +10,6 @@
             <th>Id</th>
             <th>By</th>
             <th>Created</th>
-            
         </tr>
         </thead>
     </table>
@@ -18,14 +17,15 @@
         $(document).ready(function () {
             var oTable = $('#ticket-records-table').DataTable({
                 oLanguage: {
-                    sInfoFiltered : ''
+                    sInfoFiltered: ''
                 },
-                
+
+                pageLength: 5,
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],
                 order: [
-                    [2, 'desc']
+                    [3, 'desc']
                 ],
                 columns: [
                     {
@@ -40,24 +40,28 @@
                     {data: 'publicId'},
                     {
                         data: 'creator.username',
-                        render: function ( data, type, full, row ) {
-                            var data1 = oTable.row(row).data();
-                            var link = '/bugtracker/users/' + data1['publicId'] + '/profile';
-                            var creatorName = data1['creator']['username'];
-                            
-                            return '<a href="' + link + '">' + creatorName + '</a>';
+                        render: function (data, type, row) {
+                            var creator = row['creator'];
+                            var links = row['links'];
+
+                            return '<img src="' + creator['avatarURL'] + '" class="img-xs rounded-circle">\n' +
+                                '<a href="' + getLink(links, 'creatorPage') + '"> ' +
+                                '<h7 class="font-weight-bold text-primary">' + creator['username'] + '</h7> </a>';
                         }
                     },
-                    {data: 'lastUpdateTime'}
+                    {
+                        data: 'createdTime',
+                        render: function (data) {
+                            return moment(data, 'YYYY-MM-DD HH:mm:ss').format('MM/DD/YYYY HH:mm:ss')
+                        }
+                    }
                 ]
-            });
-            $('#ticket-records-table')
+            })
                 .on('click', 'tbody tr', function () {
                     var currentRow = $(this).closest("tr").children();
-                    var id = oTable.row(currentRow).data()['publicId'];
-
-                    //hard code
-                    $('#ticket-info-block').load([[${dataSource}]] + "/" + id);
+                    var links = oTable.row(currentRow).data()['links'];
+                    
+                    $('#ticket-details-block').load(getLink(links, 'details'));
                 });
         });
     </script>

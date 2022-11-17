@@ -19,7 +19,7 @@ public class ProjectEntity implements Serializable {
     @Serial
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = 90481049740702283L;
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,11 +29,10 @@ public class ProjectEntity implements Serializable {
     @Column(nullable = false, length = 30)
     private String name;
 
-    @ManyToOne(optional = false,
-               fetch =  FetchType.LAZY)
-    @JoinColumn(name="creator_id",
-                nullable=false,
-                updatable=false) 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "creator_id",
+            referencedColumnName = "id",
+            nullable = false, updatable = false)
     private UserEntity creator;
 
     @OneToMany(mappedBy = "project",
@@ -42,18 +41,11 @@ public class ProjectEntity implements Serializable {
             orphanRemoval = true)
     private Set<TicketEntity> tickets = new HashSet<>();
 
-//    @OneToMany(
-//            fetch = FetchType.LAZY,
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true)
-//    @JoinColumn(name = "project_id")
-//    private Set<TicketEntity> tickets;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "projects_subscribers",
-            joinColumns=@JoinColumn(name="project_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="subscriber_id", referencedColumnName="id"))
-    private Set<UserEntity> subscribers;
+            joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "subscriber_id", referencedColumnName = "id"))
+    private Set<UserEntity> subscribers = new HashSet<>();
 
     @OneToMany(mappedBy = "project",
             cascade = CascadeType.ALL,
@@ -61,11 +53,21 @@ public class ProjectEntity implements Serializable {
             fetch = FetchType.LAZY)
     private Set<CommentEntity> comments = new HashSet<>();
 
-    
-//    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-//    @JoinColumn(name = "project_id",
-//                referencedColumnName = "comment_id")
-//    private Set<CommentEntity> comments;
+
+    public boolean setCreator(UserEntity creator) {
+        this.creator = creator;
+        return creator.getProjects().add(this);
+    }
+
+    public boolean removeCreator() {
+        if(creator == null) return false;
+        
+        boolean isRemoved = creator.getProjects().remove(this);
+        this.creator = null;
+
+        return isRemoved;
+    }
+
 
     public boolean addTicket(TicketEntity ticketEntity) {
         boolean isAdded = tickets.add(ticketEntity);
@@ -74,6 +76,7 @@ public class ProjectEntity implements Serializable {
 
         return isAdded;
     }
+
     public boolean removeTicket(TicketEntity ticketEntity) {
         boolean isRemoved = tickets.remove(ticketEntity);
 
@@ -81,19 +84,17 @@ public class ProjectEntity implements Serializable {
 
         return isRemoved;
     }
+
     public boolean addSubscriber(UserEntity subscriber) {
         boolean isAddedUser = subscribers.add(subscriber);
-
-        boolean isAddedProject =
-            subscriber.getSubscribedToProjects().add(this);
+        boolean isAddedProject = subscriber.getSubscribedToProjects().add(this);
 
         return isAddedUser && isAddedProject;
     }
+
     public boolean removeSubscriber(UserEntity subscriber) {
         boolean isRemovedUser = subscribers.remove(subscriber);
-
-        boolean isRemovedProject =
-                subscriber.getSubscribedToProjects().remove(this);
+        boolean isRemovedProject = subscriber.getSubscribedToProjects().remove(this);
 
         return isRemovedUser && isRemovedProject;
     }
@@ -103,11 +104,11 @@ public class ProjectEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProjectEntity that = (ProjectEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(name, that.name);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, publicId, name);
+        return Objects.hash(id);
     }
 }

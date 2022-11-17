@@ -55,14 +55,10 @@ public class TicketRecordEntity implements Serializable {
     @Lob
     @Column(columnDefinition = "varchar(250) default 'Solution is not found.'")
     private String howToSolve;
-
+    
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date reportedTime;
-
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdateTime;
+    private Date createdTime;
 
     @ManyToOne
     @JoinColumn(name = "main_ticket_id",

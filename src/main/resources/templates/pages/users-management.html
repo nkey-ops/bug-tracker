@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bug Tracker Admin</title>
+
+    <!-- Js script -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+    <!-- end Js script -->
+
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" media="screen" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+    <!-- end inject -->
+
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/vendors/data-tables-1.12.1/datatables.css}"/>
+    <!-- End plugin css for this page -->
+
+    <!-- inject:css -->
+    <!-- end inject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+</head>
+<body>
+<div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <div th:replace="fragments/sidebar"></div>
+    <!-- partial:partials/_sidebar.html ends -->
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <div th:replace="fragments/navbar"></div>
+        <!-- partial:partials/_navbar.html  ends-->
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h3 class="page-title"> Users Management </h3>
+                </div>
+                <div class="row ">
+                    <div  class="col-12 grid-margin">
+                        <div id="users-content-block" class="card card-body"></div>
+                    </div>
+                </div>
+                <script th:inline="javascript">
+                    window.onload = function () {
+                        $("#users-content-block").load([[${userContentLink}]]);
+                    }
+                </script>
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<!-- endinject -->
+<!-- Plugin js for this page -->
+<script th:src="@{/assets/vendors/perfect-scrollbar/dist/perfect-scrollbar.min.js}"></script>
+<script th:src="@{/assets/vendors/data-tables-1.12.1/datatables.js}"></script>
+<!-- End plugin js for this page -->
+
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<script th:src="@{/assets/js/test/serialize.js}"></script>
+<script th:src="@{/assets/js/test/get-link.js}"></script>
+<!-- End custom js for this page -->
+</body>
+</html>

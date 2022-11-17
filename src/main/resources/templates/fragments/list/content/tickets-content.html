@@ -21,9 +21,9 @@
         $(document).ready(function () {
             var oTable = $('#tickets-table').DataTable({
                 oLanguage: {
-                    sInfoFiltered : ''
+                    sInfoFiltered: ''
                 },
-                
+                pageLength: 5,
                 serverSide: true,
                 deferRender: true,
                 ajax: [[${dataSource}]],
@@ -45,25 +45,49 @@
                         }
                     },
                     {data: 'shortDescription'},
-                    {data: 'status'},
-                    {data: 'severity'},
-                    {data: 'priority'},
-                    {data: 'reporter.username'},
-                    {data: 'reportedTime'}
+                    {
+                        data: 'status',
+                        render: function (data) {
+                            return data['text']
+                        }
+                    },
+                    {
+                        data: 'severity',
+                        render: function (data) {
+                            return data['text']
+                        }
+                    },
+                    {
+                        data: 'priority',
+                        render: function (data) {
+                            return data['text']
+                        }
+                    },
+                    {
+                        data: 'reporter.username',
+                        render: function (data, type, row) {
+                            var reporter = row['reporter'];
+                            var links = row['links'];
+
+                            return '<img src="' + reporter['avatarURL'] + '" class="img-xs rounded-circle">\n' +
+                                '<a href="' + getLink(links, 'creator page') + '"> ' +
+                                '<h7 class="font-weight-bold text-primary">' + reporter['username'] + '</h7> </a>';
+                        }
+                    },
+                    {
+                        data: 'createdTime',
+                        render: function (data) {
+                            return moment(data, 'YYYY-MM-DD HH:mm:ss').format('MM/DD/YYYY HH:mm:ss')
+                        }
+                    }
                 ],
-                // columnDefs: [{
-                //     targets: 7,
-                //     // render: $.fn.dataTable.render.moment('EEE MMM dd HH:mm:ss zzz yyyy', 'Do MMM YY')
-                //     render: $.fn.dataTable.render.moment('Fri Sep 16 10:04:30 GET 2022', 'Do MMM YY')
-                // }]
             });
             $('#tickets-table')
                 .on('click', 'tbody tr', function (e) {
-
                     var currentRow = $(this).closest("tr").children();
-                    var id = oTable.row(currentRow).data()['publicId'];
-                    //hard code
-                    window.location.href = [[${dataSource}]] + "/" + id;
+                    var links = oTable.row(currentRow).data()['links'];
+
+                    window.location.href = getLink(links, 'page');
                 });
         });
     </script>

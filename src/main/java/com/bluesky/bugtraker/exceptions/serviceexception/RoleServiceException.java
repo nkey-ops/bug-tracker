@@ -1,7 +1,6 @@
 package com.bluesky.bugtraker.exceptions.serviceexception;
 
-import com.bluesky.bugtraker.exceptions.ErrorMessages;
-import com.bluesky.bugtraker.shared.authorizationenum.Role;
+import com.bluesky.bugtraker.exceptions.ErrorType;
 
 import java.io.Serial;
 
@@ -13,11 +12,11 @@ public class RoleServiceException extends  ServiceException{
         super(message);
     }
 
-    public RoleServiceException(ErrorMessages message) {
+    public RoleServiceException(ErrorType message) {
         super(message);
     }
 
-    public RoleServiceException(ErrorMessages message, String identifier) {
+    public RoleServiceException(ErrorType message, String identifier) {
         super(message, identifier);
     }
 }

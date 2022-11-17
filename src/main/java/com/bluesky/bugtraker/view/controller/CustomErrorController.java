@@ -3,7 +3,6 @@ package com.bluesky.bugtraker.view.controller;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.RequestDispatcher;
@@ -26,6 +25,10 @@ public class CustomErrorController implements ErrorController {
                 return "/errors/error-500";
             }
         }
-        return "/errors/error-500";
+
+        
+
+        int i = Integer.parseInt(status.toString());
+        return "/errors/error :: simpleError (errorMessage='" + i + "')";
     }
 }

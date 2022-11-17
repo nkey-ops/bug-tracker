@@ -1,36 +1,42 @@
 package com.bluesky.bugtraker.service;
 
 
-import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.bluesky.bugtraker.shared.dto.*;
-import org.springframework.data.domain.Page;
+import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.Set;
+import javax.validation.constraints.NotNull;
 
-public interface UserService extends UserDetailsService  {
-    UserDto createUserWithRoles(UserDto userDto, Set<Role> roles);
+public interface UserService extends UserDetailsService {
+    UserDTO createUserWithRole(UserDTO userDto);
 
-    UserDto createUser(UserDto userDto);
+    UserDTO createUser(UserDTO userDto);
 
-    UserDto getUserById(String id);
+    boolean existsUserByEmail(@NotNull String email);
 
-    UserDto getUserByEmail(String userName);
+    UserDTO getUserById(String id);
+
+    UserDTO getUserByEmail(String userName);
+
+    DataTablesOutput<UserDTO> getUsers(DataTablesInput input);
 
     boolean isUserExistsByEmail(String email);
 
 
-    void updateUser(String id, UserDto userDto);
+    void updateUser(String id, UserDTO userDto);
 
     void deleteUser(String id);
 
-    Page<TicketDto> getReportedTickets(String id, int page, int limit);
 
-    Page<TicketDto> getWorkingOnTickets(String id, int page, int limit);
-
-    Page<ProjectDto> getSubscribedOnProjects(String id, int page, int limit);
-
-    TicketsInfoDTO getTicketsInfo(String userId);
+    ProjectsInfoDTO getProjectsInfo(String userId);
 
     UserInfoDTO getUserInfo(String userId);
+
+    boolean isSubscribedToProject(String userId, String projectId);
+
+    boolean isSubscribedToTicket(String userId, String ticketId);
+
 }

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div class="table-responsive">
+
+    <table id="user-subscribed-to-projects-tables" class="table table-bordered">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Id</th>
+        </tr>
+        </thead>
+        <script th:inline="javascript">
+            $(document).ready(function () {
+                var oTable = $('#user-subscribed-to-projects-tables').DataTable({
+                    oLanguage: {
+                        sInfoFiltered : ''
+                    },
+
+                    pageLength: 5,
+                    serverSide: true,
+                    deferRender: true,
+
+                    ajax: [[${dataSource}]],
+                    order: [
+                        [1, 'desc']
+                    ],
+                    columns: [
+                        {
+                            width: '1%',
+                            data: null,
+                            searchable: false,
+                            orderable: false,
+                            render: function (data, type, row, meta) {
+                                return meta.row + meta.settings._iDisplayStart + 1;
+                            }
+                        },
+                        {data: 'name'},
+                        {data: 'publicId'},
+                    ]
+                });
+                $('.dataTable').on('click', 'tbody tr', function() {
+                    var currentRow = $(this).closest("tr").children();
+                    let links = oTable.row(currentRow).data()['links'];
+                    
+                    window.location.href =  getLink(links, 'page');
+                });
+            });
+        </script>
+    </table>
+</div>
+</body>
+</html>

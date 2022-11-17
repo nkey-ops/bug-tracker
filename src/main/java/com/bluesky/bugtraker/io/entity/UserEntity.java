@@ -1,11 +1,11 @@
 package com.bluesky.bugtraker.io.entity;
 
-import com.bluesky.bugtraker.io.entity.authorization.RoleEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -33,11 +33,13 @@ public class UserEntity implements Serializable {
     @Column(nullable = false, length = 320)
     private String email;
     
-    @Column(nullable = false, length = 60)
+    @Column(length = 200)
+    private String avatarURL;
+    @Column(length = 60)
     private String address;
-    @Column(nullable = false, length = 12)
+    @Column(length = 12)
     private String phoneNumber;
-    @Column(nullable = false, length = 80)
+    @Column(length = 80)
     private String status;
 
     @Column(nullable = false, length = 60)
@@ -49,17 +51,31 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private Boolean emailVerificationStatus;
 
+    @ManyToOne( fetch = FetchType.EAGER)
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+    private RoleEntity roleEntity;
+
+
+    @OneToMany(mappedBy = "creator", 
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
+    private Set<ProjectEntity> projects = new HashSet<>();
+    
+    @ManyToMany(mappedBy = "subscribers",
+            fetch = FetchType.LAZY)
+    private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
+
+
     @OneToMany(
             cascade = CascadeType.ALL)
     private Set<TicketEntity> reportedTickets = new HashSet<>();
 
-    @ManyToMany(mappedBy = "assignedDevs",
-            fetch = FetchType.LAZY)
-    private Set<TicketEntity> workingOnTickets = new HashSet<>();
-
     @ManyToMany(mappedBy = "subscribers",
             fetch = FetchType.LAZY)
-    private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
+    private Set<TicketEntity> subscribedToTickets = new HashSet<>();
 
     @OneToMany(mappedBy = "creator",
             cascade = CascadeType.ALL,
@@ -67,10 +83,10 @@ public class UserEntity implements Serializable {
             orphanRemoval = true)
     private Set<CommentEntity> comments = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles")
-    private Set<RoleEntity> roles;
-
+    public boolean setRoleEntity(RoleEntity roleEntity) {
+        this.roleEntity = roleEntity;
+        return roleEntity.getUsers().add(this);
+    }
 
     @Override
     public boolean equals(Object o) {

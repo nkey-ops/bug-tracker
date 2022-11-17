@@ -106,6 +106,7 @@
         }
 
         return function ( d, type, row ) {
+            alert(d);
             if (! d) {
                 return type === 'sort' || type === 'type' ? 0 : d;
             }

@@ -1,20 +1,17 @@
 package com.bluesky.bugtraker.view.model.rensponse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter @Setter
 public class ProjectResponseModel extends RepresentationModel<ProjectResponseModel> {
     private String name;
 
     private String publicId;
-    @JsonIgnore
+    
     private UserResponseModel creator;
 
     @Override
