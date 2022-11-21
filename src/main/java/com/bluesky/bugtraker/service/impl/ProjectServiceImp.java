@@ -32,7 +32,6 @@ import java.util.Date;
 import static com.bluesky.bugtraker.exceptions.ErrorType.*;
 import static com.bluesky.bugtraker.service.specifications.Specs.*;
 
-
 @Service
 public class ProjectServiceImp implements ProjectService {
     private final ProjectRepository projectRepo;
@@ -159,7 +158,7 @@ public class ProjectServiceImp implements ProjectService {
         commentEntity.setPublicId(utils.generateRandomString(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        UserEntity creator = serviceUtils.getUserEntity(projectId);
+        UserEntity creator = serviceUtils.getUserEntity(commentCreatorId);
         ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
 
         boolean isCreatorAdded = commentEntity.setCreator(creator);

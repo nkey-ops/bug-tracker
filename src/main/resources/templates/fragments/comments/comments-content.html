@@ -24,7 +24,7 @@
     
     <div class="form-group"
          th:if="${totalElements > limit}"
-         th:include="fragments/list/list-parts ::
+         th:include="fragments/list/pagination ::
                             paging (
                                     listRequestLink=${listRequestLink},
                                     limit=${limit},

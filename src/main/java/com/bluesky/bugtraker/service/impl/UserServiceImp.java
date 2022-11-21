@@ -114,7 +114,7 @@ public class UserServiceImp implements UserService {
 
         DataTablesOutput<UserEntity> userEntities = userRepo.findAll(input);
 
-        return utils.map(userEntities, new TypeToken<List<UserDTO>>() {
+        return utils.map(userEntities, new TypeToken<>() {
         });
     }
 

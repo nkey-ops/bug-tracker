@@ -10,19 +10,19 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 public interface ProjectService {
-    ProjectDTO getProject(String projectId);
-
     void createProject(String creatorId, ProjectDTO projectDto);
 
     ProjectDTO updateProject(String projectId, ProjectDTO projectDto);
+
+    ProjectDTO getProject(String projectId);
 
     void deleteProject(String projectId);
 
     void addSubscriber(String projectId, SubscriberRequestModel subscriber);
 
-    void removeSubscriber(String projectId, String subscriberId);
-
     DataTablesOutput<UserDTO> getSubscribers(String projectId, DataTablesInput input);
+
+    void removeSubscriber(String projectId, String subscriberId);
 
     void createComment( String projectId, String commentCreatorId, CommentDTO map);
 

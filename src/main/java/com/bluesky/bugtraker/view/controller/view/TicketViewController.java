@@ -33,14 +33,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TicketViewController {
 
     private final UserController userController;
-    private final TicketService ticketService;
-    private final ModelMapper modelMapper;
     private final TicketAccessEvaluator ticketAccessEvaluator;
 
-    public TicketViewController(UserController userController, TicketService ticketService, ModelMapper modelMapper, TicketAccessEvaluator ticketAccessEvaluator) {
+    public TicketViewController(UserController userController, 
+                                TicketAccessEvaluator ticketAccessEvaluator) {
         this.userController = userController;
-        this.ticketService = ticketService;
-        this.modelMapper = modelMapper;
         this.ticketAccessEvaluator = ticketAccessEvaluator;
     }
 
@@ -50,7 +47,7 @@ public class TicketViewController {
                                       @PathVariable String projectId,
                                       @PathVariable String ticketId) {
 
-        ModelAndView modelAndView = new ModelAndView("pages/ticket");
+        ModelAndView modelAndView = new ModelAndView("pages/tickets/ticket");
         WebMvcLinkBuilder ticketLink = linkTo(methodOn(TicketController.class).getTicket(creatorId, projectId, ticketId));
 
         String projectPageLink = linkTo(methodOn(ProjectViewController.class).getProjectPage(creatorId, projectId)).toString();
@@ -79,7 +76,6 @@ public class TicketViewController {
         modelAndView.addObject("areCommentsAllowed", areCommentsAllowed);
         modelAndView.addObject("isUserSubscribed", isUserSubscribed);
         modelAndView.addObject("isCreator", creatorId.equals(currentUser.getPublicId()));
-
 
         return modelAndView;
     }

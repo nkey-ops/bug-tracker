@@ -3,12 +3,6 @@
 
 <body>
 <!---->
-<div th:fragment="listInfo(listName)">
-    <h4 class="card-title">[[${listName}]]
-    </h4>
-</div>
-
-<!---->
 <div id="pagination" th:fragment="paging (listRequestLink, limit, currentPage, totalPages, id)">
     <div class="text-center">
         <div class="btn-group" role="group" aria-label="Basic example"

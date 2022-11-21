@@ -43,7 +43,7 @@ public class ProjectModelAssembler implements
     
     public DataTablesOutput<ProjectResponseModel> toDataTablesOutputModel(DataTablesOutput<ProjectDTO> input){
         DataTablesOutput<ProjectResponseModel> output =
-                utils.map(input, new TypeToken<List<ProjectResponseModel>>() {});
+                utils.map(input, new TypeToken<>() {});
 
         CollectionModel<ProjectResponseModel> withSelfRel =
                 RepresentationModelAssembler.super.toCollectionModel(output.getData());

@@ -16,12 +16,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Controller
 public class NavigationController {
     private final UserController userController;
-    private final ProjectController projectController;
 
 
-    public NavigationController(UserController userController, ProjectController projectController) {
+    public NavigationController(UserController userController) {
         this.userController = userController;
-        this.projectController = projectController;
     }
 
     @ModelAttribute("user")

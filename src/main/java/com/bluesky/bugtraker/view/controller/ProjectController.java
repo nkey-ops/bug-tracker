@@ -38,7 +38,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @Controller
 @RequestMapping("/users/{creatorId}/projects")
 public class ProjectController {
-    private final UserService userService;
     private final ProjectService projectService;
     private final ProjectModelAssembler projectModelAssembler;
     private final UserModelAssembler userModelAssembler;
@@ -46,13 +45,11 @@ public class ProjectController {
 
     @Autowired
     public ProjectController(ProjectService projectService,
-                             UserService userService,
                              ProjectModelAssembler projectModelAssembler,
                              ModelMapper modelMapper,
                              UserModelAssembler userModelAssembler) {
        
         this.projectService = projectService;
-        this.userService = userService;
         this.projectModelAssembler = projectModelAssembler;
         this.userModelAssembler = userModelAssembler;
         this.modelMapper = modelMapper;

@@ -202,7 +202,6 @@ public class TicketServiceImp implements TicketService {
     @Override
     public void createComment(String ticketId, String commentCreatorId, CommentDTO comment) {
         CommentEntity commentEntity = modelMapper.map(comment, CommentEntity.class);
-
         commentEntity.setPublicId(utils.generateRandomString(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 

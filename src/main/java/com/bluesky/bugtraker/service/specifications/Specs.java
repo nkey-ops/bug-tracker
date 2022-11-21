@@ -69,16 +69,12 @@ public class Specs {
     }
 
     public static Specification<TicketRecordEntity> allTicketRecordsByTicket(TicketEntity ticketEntity) {
-        return (root, query, cb) -> {
-
-            return cb.equal(root.get("mainTicket"), ticketEntity);
-        };
+        return (root, query, cb) -> cb.equal(root.get("mainTicket"), ticketEntity);
     }
 
     public static Specification<TicketEntity> reportedADayAgo() {
-        return (root, query, cb) -> {
-            return cb.between(root.get("createdTime"), Date.from(Instant.now().minus(Period.ofDays(1))), Date.from(Instant.now()));
-        };
+        return (root, query, cb) -> 
+                cb.between(root.get("createdTime"), Date.from(Instant.now().minus(Period.ofDays(1))), Date.from(Instant.now()));
     }
 
     public static Specification<TicketEntity> reportedAMonthAgo() {
@@ -90,26 +86,18 @@ public class Specs {
     }
 
     public static Specification<TicketEntity> statusIsCompleted() {
-        return (root, query, cb) -> {
-            return cb.equal(root.get("status"), Status.COMPLETED);
-        };
+        return (root, query, cb) -> cb.equal(root.get("status"), Status.COMPLETED);
     }
     public static Specification<TicketEntity> statusIs(Status status) {
-        return (root, query, cb) -> {
-            return cb.equal(root.get("status"), status);
-        };
+        return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
 
     public static Specification<TicketEntity> byReporter(UserEntity userEntity) {
-        return (root, query, cb) -> {
-            return cb.equal(root.get("reporter"), userEntity);
-        };
+        return (root, query, cb) -> cb.equal(root.get("reporter"), userEntity);
     }
 
     public static Specification<TicketEntity> bySubscriber(UserEntity userEntity) {
-        return (root, query, cb) -> {
-            return cb.isMember(userEntity, root.get("subscribers"));
-        };
+        return (root, query, cb) -> cb.isMember(userEntity, root.get("subscribers"));
     }
 
     public static Specification<TicketEntity> lastUpdatedWeeksAgo(int weeks) {

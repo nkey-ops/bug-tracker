@@ -40,7 +40,7 @@ public  class UserModelAssembler implements RepresentationModelAssembler<UserRes
 
     public DataTablesOutput<UserResponseModel> toDataTablesOutputModel(DataTablesOutput<UserDTO> input){
         DataTablesOutput<UserResponseModel> output =
-                utils.map(input, new TypeToken<List<UserResponseModel>>() {});
+                utils.map(input, new TypeToken<>() {});
 
         CollectionModel<UserResponseModel> withSelfRel =
                 RepresentationModelAssembler.super.toCollectionModel(output.getData());

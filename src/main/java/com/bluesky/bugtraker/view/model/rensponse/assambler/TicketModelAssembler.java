@@ -46,7 +46,7 @@ public class TicketModelAssembler implements RepresentationModelAssembler<Ticket
 
     public DataTablesOutput<TicketResponseModel> toDataTablesOutputModel(DataTablesOutput<TicketDTO> input){
         DataTablesOutput<TicketResponseModel> output =
-                utils.map(input, new TypeToken<List<TicketResponseModel>>() {});
+                utils.map(input, new TypeToken<>() {});
 
         CollectionModel<TicketResponseModel> withSelfRel =
                 RepresentationModelAssembler.super.toCollectionModel(output.getData());

@@ -107,7 +107,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("(#userId == principal.getId() and #userRequestModel.getRole() == null) or " +
+    @PreAuthorize("(#userId == principal.id and #userRequestModel.getRole() == null) or " +
             "hasRole('ROLE_SUPER_ADMIN')")
     @PatchMapping(value = "/{userId}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
