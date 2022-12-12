@@ -54,13 +54,13 @@
             
             $("#user-edit").submit(function (e) {
                 e.preventDefault();
-                    
+
                 var form = $(this);
                 $.ajax({
                     type: 'PATCH',
                     url: form.attr('action'),
                     data: form.serialize(),
-
+                    
                     beforeSend: function () {
                         $('#user-edit-error').html('');
                     },

@@ -8,7 +8,7 @@ import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.utils.Utils;
-import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
 import com.bluesky.bugtraker.shared.dto.CommentDTO;
 import com.bluesky.bugtraker.shared.dto.ProjectDTO;
 import com.bluesky.bugtraker.shared.dto.UserDTO;
@@ -48,7 +48,7 @@ class ProjectServiceImpTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private ServiceUtils serviceUtils;
+    private DataExtractionUtils dataExtractionUtils;
     @Mock
     private Utils utils;
     @Mock
@@ -99,12 +99,12 @@ class ProjectServiceImpTest {
 
     @Test
     void getProject() {
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(modelMapper.map(any(ProjectEntity.class), eq(ProjectDTO.class))).thenReturn(projectDTO);
 
         ProjectDTO actualProject = projectService.getProject(projectDTO.getPublicId());
 
-        verify(serviceUtils, times(1)).getProjectEntity(anyString());
+        verify(dataExtractionUtils, times(1)).getProjectEntity(anyString());
         verify(modelMapper, times(1)).map(any(ProjectEntity.class), eq(ProjectDTO.class));
 
         assertNotNull(actualProject);
@@ -121,7 +121,7 @@ class ProjectServiceImpTest {
         dataTablesOutputEntity.setDraw(dataTablesInput.getDraw());
         dataTablesOutputEntity.setData(List.of(projectEntity));
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(projectRepo.findAll(any(DataTablesInput.class), ArgumentMatchers.<Specification<ProjectEntity>>any()))
                 .thenReturn(dataTablesOutputEntity);
         when(utils.map(any(DataTablesOutput.class), ArgumentMatchers.<TypeToken<List<ProjectDTO>>>any()))
@@ -130,7 +130,7 @@ class ProjectServiceImpTest {
         DataTablesOutput<ProjectDTO> actualDatatablesOutput =
                 projectService.getProjects(projectDTO.getCreator().getPublicId(), dataTablesInput);
 
-        verify(serviceUtils, times(1)).getUserEntity(anyString());
+        verify(dataExtractionUtils, times(1)).getUserEntity(anyString());
         verify(projectRepo, times(1)).findAll(any(DataTablesInput.class),
                 ArgumentMatchers.<Specification<ProjectEntity>>any());
         verify(utils, times(1)).map(any(DataTablesOutput.class),
@@ -144,14 +144,14 @@ class ProjectServiceImpTest {
     void createProject() {
         assertTrue(projectEntity.removeCreator());
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(projectRepo.existsByCreatorAndName(any(UserEntity.class), anyString())).thenReturn(false);
         when(modelMapper.map(any(ProjectDTO.class), eq(ProjectEntity.class))).thenReturn(projectEntity);
         when(utils.generateProjectId()).thenReturn(projectEntity.getPublicId());
 
         projectService.createProject(creatorEntity.getPublicId(), projectDTO);
 
-        verify(serviceUtils, times(1)).getUserEntity(anyString());
+        verify(dataExtractionUtils, times(1)).getUserEntity(anyString());
         verify(projectRepo, times(1)).existsByCreatorAndName(any(UserEntity.class), anyString());
         verify(modelMapper, times(1)).map(any(ProjectDTO.class), eq(ProjectEntity.class));
         verify(utils, times(1)).generateProjectId();
@@ -162,19 +162,19 @@ class ProjectServiceImpTest {
     void createProjectThrowsWhenProjectWithTheSameNameAlreadyExists() {
         assertTrue(projectEntity.removeCreator());
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(projectRepo.existsByCreatorAndName(any(UserEntity.class), anyString())).thenReturn(true);
 
         assertThrows(ProjectServiceException.class, () ->
                 projectService.createProject(creatorEntity.getPublicId(), projectDTO));
 
-        verify(serviceUtils, times(1)).getUserEntity(anyString());
+        verify(dataExtractionUtils, times(1)).getUserEntity(anyString());
         verify(projectRepo, times(1)).existsByCreatorAndName(any(UserEntity.class), anyString());
     }
 
     @Test
     void createProjectThrowsWhenProjectAlreadyAddedToCreator() {
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(projectRepo.existsByCreatorAndName(any(UserEntity.class), anyString())).thenReturn(false);
         when(modelMapper.map(any(ProjectDTO.class), eq(ProjectEntity.class))).thenReturn(projectEntity);
         when(utils.generateProjectId()).thenReturn(projectEntity.getPublicId());
@@ -182,7 +182,7 @@ class ProjectServiceImpTest {
         assertThrows(ProjectServiceException.class, () ->
                 projectService.createProject(creatorEntity.getPublicId(), projectDTO));
 
-        verify(serviceUtils, times(1)).getUserEntity(anyString());
+        verify(dataExtractionUtils, times(1)).getUserEntity(anyString());
         verify(projectRepo, times(1)).existsByCreatorAndName(any(UserEntity.class), anyString());
         verify(modelMapper, times(1)).map(any(ProjectDTO.class), eq(ProjectEntity.class));
         verify(utils, times(1)).generateProjectId();
@@ -204,7 +204,7 @@ class ProjectServiceImpTest {
         projectDTOOutput.setName(newName);
 
         
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(projectRepo.existsByCreatorAndName(any(UserEntity.class), anyString())).thenReturn(false);
         when(projectRepo.save(projectEntityOutput)).thenReturn(projectEntityOutput);
         when(modelMapper.map(any(ProjectEntity.class), eq(ProjectDTO.class))).thenReturn(projectDTOOutput);
@@ -227,7 +227,7 @@ class ProjectServiceImpTest {
 
         ArgumentCaptor<ProjectEntity> projectEntityCapture = ArgumentCaptor.forClass(ProjectEntity.class);
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
 
         projectService.deleteProject(projectDTO.getPublicId());
 
@@ -236,19 +236,7 @@ class ProjectServiceImpTest {
         ProjectEntity actualProjectEntity = projectEntityCapture.getValue();
 
         assertNotNull(actualProjectEntity);
-        assertNull(actualProjectEntity.getCreator());
-    }
-
-    @Test
-    void deleteProjectThrowsOnRemoveCreator() {
-        ProjectEntity expected = new ProjectEntity();
-
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(expected);
-
-        assertThrows(ProjectServiceException.class, () ->
-                projectService.deleteProject(projectDTO.getPublicId()));
-
-        verify(serviceUtils).getProjectEntity(anyString());
+        assertEquals(expected, actualProjectEntity);
     }
 
     @Test
@@ -258,8 +246,8 @@ class ProjectServiceImpTest {
 
         ArgumentCaptor<ProjectEntity> projectEntityCaptor = ArgumentCaptor.forClass(ProjectEntity.class);
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(new ProjectEntity());
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(new ProjectEntity());
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
 
         projectService.addSubscriber(projectEntity.getPublicId(), subscriber);
 
@@ -283,7 +271,7 @@ class ProjectServiceImpTest {
         dataTablesOutputDTO.setData(List.of(creatorDTO));
 
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(userRepository.findAll(any(DataTablesInput.class), ArgumentMatchers.<Specification<UserEntity>>any()))
                 .thenReturn(dataTablesOutputEntity);
         when(utils.map(eq(dataTablesOutputEntity), ArgumentMatchers.<TypeToken<List<UserDTO>>>any()))
@@ -292,7 +280,7 @@ class ProjectServiceImpTest {
         DataTablesOutput<UserDTO> actualSubscribers =
                 projectService.getSubscribers(projectEntity.getPublicId(), dataTablesInput);
 
-        verify(serviceUtils).getProjectEntity(anyString());
+        verify(dataExtractionUtils).getProjectEntity(anyString());
         verify(userRepository).findAll(any(DataTablesInput.class), ArgumentMatchers.<Specification<UserEntity>>any());
         verify(utils).map(eq(dataTablesOutputEntity), ArgumentMatchers.<TypeToken<List<UserDTO>>>any());
 
@@ -310,8 +298,8 @@ class ProjectServiceImpTest {
 
         assert projectEntity.addSubscriber(subscriber);
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(subscriber);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(subscriber);
 
         projectService.removeSubscriber(projectEntity.getPublicId(), subscriber.getPublicId());
 
@@ -339,8 +327,8 @@ class ProjectServiceImpTest {
 
         when(modelMapper.map(any(CommentDTO.class), eq(CommentEntity.class))).thenReturn(commentEntity);
         when(utils.generateRandomString(anyInt())).thenReturn(publicId);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
 
         projectService.createComment(projectEntity.getPublicId(), creatorEntity.getPublicId(), commentDto);
 
@@ -369,7 +357,7 @@ class ProjectServiceImpTest {
         PageImpl<CommentEntity> commentEntities = new PageImpl<>(List.of(commentEntity));
         PageImpl<CommentDTO> commentDTOs = new PageImpl<>(List.of(commentDto), Pageable.ofSize(5), 3);
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(commentRepo.findAllByProject(any(ProjectEntity.class), any(PageRequest.class)))
                 .thenReturn(commentEntities);
         when(modelMapper.map(ArgumentMatchers.<Page<CommentEntity>>any(), eq(new TypeToken<Page<CommentDTO>>() {
@@ -391,7 +379,7 @@ class ProjectServiceImpTest {
         DataTablesOutput<ProjectDTO> dataTablesOutputDTO = new DataTablesOutput<>();
         dataTablesOutputDTO.setData(List.of(projectDTO));
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(projectRepo.findAll(any(DataTablesInput.class), ArgumentMatchers.<Specification<ProjectEntity>>any()))
                 .thenReturn(dataTablesOutputEntity);
 

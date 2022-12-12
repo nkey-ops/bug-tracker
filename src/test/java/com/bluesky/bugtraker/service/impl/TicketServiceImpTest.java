@@ -6,7 +6,7 @@ import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.utils.Utils;
-import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
 import com.bluesky.bugtraker.shared.dto.*;
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
@@ -47,7 +47,7 @@ class TicketServiceImpTest {
     @Mock
     private UserRepository userRepo;
     @Mock
-    private ServiceUtils serviceUtils;
+    private DataExtractionUtils dataExtractionUtils;
     @Mock
     private Utils utils;
     @Mock
@@ -119,7 +119,7 @@ class TicketServiceImpTest {
 
     @Test
     void getTicket() {
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         when(modelMapper.map(any(TicketEntity.class), eq(TicketDTO.class))).thenReturn(ticketDTO);
 
         TicketDTO actualTicketDTO = ticketService.getTicket(ticketEntity.getPublicId());
@@ -136,7 +136,7 @@ class TicketServiceImpTest {
         dataTablesOutputDTO.setDraw(dataTablesInput.getDraw());
         dataTablesOutputDTO.setData(List.of(ticketDTO));
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(ticketRepo.findAll(any(DataTablesInput.class),
                 ArgumentMatchers.<Specification<TicketEntity>>any())).thenReturn(dataTablesOutputEntity);
         when(utils.map(ArgumentMatchers.<DataTablesOutput<TicketEntity>>any(),
@@ -171,10 +171,10 @@ class TicketServiceImpTest {
 
         ArgumentCaptor<TicketEntity> ticketCaptor = ArgumentCaptor.forClass(TicketEntity.class);
 
-        when(serviceUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
+        when(dataExtractionUtils.getProjectEntity(anyString())).thenReturn(projectEntity);
         when(modelMapper.map(any(TicketDTO.class), eq(TicketEntity.class))).thenReturn(inputTicketEntity);
         when(utils.generateRandomString(anyInt())).thenReturn(projectEntity.getPublicId());
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(ticketRepo.save(any(TicketEntity.class))).thenReturn(ticketEntity);
         doNothing().when(ticketServiceSpy)
                 .createTicketRecord(projectEntity.getPublicId(), creatorEntity.getPublicId());
@@ -214,7 +214,7 @@ class TicketServiceImpTest {
 
         ArgumentCaptor<TicketEntity> ticketEntityCaptor = ArgumentCaptor.forClass(TicketEntity.class);
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         doAnswer(invocation -> {
                     assertEquals(ticketDTOUpdate, invocation.getArgument(0));
                     assertEqualsTicket(ticketEntity, invocation.getArgument(1));
@@ -249,7 +249,7 @@ class TicketServiceImpTest {
         projectEntity.addTicket(ticketEntity);
 
         ArgumentCaptor<TicketEntity> ticketCaptor = ArgumentCaptor.forClass(TicketEntity.class);
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
 
         ticketService.deleteTicket(ticketEntity.getPublicId());
 
@@ -274,10 +274,10 @@ class TicketServiceImpTest {
 
         ArgumentCaptor<TicketRecordEntity> ticketRecordCaptor = ArgumentCaptor.forClass(TicketRecordEntity.class);
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         when(modelMapper.map(eq(ticketEntity), eq(TicketRecordEntity.class))).thenReturn(inputTicketRecord);
         when(utils.generateRandomString(anyInt())).thenReturn(expectedTicketRecord.getPublicId());
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
 
         ticketService.createTicketRecord(ticketEntity.getPublicId(), creatorEntity.getPublicId());
 
@@ -304,7 +304,7 @@ class TicketServiceImpTest {
         ticketRecordsDTOs.setDraw(dataTablesInput.getDraw());
         ticketRecordsDTOs.setData(List.of(ticketRecordDTO));
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         when(ticketRecordRepo.findAll(any(DataTablesInput.class),
                 ArgumentMatchers.<Specification<TicketRecordEntity>>any()))
                 .thenReturn(ticketRecordsEntities);
@@ -355,8 +355,8 @@ class TicketServiceImpTest {
 
         ArgumentCaptor<TicketEntity> ticketEntityCaptor = ArgumentCaptor.forClass(TicketEntity.class);
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(inputTicketEntity);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(inputSubscriberEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(inputTicketEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(inputSubscriberEntity);
 
         ticketService.addSubscriber(ticketEntity.getPublicId(), creatorEntity.getPublicId());
 
@@ -377,7 +377,7 @@ class TicketServiceImpTest {
         subscribersDTOs.setDraw(dataTablesInput.getDraw());
         subscribersDTOs.setData(List.of(creatorDTO));
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         when(userRepo.findAll(any(DataTablesInput.class),
                 ArgumentMatchers.<Specification<UserEntity>>any()))
                 .thenReturn(subscribersEntities);
@@ -406,8 +406,8 @@ class TicketServiceImpTest {
 
         ArgumentCaptor<TicketEntity> ticketEntityCaptor = ArgumentCaptor.forClass(TicketEntity.class);
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(inputTicketEntity);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(inputSubscriberEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(inputTicketEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(inputSubscriberEntity);
 
         ticketService.removeSubscriber(ticketEntity.getPublicId(), creatorEntity.getPublicId());
 
@@ -433,8 +433,8 @@ class TicketServiceImpTest {
 
         when(modelMapper.map(any(CommentDTO.class), eq(CommentEntity.class))).thenReturn(commentEntity);
         when(utils.generateRandomString(anyInt())).thenReturn(publicId);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
 
         ticketService.createComment(ticketEntity.getPublicId(), creatorEntity.getPublicId(), commentDto);
 
@@ -462,7 +462,7 @@ class TicketServiceImpTest {
         PageImpl<CommentEntity> commentEntities = new PageImpl<>(List.of(commentEntity));
         PageImpl<CommentDTO> commentDTOs = new PageImpl<>(List.of(commentDto), Pageable.ofSize(5), 3);
 
-        when(serviceUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
+        when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);
         when(commentRepo.findAllByTicket(any(TicketEntity.class), any(PageRequest.class))).thenReturn(commentEntities);
         when(modelMapper.map(ArgumentMatchers.<Page<CommentEntity>>any(), eq(new TypeToken<Page<CommentDTO>>() {
         }.getType())))
@@ -485,7 +485,7 @@ class TicketServiceImpTest {
         dataTablesOutputDTO.setDraw(dataTablesInput.getDraw());
         dataTablesOutputDTO.setData(List.of(ticketDTO));
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(creatorEntity);
         when(ticketRepo.findAll(any(DataTablesInput.class),
                 ArgumentMatchers.<Specification<TicketEntity>>any())).thenReturn(dataTablesOutputEntity);
         when(utils.map(ArgumentMatchers.<DataTablesOutput<TicketEntity>>any(),

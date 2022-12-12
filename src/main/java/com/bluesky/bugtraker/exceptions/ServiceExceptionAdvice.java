@@ -1,6 +1,8 @@
 package com.bluesky.bugtraker.exceptions;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -13,11 +15,13 @@ import java.util.List;
 
 @ControllerAdvice
 public class ServiceExceptionAdvice {
+    Logger logger = LoggerFactory.getLogger(ServiceExceptionAdvice.class);
+
 
     @ResponseBody
     @ExceptionHandler({ServiceException.class})
     public ResponseEntity<?> handleException(ServiceException ex) {
-
+        
         HttpStatus httpStatus = switch (ex.getErrorType()) {
             case MISSING_REQUIRED_FIELD -> HttpStatus.BAD_REQUEST;
             case NO_RECORD_FOUND -> HttpStatus.NOT_FOUND;
@@ -26,6 +30,7 @@ public class ServiceExceptionAdvice {
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
 
+        logger.error(ex.getErrorType().getText() + ": " +  ex.getErrorMessage(), (Object[]) ex.getStackTrace());
         return new ResponseEntity<> (ex.getErrorType().getText() + ": " +  ex.getErrorMessage(), httpStatus);
     }
 
@@ -33,7 +38,8 @@ public class ServiceExceptionAdvice {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<?> handleException(BindException ex) {
         final List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-        
+
+        logger.error(fieldErrors.get(0).getDefaultMessage());
         return ResponseEntity.badRequest().body(fieldErrors.get(0).getDefaultMessage());
     }
     

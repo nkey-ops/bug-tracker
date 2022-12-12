@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div class="table-responsive">
-    <table id="projects-table" class="table table-bordered">
+    <table id="projects-table" class="table table-bordered display" style="width:100%">
         <thead>
         <tr>
             <th>#</th>
@@ -21,6 +21,7 @@
                     deferRender: true,
                    
                     ajax: [[${dataSource}]],
+                    
                     order: [
                         [1, 'desc']
                     ],

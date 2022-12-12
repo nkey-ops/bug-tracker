@@ -9,7 +9,7 @@ import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.ProjectService;
-import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
 import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.dto.CommentDTO;
 import com.bluesky.bugtraker.shared.dto.ProjectDTO;
@@ -37,18 +37,18 @@ public class ProjectServiceImp implements ProjectService {
     private final ProjectRepository projectRepo;
     private final CommentRepository commentRepo;
     private final UserRepository userRepository;
-    private final ServiceUtils serviceUtils;
+    private final DataExtractionUtils dataExtractionUtils;
     private final Utils utils;
     private final ModelMapper modelMapper;
 
     @Autowired
     public ProjectServiceImp(ProjectRepository projectRepo,
-                             ServiceUtils serviceUtils,
+                             DataExtractionUtils dataExtractionUtils,
                              UserRepository userRepository,
                              CommentRepository commentRepo,
                              Utils utils, ModelMapper modelMapper) {
         this.projectRepo = projectRepo;
-        this.serviceUtils = serviceUtils;
+        this.dataExtractionUtils = dataExtractionUtils;
         this.userRepository = userRepository;
         this.commentRepo = commentRepo;
         this.utils = utils;
@@ -58,24 +58,25 @@ public class ProjectServiceImp implements ProjectService {
     @Override
     @NotNull
     public ProjectDTO getProject(@NotNull String projectId) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         return modelMapper.map(projectEntity, ProjectDTO.class);
     }
 
     @Override
     public DataTablesOutput<ProjectDTO> getProjects(String creatorId, DataTablesInput input) {
-        UserEntity userEntity = serviceUtils.getUserEntity(creatorId);
+        UserEntity userEntity = dataExtractionUtils.getUserEntity(creatorId);
 
         DataTablesOutput<ProjectEntity> all =
                 projectRepo.findAll(input, projectByCreator(userEntity));
 
-        return utils.map(all, new TypeToken<>() {});
+        return utils.map(all, new TypeToken<>() {
+        });
     }
 
     @Override
     public void createProject(String creatorId, ProjectDTO projectDto) {
-        UserEntity creator = serviceUtils.getUserEntity(creatorId);
+        UserEntity creator = dataExtractionUtils.getUserEntity(creatorId);
 
         if (projectRepo.existsByCreatorAndName(creator, projectDto.getName()))
             throw new ProjectServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
@@ -92,7 +93,7 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public ProjectDTO updateProject(String projectId, ProjectDTO projectDto) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         if (projectRepo.existsByCreatorAndName(projectEntity.getCreator(), projectDto.getName()))
             throw new ProjectServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
@@ -104,22 +105,18 @@ public class ProjectServiceImp implements ProjectService {
     }
 
     @Override
-    public void deleteProject(@NotNull  String projectId) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
-        boolean isRemoved = projectEntity.removeCreator();
+    public void deleteProject(@NotNull String projectId) {
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
-        if (!isRemoved)
-            throw new ProjectServiceException(NO_RECORD_FOUND, projectId);
-        else 
-            projectRepo.delete(projectEntity);
+        projectRepo.delete(projectEntity);
     }
 
     @Override
     public void addSubscriber(String projectId,
                               SubscriberRequestModel subscriber) {
 
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
-        UserEntity subscribedEntity = serviceUtils.getUserEntity(subscriber.getPublicId());
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
+        UserEntity subscribedEntity = dataExtractionUtils.getUserEntity(subscriber.getPublicId());
 
         boolean isAdded = projectEntity.addSubscriber(subscribedEntity);
 
@@ -131,18 +128,19 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public DataTablesOutput<UserDTO> getSubscribers(String projectId, DataTablesInput input) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         DataTablesOutput<UserEntity> all =
                 userRepository.findAll(input, allProjectSubscribersByProject(projectEntity));
-        return utils.map(all, new TypeToken<>() {});
+        return utils.map(all, new TypeToken<>() {
+        });
     }
 
 
     @Override
     public void removeSubscriber(String projectId, String subscriberId) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
-        UserEntity userEntity = serviceUtils.getUserEntity(subscriberId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
+        UserEntity userEntity = dataExtractionUtils.getUserEntity(subscriberId);
 
         boolean isRemoved = projectEntity.removeSubscriber(userEntity);
 
@@ -158,8 +156,8 @@ public class ProjectServiceImp implements ProjectService {
         commentEntity.setPublicId(utils.generateRandomString(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        UserEntity creator = serviceUtils.getUserEntity(commentCreatorId);
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        UserEntity creator = dataExtractionUtils.getUserEntity(commentCreatorId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         boolean isCreatorAdded = commentEntity.setCreator(creator);
         if (!isCreatorAdded)
@@ -179,7 +177,7 @@ public class ProjectServiceImp implements ProjectService {
                                         String sortBy, Sort.Direction dir) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, dir, sortBy);
 
@@ -193,14 +191,15 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public DataTablesOutput<ProjectDTO> getSubscribedToProjects(String userId, DataTablesInput input) {
-        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+        UserEntity userEntity = dataExtractionUtils.getUserEntity(userId);
 
         DataTablesOutput<ProjectEntity> subscribedToProjects =
                 projectRepo.findAll(input, projectBySubscriber(userEntity));
 
-        return utils.map(subscribedToProjects, new TypeToken<>() {});
+        return utils.map(subscribedToProjects, new TypeToken<>() {
+        });
     }
-    
+
 }
 
 

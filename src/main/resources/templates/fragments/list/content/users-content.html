@@ -5,7 +5,7 @@
     <div id="users-success"></div>
     <div id="users-error"></div>
 
-    <table id="users-content" class="table nowrap table-bordered">
+    <table id="users-content" class="table nowrap table-bordered display"  style="width:100%">
         <thead>
         <tr>
             <th>#</th>
@@ -26,7 +26,9 @@
                 pageLength: 5,
                 serverSide: true,
                 deferRender: true,
+
                 ajax: [[${dataSource}]],
+               
                 order: [
                     [2, 'desc']
                 ],

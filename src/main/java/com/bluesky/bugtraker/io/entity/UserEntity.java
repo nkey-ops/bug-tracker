@@ -47,7 +47,7 @@ public class UserEntity implements Serializable {
     @Column(length = 60)
     private String emailVerificationToken;
 
-    @Column(nullable = false)
+    @Column
     private Boolean emailVerificationStatus;
 
     @ManyToOne( fetch = FetchType.EAGER)
@@ -66,7 +66,6 @@ public class UserEntity implements Serializable {
     @ManyToMany(mappedBy = "subscribers",
             fetch = FetchType.LAZY)
     private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
-
 
     @OneToMany(
             cascade = CascadeType.ALL)

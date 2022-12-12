@@ -43,7 +43,7 @@
         <div class="main-panel">
             <div class="content-wrapper">
                 <div class="page-header">
-                    <h3 class="page-title">My Projects Stats</h3>
+                    <h3 class="page-title">My Projects Statistics</h3>
                 </div>
                 <div class="row">
                     <div id="ticket-info-error"></div>
@@ -105,145 +105,265 @@
                                             height="330"></canvas>
                                 </div>
                             </div>
-                            <script th:inline="javascript">
-                                var info;
-                                var ticketsPerWeek; 
-                               
-                                $.ajax({
-                                    type: 'GET',
-                                    url: [[${ticketsInfoLink}]],
-                                    success: function (result) {
-                                        info = result;
-                                        ticketsPerWeek = info['ticketsPerWeek'];
-                                    },
-                                    async: false
-                                });
-
-                                const data = {
-                                    labels: [
-                                        '5 weeks ago',
-                                        '4 weeks ago',
-                                        '3 weeks ago',
-                                        '2 weeks ago',
-                                        '1 week ago',
-                                    ],
-                                    datasets: [
-                                        {
-                                            label: Object.keys(ticketsPerWeek)[0],
-                                            backgroundColor: 'rgb(203,36,70)',
-                                            borderColor: 'rgb(203,36,70)',
-                                            data: Object.values(ticketsPerWeek)[0].reverse(),
-                                        },
-                                        {
-                                            label: Object.keys(ticketsPerWeek)[1],
-                                            backgroundColor: 'rgb(238,165,28)',
-                                            borderColor: 'rgb(238,165,28)',
-                                            data: Object.values(ticketsPerWeek)[1].reverse(),
-                                        },
-                                        {
-                                            label: Object.keys(ticketsPerWeek)[2],
-                                            backgroundColor: 'rgb(138,255,99)',
-                                            borderColor: 'rgb(138,255,99)',
-                                            data: Object.values(ticketsPerWeek)[2].reverse(),
-                                        }
-                                    ]
-                                };
-
-                                const config = {
-                                    type: 'line',
-                                    data: data,
-                                    options: {
-                                        scales: {
-                                            y: {
-                                                ticks: {
-                                                    stepSize: 1
-                                                }
-                                            }
-                                        }
-                                    },
-                                };
-                                
-                                const myChartBar = new Chart(
-                                    document.getElementById('lineChart'),
-                                    config
-                                );
-                                
-                                
-
-                                const dataPie = {
-                                    labels: Object.keys(info['tickets']),
-                                    datasets: [{
-                                        label: 'Tickets',
-                                        backgroundColor: ['rgb(255,60,104)', 'rgb(248,181,7)', 'rgb(23,245,8)'],
-                                        data: Object.values(info['tickets']),
-                                    }]
-                                };
-
-                                const configPie = {
-                                    type: 'doughnut',
-                                    data: dataPie,
-                                    options: {}
-                                };
-
-                                const myChartPie = new Chart(
-                                    document.getElementById('pieChart'),
-                                    configPie
-                                );
-
-                            </script>
                         </div>
                     </div>
                 </div>
+                <script th:inline="javascript">
+                    var ticketsPerWeek;
+                    var ticketsStatusOverall;
+
+                    $.ajax({
+                        type: 'GET',
+                        url: [[${ticketsInfoLink}]],
+                        success: function (result) {
+                            ticketsPerWeek = result['ticketsStatusPerWeek'];
+                            ticketsStatusOverall = result['ticketsStatusOverall'];
+                        },
+                        async: false
+                    });
+
+                    var dataLine = {
+                        labels: [
+                            '5 weeks ago',
+                            '4 weeks ago',
+                            '3 weeks ago',
+                            '2 weeks ago',
+                            '1 week ago',
+                        ],
+                        datasets: [
+                            {
+                                label: Object.keys(ticketsPerWeek)[0],
+                                backgroundColor: 'rgb(203,36,70)',
+                                borderColor: 'rgb(203,36,70)',
+                                data: Object.values(ticketsPerWeek)[0].reverse(),
+                            },
+                            {
+                                label: Object.keys(ticketsPerWeek)[1],
+                                backgroundColor: 'rgb(238,165,28)',
+                                borderColor: 'rgb(238,165,28)',
+                                data: Object.values(ticketsPerWeek)[1].reverse(),
+                            },
+                            {
+                                label: Object.keys(ticketsPerWeek)[2],
+                                backgroundColor: 'rgb(138,255,99)',
+                                borderColor: 'rgb(138,255,99)',
+                                data: Object.values(ticketsPerWeek)[2].reverse(),
+                            }
+                        ]
+                    };
+
+                    var configLine = {
+                        type: 'line',
+                        data: dataLine,
+                        options: {
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        },
+                    };
+
+                    var myLineChart = new Chart(
+                        document.getElementById('lineChart'),
+                        configLine
+                    );
+
+
+                    var dataPie = {
+                        labels: Object.keys(ticketsStatusOverall),
+                        datasets: [{
+                            label: 'Tickets',
+                            backgroundColor: ['rgb(255,60,104)', 'rgb(248,181,7)', 'rgb(23,245,8)'],
+                            data: Object.values(ticketsStatusOverall),
+                        }]
+                    };
+
+                    var configPie = {
+                        type: 'doughnut',
+                        data: dataPie,
+                        options: {}
+                    };
+
+                    var myChartPie = new Chart(
+                        document.getElementById('pieChart'),
+                        configPie
+                    );
+
+                </script>
+               
                 <div class="page-header">
-                    <h3 class="page-title">My Stats </h3>
+                    <h3 class="page-title">My Statistics </h3>
                 </div>
+                
                 <div class="row">
                     <div id="user-info-error"></div>
                     <div id="tickets-reported-by-user" class="col-sm-4 grid-margin"></div>
                     <div id="tickets-completed-by-user" class="col-sm-4 grid-margin"></div>
                     <div id="tickets-subscribed-to" class="col-sm-4 grid-margin"></div>
                     <div class="col-sm-4 grid-margin"></div>
-                    <script th:inline="javascript">
-                        $.ajax({
-                            type: 'GET',
-                            url: [[${userInfoLink}]],
-                            success: function (result) {
-                                userInfo(
-                                    'tickets-reported-by-user',
-                                    'Reported tickets',
-                                    result['ticketsReported'],
-                                    result['ticketsReportedADayAgo'],
-                                    result['ticketsReportedAMonthAgo'],
-                                    'mdi mdi-file-multiple ');
-                                userInfo(
-                                    'tickets-completed-by-user',
-                                    'Completed tickets',
-                                    result['ticketsCompleted'],
-                                    result['ticketsCompletedADayAgo'],
-                                    result['ticketsCompletedAMonthAgo'],
-                                    'mdi mdi-checkbox-multiple-marked');
-                                userInfo(
-                                    'tickets-subscribed-to',
-                                    'Ticket Subscriptions',
-                                    result['ticketsSubscribedTo'],
-                                    result['ticketsSubscribedToADayAgo'],
-                                    result['ticketsSubscribedToAMonthAgo'],
-                                    'mdi mdi-bookmark-check');
-                            },
-                            error: function (jqXHR) {
-                                $('#user-info-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
-                            }
-                        });
-                    </script>
-
                 </div>
+                <script th:inline="javascript">
+                    $.ajax({
+                        type: 'GET',
+                        url: [[${userInfoLink}]],
+                        success: function (result) {
+                            userInfo(
+                                'tickets-reported-by-user',
+                                'Reported tickets',
+                                result['ticketsReported'],
+                                result['ticketsReportedADayAgo'],
+                                result['ticketsReportedAMonthAgo'],
+                                'mdi mdi-file-multiple ');
+                            userInfo(
+                                'tickets-completed-by-user',
+                                'Completed tickets',
+                                result['ticketsCompleted'],
+                                result['ticketsCompletedADayAgo'],
+                                result['ticketsCompletedAMonthAgo'],
+                                'mdi mdi-checkbox-multiple-marked');
+                            userInfo(
+                                'tickets-subscribed-to',
+                                'Ticket Subscriptions',
+                                result['ticketsSubscribedTo'],
+                                result['ticketsSubscribedToADayAgo'],
+                                result['ticketsSubscribedToAMonthAgo'],
+                                'mdi mdi-bookmark-check');
+                        },
+                        error: function (jqXHR) {
+                            $('#user-info-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+                        }
+                    });
+                </script>
+
+                <div class="row">
+                    <div class="col-lg-8 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Tickets Severity Per Week</h4>
+                                <div class="chart-container" style="position: relative;">
+                                    <canvas id="my-stats-line-chart" class="chartjs-render-monitor" width="662"
+                                            height="330"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Tickets Severity Overall </h4>
+                                <div class="chart-container" style="position: relative;">
+                                    <canvas id="my-stats-pie-chart" class="chartjs-render-monitor" width="662"
+                                            height="330"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script th:inline="javascript">
+                    var ticketsSeverityPerWeek;
+                    var ticketSeverityOverall;
+
+                    $.ajax({
+                        type: 'GET',
+                        url: [[${userInfoLink}]],
+                        success: function (result) {
+                            ticketsSeverityPerWeek = result['ticketsSeverityPerWeek'];
+                            ticketSeverityOverall = result['ticketsSeverityOverall'];
+                        },
+                        async: false
+                    });
+
+                    var dataLine = {
+                        labels: [
+                            '5 weeks ago',
+                            '4 weeks ago',
+                            '3 weeks ago',
+                            '2 weeks ago',
+                            '1 week ago',
+                        ],
+                        datasets: [
+                            {
+                                label: Object.keys(ticketsSeverityPerWeek)[0],
+                                backgroundColor: 'rgb(0,250,0)',
+                                borderColor: 'rgb(16,238,33)',
+                                data: Object.values(ticketsSeverityPerWeek)[0].reverse(),
+                            },
+                            {
+                                label: Object.keys(ticketsSeverityPerWeek)[1],
+                                backgroundColor: 'rgb(238,165,28)',
+                                borderColor: 'rgb(238,165,28)',
+                                data: Object.values(ticketsSeverityPerWeek)[1].reverse(),
+                            },
+                            {
+                                label: Object.keys(ticketsSeverityPerWeek)[2],
+                                backgroundColor: 'rgb(203,36,70)',
+                                borderColor: 'rgb(203,36,70)',
+                                data: Object.values(ticketsSeverityPerWeek)[2].reverse(),
+                            },
+                            {
+                                label: Object.keys(ticketsSeverityPerWeek)[3],
+                                backgroundColor: 'rgb(255,0,0)',
+                                borderColor: 'rgb(255,0,0)',
+                                data: Object.values(ticketsSeverityPerWeek)[3].reverse(),
+                            }
+                        ]
+                    };
+
+                    var configLine = {
+                        type: 'line',
+                        data: dataLine,
+                        options: {
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        },
+                    };
+
+                    var myLineChart = new Chart(
+                        document.getElementById('my-stats-line-chart'),
+                        configLine
+                    );
+
+
+                    var dataPie = {
+                        labels: Object.keys(ticketSeverityOverall),
+                        datasets: [{
+                            label: 'Tickets',
+                            backgroundColor: ['rgb(0,250,0)', 'rgb(238,165,28)', 'rgb(203,36,70)', 'rgb(255,0,0)'],
+                            data: Object.values(ticketSeverityOverall),
+                        }]
+                    };
+
+                    var configPie = {
+                        type: 'doughnut',
+                        data: dataPie,
+                        options: {}
+                    };
+
+                    var myChartPie = new Chart(
+                        document.getElementById('my-stats-pie-chart'),
+                        configPie
+                    );
+
+                </script>
+
             </div>
-            <!-- content-wrapper ends -->
-            <!-- partial -->
         </div>
-        <!-- main-panel ends -->
+        <!-- content-wrapper ends -->
+        <!-- partial -->
     </div>
-    <!-- page-body-wrapper ends -->
+    <!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends -->
 </div>
 <!-- container-scroller -->
 

@@ -22,16 +22,16 @@ import static com.bluesky.bugtraker.exceptions.ErrorType.INTERNAL_SERVER_ERROR;
 import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
 
 @Component
-public class ServiceUtils {
+public class DataExtractionUtils {
     private final UserRepository userRepo;
     private final ProjectRepository projectRepo;
     private final TicketRepository ticketRepo;
     private final RoleRepository roleRepo;
 
     @Autowired
-    public ServiceUtils(UserRepository userRepo,
-                        ProjectRepository projectRepo, 
-                        TicketRepository ticketRepo, RoleRepository roleRepo) {
+    public DataExtractionUtils(UserRepository userRepo,
+                               ProjectRepository projectRepo,
+                               TicketRepository ticketRepo, RoleRepository roleRepo) {
         this.userRepo = userRepo;
         this.projectRepo = projectRepo;
         this.ticketRepo = ticketRepo;

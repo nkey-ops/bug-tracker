@@ -56,68 +56,68 @@ public class ProjectController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                   "#creatorId == principal.id")
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> createProject(@PathVariable String creatorId,
-                                           @Valid @ModelAttribute("projectRequestModel")
-                                           ProjectRequestModel projectRequestModel) {
+                                           @Valid ProjectRequestModel projectRequestModel) {
 
         ProjectDTO projectDto = modelMapper.map(projectRequestModel, ProjectDTO.class);
-
         projectService.createProject(creatorId, projectDto);
 
         return ResponseEntity.status(HttpStatus.CREATED.value()).build();
     }
 
-    @PreAuthorize("#creatorId == principal.id or  " +
-            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or  " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{projectId}")
-    public ResponseEntity<?> getProject(
-            @PathVariable String creatorId,
-            @PathVariable String projectId) {
+    public ResponseEntity<ProjectResponseModel> getProject(
+                                        @PathVariable String creatorId,
+                                        @PathVariable String projectId) {
 
         ProjectDTO projectDto = projectService.getProject(projectId);
-
-        ProjectResponseModel projectResponseModel = 
-                modelMapper.map(projectDto, ProjectResponseModel.class);
-        ProjectResponseModel assembledProject = 
-                projectModelAssembler.toModel(projectResponseModel);
+        ProjectResponseModel assembledProject = projectModelAssembler.toModel(projectDto);
 
         return ResponseEntity.ok(assembledProject);
 
     }
 
-
-    @PreAuthorize(value = "#creatorId == principal.id")
-    @GetMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id")
     @ResponseBody
-    public ResponseEntity<DataTablesOutput<ProjectResponseModel>> getProjects(
-                                                        @PathVariable String creatorId,
-                                                        @Valid DataTablesInput input) {
+    @GetMapping
+    public ResponseEntity<DataTablesOutput<ProjectResponseModel>>
+                                    getProjects(
+                                            @PathVariable String creatorId,
+                                            @Valid DataTablesInput input) {
 
-        DataTablesOutput<ProjectDTO> pagedProjectsDto = projectService.getProjects(creatorId, input);
+        DataTablesOutput<ProjectDTO> pagedProjectsDto = 
+                projectService.getProjects(creatorId, input);
 
-        return ResponseEntity.ok(projectModelAssembler.toDataTablesOutputModel(pagedProjectsDto));
+        DataTablesOutput<ProjectResponseModel> assembledProjects = 
+                projectModelAssembler.toDataTablesOutputModel(pagedProjectsDto);
+
+        return ResponseEntity.ok(assembledProjects);
     }
 
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id")
     @PatchMapping(value = "/{projectId}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> updateProject(@PathVariable String creatorId,
                                            @PathVariable String projectId,
-                                           @Valid @ModelAttribute("projectRequestModel")
-                                           ProjectRequestModel projectRequestModel) {
+                                           @Valid ProjectRequestModel projectRequestModel) {
 
         ProjectDTO projectDTO = modelMapper.map(projectRequestModel, ProjectDTO.class);
-        projectDTO = projectService.updateProject(projectId, projectDTO);
-        
-        ProjectResponseModel projectResponseModel = modelMapper.map(projectDTO, ProjectResponseModel.class);
+        projectService.updateProject(projectId, projectDTO);
 
-        return ResponseEntity.ok().body(projectResponseModel);
+        return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize(value = "#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id")
     @DeleteMapping(value = "/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable String creatorId,
                                            @PathVariable String projectId) {
@@ -127,14 +127,14 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id")
     @PostMapping(value = "/{projectId}/subscribers",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> addSubscriber(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @ModelAttribute("subscriberRequestModel")
-            SubscriberRequestModel subscriber) {
+    public ResponseEntity<?> addSubscriber(@PathVariable String creatorId,
+                                            @PathVariable String projectId,
+                                            @ModelAttribute("subscriberRequestModel")
+                                            SubscriberRequestModel subscriber) {
 
         projectService.addSubscriber(projectId, subscriber);
 
@@ -142,7 +142,8 @@ public class ProjectController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or " +
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
                   "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{projectId}/subscribers")
     @ResponseBody
@@ -151,24 +152,30 @@ public class ProjectController {
                                                 @PathVariable String projectId,
                                                 @Valid DataTablesInput input) {
 
-        DataTablesOutput<UserDTO> pagedSubsDtos =
+        DataTablesOutput<UserDTO> pagedSubsDTOs =
                 projectService.getSubscribers(projectId, input);
 
-        return ResponseEntity.ok(userModelAssembler.toDataTablesOutputModel(pagedSubsDtos));
+        DataTablesOutput<UserResponseModel> assembledSubscribers = 
+                userModelAssembler.toDataTablesOutputModel(pagedSubsDTOs);
+
+        return ResponseEntity.ok(assembledSubscribers);
     }
 
-    @PreAuthorize("#creatorId == principal.id or #subscriberId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or" + 
+                  "#subscriberId == principal.id")
     @DeleteMapping("/{projectId}/subscribers/{subscriberId}")
     public ResponseEntity<?> removeSubscriber(@PathVariable String creatorId,
                                               @PathVariable String projectId,
                                               @PathVariable String subscriberId) {
         projectService.removeSubscriber(projectId, subscriberId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("#creatorId == principal.id or " +
-            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or" +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @PostMapping(value = "/{projectId}/comments",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> createComment(@PathVariable String creatorId,
@@ -183,8 +190,9 @@ public class ProjectController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or " +
-              "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{projectId}/comments")
     public String getComments(@PathVariable String creatorId,
                               @PathVariable String projectId,
@@ -197,7 +205,8 @@ public class ProjectController {
         Page<CommentDTO> pagedCommentsDto =
                 projectService.getComments(projectId, page, limit, sortBy, dir);
 
-        List<CommentDTO> pagedCommentsResponseModel = modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentDTO>>() {}.getType());
+        List<CommentDTO> pagedCommentsResponseModel = 
+                modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentDTO>>() {}.getType());
 
         model.addAttribute("totalElements", pagedCommentsDto.getTotalElements());
         model.addAttribute("limit", limit);
@@ -220,20 +229,4 @@ public class ProjectController {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

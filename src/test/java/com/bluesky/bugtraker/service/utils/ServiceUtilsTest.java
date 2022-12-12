@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 public class ServiceUtilsTest {
     
     @InjectMocks
-    private  ServiceUtils serviceUtils;
+    private DataExtractionUtils serviceUtils;
     @Mock
     private UserRepository userRepo;
     @Mock

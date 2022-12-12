@@ -190,6 +190,10 @@
             i {
               color: #a7afb7;
             }
+            .mdi-dots-vertical {
+              font-size: 20px;
+              color: $text-muted;
+            }
           }
           &.create-new-button {
             padding: 0.375rem 0.75rem;

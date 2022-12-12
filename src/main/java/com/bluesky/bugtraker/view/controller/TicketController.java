@@ -76,12 +76,12 @@ public class TicketController {
                                                         @PathVariable String ticketId) {
 
         TicketDTO ticketDto = ticketService.getTicket(ticketId);
-        TicketResponseModel ticketResponseModel = modelMapper.map(ticketDto, TicketResponseModel.class);
 
-        return ResponseEntity.ok(ticketModelAssembler.toModel(ticketResponseModel));
+        return ResponseEntity.ok(ticketModelAssembler.toModel(ticketDto));
     }
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or " +
+                    "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping
     @ResponseBody
     public ResponseEntity<DataTablesOutput<TicketResponseModel>> getTickets(
@@ -89,11 +89,11 @@ public class TicketController {
             @PathVariable String projectId,
             @Valid DataTablesInput input) {
 
-        DataTablesOutput<TicketDTO> pagedTicketsDtos =
+        DataTablesOutput<TicketDTO> pagedTicketsDTOs =
                 ticketService.getTickets(projectId, input);
 
         DataTablesOutput<TicketResponseModel> pagedTickets =
-                ticketModelAssembler.toDataTablesOutputModel(pagedTicketsDtos);
+                ticketModelAssembler.toDataTablesOutputModel(pagedTicketsDTOs);
 
         return ResponseEntity.ok(pagedTickets);
     }
@@ -113,6 +113,8 @@ public class TicketController {
 
         ticketService.createTicket(projectId, requestTicketDTO, reporter.getId());
 
+        ticketModelAssembler.toModel(requestTicketDTO);
+        
         String projectPageLink = linkTo(UserController.class)
                 .slash(creatorId)
                 .slash("projects")

@@ -10,10 +10,26 @@
         <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
             <span class="mdi mdi-menu"></span>
         </button>
+        <ul class="navbar-nav w-100">
+            <li class="nav-item w-100 d-none"></li>
+        </ul>
         <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item d-lg-block">
+                <a class="nav-link btn btn-success create-new-button" th:href="@{/my-projects}">+ Create New Project</a>
+            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown">
-                    <i class=" mdi mdi-settings  "></i>
+                    <div class="navbar-profile">
+                        <div class="count-indicator">
+                            <img class="img-xs rounded-circle " th:src="${user.avatarURL}" alt="avatar">
+                        </div>
+
+                        <div class="navbar-profile-name">
+                            <h5 class="mb-0 font-weight-normal " th:text="${user.username}"></h5>
+                            <span th:text="${user.status}"></span>
+                        </div>
+                        <i class="mdi mdi-dots-vertical sm-2"></i>
+                    </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list"
                      aria-labelledby="profileDropdown">
@@ -27,9 +43,9 @@
                                 <i class="mdi mdi-logout text-danger"></i>
                             </div>
                         </div>
-                        <dib class="preview-item-content">
+                        <div class="preview-item-content">
                             <p class="preview-subject mb-1">Log out</p>
-                        </dib>
+                        </div>
                     </a>
                 </div>
             </li>

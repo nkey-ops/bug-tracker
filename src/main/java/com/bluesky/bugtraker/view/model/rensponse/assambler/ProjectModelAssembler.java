@@ -6,6 +6,8 @@ import com.bluesky.bugtraker.view.controller.ProjectController;
 import com.bluesky.bugtraker.view.controller.view.ProjectViewController;
 import com.bluesky.bugtraker.view.controller.view.UserViewController;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
+import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.hateoas.CollectionModel;
@@ -13,25 +15,30 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class ProjectModelAssembler implements
-        RepresentationModelAssembler<ProjectResponseModel, ProjectResponseModel> {
+        RepresentationModelAssembler<ProjectDTO, ProjectResponseModel> {
     private final Utils utils;
+    private  final ModelMapper modelMapper;
 
-    public ProjectModelAssembler(Utils utils) {
+    public ProjectModelAssembler(Utils utils, 
+                                 ModelMapper modelMapper) {
         this.utils = utils;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public ProjectResponseModel toModel(ProjectResponseModel project) {
+    public ProjectResponseModel toModel(ProjectDTO projectDTO) {
+        ProjectResponseModel project = 
+                modelMapper.map(projectDTO, ProjectResponseModel.class);
+        
         return project.add(
                 linkTo(methodOn(ProjectController.class)
-                                .getProject(project.getCreator().getPublicId(), project.getPublicId())).withSelfRel(),
+                        .getProject(project.getCreator().getPublicId(), project.getPublicId())).withSelfRel(),
                 linkTo(methodOn(ProjectViewController.class)
                         .getProjectPage(project.getCreator().getPublicId(), project.getPublicId())).withRel("page"),
                 linkTo(methodOn(ProjectController.class)
@@ -42,12 +49,10 @@ public class ProjectModelAssembler implements
     
     
     public DataTablesOutput<ProjectResponseModel> toDataTablesOutputModel(DataTablesOutput<ProjectDTO> input){
-        DataTablesOutput<ProjectResponseModel> output =
-                utils.map(input, new TypeToken<>() {});
 
         CollectionModel<ProjectResponseModel> withSelfRel =
-                RepresentationModelAssembler.super.toCollectionModel(output.getData());
-
+                RepresentationModelAssembler.super.toCollectionModel(input.getData());
+        DataTablesOutput<ProjectResponseModel> output = utils.map(input, new TypeToken<>(){});
         output.setData(new ArrayList<>(withSelfRel.getContent()));
         
         return output;

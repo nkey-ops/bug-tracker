@@ -8,7 +8,7 @@ import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.TicketService;
-import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
 import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.dto.CommentDTO;
 import com.bluesky.bugtraker.shared.dto.TicketDTO;
@@ -38,7 +38,7 @@ public class TicketServiceImp implements TicketService {
     private final TicketRecordsRepository ticketRecordRepo;
     private final CommentRepository commentRepo;
     private final UserRepository userRepo;
-    private final ServiceUtils serviceUtils;
+    private final DataExtractionUtils dataExtractionUtils;
     private final Utils utils;
     private final ModelMapper modelMapper;
 
@@ -47,14 +47,14 @@ public class TicketServiceImp implements TicketService {
                             TicketRecordsRepository ticketRecordRepo,
                             CommentRepository commentRepo,
                             UserRepository userRepo,
-                            ServiceUtils serviceUtils,
+                            DataExtractionUtils dataExtractionUtils,
                             Utils utils,
                             ModelMapper modelMapper) {
         this.ticketRepo = ticketRepo;
         this.ticketRecordRepo = ticketRecordRepo;
         this.commentRepo = commentRepo;
         this.userRepo = userRepo;
-        this.serviceUtils = serviceUtils;
+        this.dataExtractionUtils = dataExtractionUtils;
         this.utils = utils;
 
         this.modelMapper = modelMapper;
@@ -63,7 +63,7 @@ public class TicketServiceImp implements TicketService {
     @Override
     @NotNull
     public TicketDTO getTicket(@NotNull String ticketId) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         return modelMapper.map(ticketEntity, TicketDTO.class);
     }
@@ -71,7 +71,7 @@ public class TicketServiceImp implements TicketService {
     @Override
     @NotNull
     public DataTablesOutput<TicketDTO> getTickets(@NotNull String projectId, @NotNull DataTablesInput input) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
 
         DataTablesOutput<TicketEntity> projectTickets =
                 ticketRepo.findAll(input, ticketByProject(projectEntity));
@@ -81,7 +81,7 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public void createTicket(@NotNull String projectId, @NotNull TicketDTO ticketDto, @NotNull String reporterId) {
-        ProjectEntity projectEntity = serviceUtils.getProjectEntity(projectId);
+        ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
         ticketEntity.setPublicId(utils.generateRandomString(10));
@@ -89,7 +89,7 @@ public class TicketServiceImp implements TicketService {
         ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
         ticketEntity.setHowToSolve("Solution is not found");
 
-        ticketEntity.setReporter(serviceUtils.getUserEntity(reporterId));
+        ticketEntity.setReporter(dataExtractionUtils.getUserEntity(reporterId));
 
         boolean isAdded = projectEntity.addTicket(ticketEntity);
         if (!isAdded)
@@ -103,7 +103,7 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public void updateTicket(@NotNull String ticketId, @NotNull TicketDTO ticketDTOUpdates, @NotNull String updatedByUserWithId) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         modelMapper.map(ticketDTOUpdates, ticketEntity);
         ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
@@ -115,7 +115,7 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public void deleteTicket(@NotNull String ticketId) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         boolean isRemoved = ticketEntity.getProject().removeTicket(ticketEntity);
 
@@ -127,7 +127,7 @@ public class TicketServiceImp implements TicketService {
 
     public void createTicketRecord(@NotNull String mainTicketEntityId, @NotNull String creatorId) {
         TicketEntity mainTicketEntity =
-                serviceUtils.getTicketEntity(mainTicketEntityId);
+                dataExtractionUtils.getTicketEntity(mainTicketEntityId);
         TicketRecordEntity ticketRecordEntity =
                 modelMapper.map(mainTicketEntity, TicketRecordEntity.class);
 
@@ -135,7 +135,7 @@ public class TicketServiceImp implements TicketService {
         ticketRecordEntity.setPublicId(utils.generateRandomString(15));
         ticketRecordEntity.setCreatedTime(Date.from(Instant.now()));
         ticketRecordEntity.setMainTicket(mainTicketEntity);
-        ticketRecordEntity.setCreator(serviceUtils.getUserEntity(creatorId));
+        ticketRecordEntity.setCreator(dataExtractionUtils.getUserEntity(creatorId));
 
         boolean isAdded = mainTicketEntity.addTicketRecord(ticketRecordEntity);
         if (!isAdded)
@@ -147,7 +147,7 @@ public class TicketServiceImp implements TicketService {
     @Override
     @NotNull
     public DataTablesOutput<TicketRecordDTO> getTicketRecords(@NotNull String ticketId, @NotNull DataTablesInput input) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         DataTablesOutput<TicketRecordEntity> ticketRecords =
                 ticketRecordRepo.findAll(input, allTicketRecordsByTicket(ticketEntity));
@@ -165,8 +165,8 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public void addSubscriber(String ticketId, String userId) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
-        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
+        UserEntity userEntity = dataExtractionUtils.getUserEntity(userId);
 
         boolean isAdded = ticketEntity.addSubscriber(userEntity);
 
@@ -178,7 +178,7 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public DataTablesOutput<UserDTO> getSubscribers(String ticketId, DataTablesInput input) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         DataTablesOutput<UserEntity> subscribersEntities =
                 userRepo.findAll(input, ticketSubscribersByTicket(ticketEntity));
@@ -188,8 +188,8 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public void removeSubscriber(String ticketId, String userId) {
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
-        UserEntity subscriberEntity = serviceUtils.getUserEntity(userId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
+        UserEntity subscriberEntity = dataExtractionUtils.getUserEntity(userId);
 
         boolean isRemoved = ticketEntity.removeSubscriber(subscriberEntity);
 
@@ -205,8 +205,8 @@ public class TicketServiceImp implements TicketService {
         commentEntity.setPublicId(utils.generateRandomString(10));
         commentEntity.setUploadTime(Date.from(Instant.now()));
 
-        UserEntity creator = serviceUtils.getUserEntity(commentCreatorId);
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        UserEntity creator = dataExtractionUtils.getUserEntity(commentCreatorId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         boolean isCreatorAdded = commentEntity.setCreator(creator);
         if (!isCreatorAdded)
@@ -226,7 +226,7 @@ public class TicketServiceImp implements TicketService {
                                         String sortBy, Sort.Direction dir) {
         if (page < 1 || limit < 1) throw new IllegalArgumentException();
 
-        TicketEntity ticketEntity = serviceUtils.getTicketEntity(ticketId);
+        TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
         PageRequest pageRequest =
                 PageRequest.of(page - 1, limit, dir, sortBy);
@@ -241,7 +241,7 @@ public class TicketServiceImp implements TicketService {
 
     @Override
     public DataTablesOutput<TicketDTO> getTicketsUserSubscribedTo(String userId, DataTablesInput input) {
-        UserEntity userEntity = serviceUtils.getUserEntity(userId);
+        UserEntity userEntity = dataExtractionUtils.getUserEntity(userId);
 
         DataTablesOutput<TicketEntity> subscribedToTickets =
                 ticketRepo.findAll(input, ticketsUserSubscribedTo(userEntity));

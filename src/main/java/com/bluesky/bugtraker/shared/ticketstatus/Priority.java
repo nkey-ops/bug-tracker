@@ -1,6 +1,9 @@
 package com.bluesky.bugtraker.shared.ticketstatus;
 
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Bug priority refers to how urgently a bug needs to be fixed and eliminated.
@@ -37,5 +40,16 @@ public enum Priority {
     @Override   
     public String toString() {
         return text;
+    }
+
+    @JsonCreator
+    public static Priority forValues(@JsonProperty("text") String text,
+                                 @JsonProperty("name") String name) {
+        for (Priority priority : Priority.values()) {
+            if (priority.getText().equals(text) && priority.getName().equals(name))
+                return priority;
+        }
+
+        return null;
     }
 }

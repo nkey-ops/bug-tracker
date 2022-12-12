@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Getter @Setter
 public class TicketResponseModel extends RepresentationModel<TicketResponseModel> {
@@ -26,5 +27,34 @@ public class TicketResponseModel extends RepresentationModel<TicketResponseModel
     
     private UserResponseModel reporter;
     private ProjectResponseModel project;
-    
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TicketResponseModel that = (TicketResponseModel) o;
+        return Objects.equals(publicId, that.publicId) && status == that.status && severity == that.severity && priority == that.priority && Objects.equals(shortDescription, that.shortDescription) && Objects.equals(howToReproduce, that.howToReproduce) && Objects.equals(erroneousProgramBehaviour, that.erroneousProgramBehaviour) && Objects.equals(howToSolve, that.howToSolve) && Objects.equals(createdTime, that.createdTime) && Objects.equals(lastUpdateTime, that.lastUpdateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), publicId, status, severity, priority, shortDescription, howToReproduce, erroneousProgramBehaviour, howToSolve, createdTime, lastUpdateTime);
+    }
+
+    @Override
+    public String toString() {
+        return "TicketResponseModel{" +
+                "publicId='" + publicId + '\'' +
+                ", status=" + status +
+                ", severity=" + severity +
+                ", priority=" + priority +
+                ", shortDescription='" + shortDescription + '\'' +
+                ", howToReproduce='" + howToReproduce + '\'' +
+                ", erroneousProgramBehaviour='" + erroneousProgramBehaviour + '\'' +
+                ", howToSolve='" + howToSolve + '\'' +
+                ", createdTime=" + createdTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                '}';
+    }
 }

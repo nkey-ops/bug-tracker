@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;

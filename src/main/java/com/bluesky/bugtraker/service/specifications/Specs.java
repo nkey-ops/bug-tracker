@@ -4,6 +4,7 @@ import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.TicketRecordEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -40,14 +41,6 @@ public class Specs {
         };
     }
 
-    public static Specification<TicketEntity> ticketByProject(final ProjectEntity projectEntity) {
-        return (root, query, cb) -> cb.equal(root.get("project"), projectEntity);
-    }
-
-    public static Specification<TicketEntity> ticketByProjectCreator(final UserEntity creator) {
-        return (root, query, cb) -> cb.equal(root.get("project").get("creator"), creator);
-    }
-
     public static Specification<ProjectEntity> projectBySubscriber(UserEntity userEntity) {
         return (root, query, cb) -> {
             query.distinct(true);
@@ -56,6 +49,14 @@ public class Specs {
 
             return cb.isMember(userEntity, subscribers);
         };
+    }
+
+    public static Specification<TicketEntity> ticketByProject(final ProjectEntity projectEntity) {
+        return (root, query, cb) -> cb.equal(root.get("project"), projectEntity);
+    }
+
+    public static Specification<TicketEntity> ticketByProjectCreator(final UserEntity creator) {
+        return (root, query, cb) -> cb.equal(root.get("project").get("creator"), creator);
     }
 
     public static Specification<TicketEntity> ticketsUserSubscribedTo(UserEntity subscriber) {
@@ -85,11 +86,12 @@ public class Specs {
         };
     }
 
-    public static Specification<TicketEntity> statusIsCompleted() {
-        return (root, query, cb) -> cb.equal(root.get("status"), Status.COMPLETED);
-    }
     public static Specification<TicketEntity> statusIs(Status status) {
         return (root, query, cb) -> cb.equal(root.get("status"), status);
+    }
+
+    public static Specification<TicketEntity> severityIs(Severity severity) {
+        return (root, query, cb) -> cb.equal(root.get("severity"), severity);
     }
 
     public static Specification<TicketEntity> byReporter(UserEntity userEntity) {

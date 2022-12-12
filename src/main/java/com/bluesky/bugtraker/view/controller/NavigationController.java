@@ -30,18 +30,19 @@ public class NavigationController {
     @RequestMapping(value = {"/home", "/"})
     public String home(@ModelAttribute("user") UserResponseModel user,
                        Model model) {
+        
+        String userId = user.getPublicId();
+
+        String ticketsInfoLink = linkTo(methodOn(UserController.class).getTicketsInfo(userId)).toString();
+        String userInfo = linkTo(methodOn(UserController.class).getUserInfo(userId)).toString();
+        String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
 
         model.addAttribute("user", user);
-
-        String ticketsInfoLink = linkTo(methodOn(UserController.class).getTicketsInfo(user.getPublicId())).toString();
-        String userInfo = linkTo(methodOn(UserController.class).getUserInfo(user.getPublicId())).toString();
-        String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(user.getPublicId())).toString();
-
         model.addAttribute("ticketsInfoLink", ticketsInfoLink);
         model.addAttribute("userInfoLink", userInfo);
         model.addAttribute("userPageLink", userPageLink);
-        
         model.addAttribute("ticketStatus", Status.values());
+
         
         return "index";
     }

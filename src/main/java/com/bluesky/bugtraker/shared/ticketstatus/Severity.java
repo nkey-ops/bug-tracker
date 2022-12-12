@@ -1,6 +1,9 @@
 package com.bluesky.bugtraker.shared.ticketstatus;
 
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
 *  Bug severity is the measure of impact a defect (or bug)
@@ -49,5 +52,16 @@ public enum Severity {
     @Override
     public String toString() {
         return text;
+    }
+
+    @JsonCreator
+    public static Severity forValues(@JsonProperty("text") String text,
+                                 @JsonProperty("name") String name) {
+        for (Severity severity : Severity.values()) {
+            if (severity.getText().equals(text) && severity.getName().equals(name))
+                return severity;
+        }
+
+        return null;
     }
 }

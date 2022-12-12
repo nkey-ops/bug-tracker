@@ -8,7 +8,7 @@ import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.utils.ServiceUtils;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
 import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.bluesky.bugtraker.shared.dto.UserDTO;
@@ -40,7 +40,7 @@ class UserServiceImpTest {
     private UserServiceImp userServiceImp;
 
     @Mock
-    private ServiceUtils serviceUtils;
+    private DataExtractionUtils dataExtractionUtils;
 
     @Mock
     private UserRepository userRepo;
@@ -107,12 +107,12 @@ class UserServiceImpTest {
 
     @Test
     void getUserById() {
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
         when(modelMapper.map(any(UserEntity.class), eq(UserDTO.class))).thenReturn(userDTO);
 
         UserDTO actualUserDTO = userServiceImp.getUserById(userEntity.getPublicId());
 
-        verify(serviceUtils).getUserEntity(anyString());
+        verify(dataExtractionUtils).getUserEntity(anyString());
 
         assertNotNull(actualUserDTO);
         assertEquals(userDTO, actualUserDTO);
@@ -256,26 +256,26 @@ class UserServiceImpTest {
     void updateUserWhenNoRoleIsSet() {
         userDTO.setRole(null);
 
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
         when(userRepo.save(any(UserEntity.class))).thenReturn(userEntity);
 
         userServiceImp.updateUser(userDTO.getPublicId(), userDTO);
 
-        verify(serviceUtils).getUserEntity(anyString());
+        verify(dataExtractionUtils).getUserEntity(anyString());
         verify(userRepo).save(any(UserEntity.class));
         verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
     }
 
     @Test
     void updateUserWhenRoleIsSet() {
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
-        when(serviceUtils.getRoleEntityToBeSet(any(Role.class), any(Role.class))).thenReturn(userEntity.getRoleEntity());
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getRoleEntityToBeSet(any(Role.class), any(Role.class))).thenReturn(userEntity.getRoleEntity());
         when(userRepo.save(any(UserEntity.class))).thenReturn(userEntity);
 
         userServiceImp.updateUser(userDTO.getPublicId(), userDTO);
 
-        verify(serviceUtils).getUserEntity(anyString());
-        verify(serviceUtils).getRoleEntityToBeSet(any(Role.class), any(Role.class));
+        verify(dataExtractionUtils).getUserEntity(anyString());
+        verify(dataExtractionUtils).getRoleEntityToBeSet(any(Role.class), any(Role.class));
         verify(userRepo).save(any(UserEntity.class));
         verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
     }
@@ -283,11 +283,11 @@ class UserServiceImpTest {
 
     @Test
     void deleteUser() {
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
 
         userServiceImp.deleteUser(userDTO.getPublicId());
 
-        verify(serviceUtils).getUserEntity(anyString());
+        verify(dataExtractionUtils).getUserEntity(anyString());
         verify(userRepo).delete(any(UserEntity.class));
     }
 
@@ -295,7 +295,7 @@ class UserServiceImpTest {
     @Test
     void isSubscribedToProject() {
         when(projectRepo.existsByPublicId(anyString())).thenReturn(true);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
         when(projectRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
 
 
@@ -307,7 +307,7 @@ class UserServiceImpTest {
     @Test
     void isSubscribedToTicket() {
         when(ticketRepo.existsByPublicId(anyString())).thenReturn(true);
-        when(serviceUtils.getUserEntity(anyString())).thenReturn(userEntity);
+        when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
         when(ticketRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
 
         boolean isSubscribedToTicket = userServiceImp.isSubscribedToTicket(userDTO.getPublicId(), "ticketId");

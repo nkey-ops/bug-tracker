@@ -61,8 +61,6 @@ public class CommentEntity implements Serializable {
     public boolean setCreator(UserEntity creator) {
         boolean isCommentAdded = creator.getComments().add(this);
         this.creator = creator;
-        
-//        this.setCreator(creator);
     
         return  isCommentAdded;
     }

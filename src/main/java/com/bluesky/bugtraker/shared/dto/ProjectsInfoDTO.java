@@ -22,7 +22,7 @@ public class ProjectsInfoDTO {
     private long ticketsInProgress;
     private long ticketInProgressADayAgo;
 
-    private Map<Status, List<Long>> ticketsPerWeek;
-    private Map<Status, Long> tickets;
+    private Map<Status, List<Long>> ticketsStatusPerWeek;
+    private Map<Status, Long> ticketsStatusOverall;
 
 }
