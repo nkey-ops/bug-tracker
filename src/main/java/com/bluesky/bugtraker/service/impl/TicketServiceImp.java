@@ -80,7 +80,7 @@ public class TicketServiceImp implements TicketService {
     }
 
     @Override
-    public void createTicket(@NotNull String projectId, @NotNull TicketDTO ticketDto, @NotNull String reporterId) {
+    public TicketDTO createTicket(@NotNull String projectId, @NotNull TicketDTO ticketDto, @NotNull String reporterId) {
         ProjectEntity projectEntity = dataExtractionUtils.getProjectEntity(projectId);
         TicketEntity ticketEntity = modelMapper.map(ticketDto, TicketEntity.class);
 
@@ -98,6 +98,8 @@ public class TicketServiceImp implements TicketService {
         TicketEntity savedTicketEntity = ticketRepo.save(ticketEntity);
 
         createTicketRecord(savedTicketEntity.getPublicId(), reporterId);
+        
+        return modelMapper.map(savedTicketEntity, TicketDTO.class) ;
     }
 
 

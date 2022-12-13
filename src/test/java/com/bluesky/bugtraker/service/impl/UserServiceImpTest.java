@@ -57,7 +57,6 @@ class UserServiceImpTest {
 
     private UserEntity userEntity;
     private UserDTO userDTO;
-    private DataTablesInput dataTablesInput;
 
     @BeforeEach
     public void setUp() {
@@ -84,7 +83,7 @@ class UserServiceImpTest {
         userEntity.setRoleEntity(role);
 
 
-        dataTablesInput = new DataTablesInput();
+        DataTablesInput dataTablesInput = new DataTablesInput();
         dataTablesInput.setLength(1);
         dataTablesInput.setStart(1);
     }

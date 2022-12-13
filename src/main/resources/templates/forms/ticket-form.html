@@ -88,12 +88,12 @@
                         type: form.attr('method'),
                         url: form.attr('action'),
                         data: form.serialize(),
-
+                        
                         beforeSend: function () {
                             $('#ticket-form-error').html('');
                         },
-                        success: function (data) {
-                            window.location.replace(data);
+                        success: function (ticket) {
+                            window.location.replace(ticket["_links"]["page"]["href"]);
                         },
                         error: function (jqXHR) {
                             $('#ticket-form-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')

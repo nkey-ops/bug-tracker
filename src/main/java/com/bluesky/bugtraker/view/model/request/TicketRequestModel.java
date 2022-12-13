@@ -6,7 +6,9 @@ import com.bluesky.bugtraker.shared.ticketstatus.Status;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 
 @Getter
@@ -19,13 +21,22 @@ public class TicketRequestModel {
     @NotNull
     private Priority priority;
 
-    @NotNull
+    @NotEmpty
+    @Size(min = 4, max = 3000,
+            message = "Short description length should be not less than 4 characters and no more than 3000")
     private String shortDescription;
-    @NotNull
+   
+    @NotEmpty
+    @Size(min = 4, max = 3000,
+            message = "How to Reproduce description length should be not less than 4 characters and no more than 3000")
     private String howToReproduce;
-    private String howToSolve;
-    @NotNull
+   
+    @NotEmpty
+    @Size(min = 4, max = 3000,
+            message = "Erroneous Program Behaviour length should be not less than 4 characters and no more than 3000")
     private String erroneousProgramBehaviour;
 
-
+    @Size(max = 3000,
+            message = "Solution length should not be more than 300")
+    private String howToSolve;
 }

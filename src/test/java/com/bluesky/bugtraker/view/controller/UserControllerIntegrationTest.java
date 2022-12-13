@@ -71,9 +71,6 @@ class UserControllerIntegrationTest {
     @Autowired
     private TicketRepository ticketRepository;
     @Autowired
-    private UserServiceImp userServiceImp;
-    
-    @Autowired
     private ModelMapper modelMapper;
     
     private UserEntity userEntity;
@@ -86,24 +83,15 @@ class UserControllerIntegrationTest {
 
     @BeforeEach
     public void setUp() {
+        initEntities();
+        
         RestAssured.authentication =
                 form(email, password,
                         new FormAuthConfig("/bugtracker/users/login",
                                 "email", "password"));
         RestAssured.port = port;
         RestAssured.basePath = contextPath + PATH;
-
-        initEntities();
-        clearRepository();
     }
-
-    public void clearRepository(){
-//        userRepository.deleteAllByEmailNotLike(email);
-//        projectRepository.deleteAll();
-//        if(userRepository.existsByEmail(userEntity.getEmail()))
-//            userServiceImp.deleteUser(userEntity.getPublicId());
-    }
-    
     void initEntities(){
         RoleEntity role = new RoleEntity(Role.ROLE_USER);
         role.setId(1L);

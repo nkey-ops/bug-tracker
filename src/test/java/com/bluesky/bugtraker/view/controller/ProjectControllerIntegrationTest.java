@@ -1,11 +1,13 @@
 package com.bluesky.bugtraker.view.controller;
 
 import com.bluesky.bugtraker.BugTrackerApplication;
-import com.bluesky.bugtraker.io.entity.*;
+import com.bluesky.bugtraker.io.entity.CommentEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.RoleEntity;
+import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.ProjectRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.impl.ProjectServiceImp;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
@@ -48,7 +50,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ProjectControllerIntegrationTest {
-    private final static String PATH = "/users";
     @LocalServerPort
     private Integer port;
     @Value("${server.servlet.context-path}")
@@ -84,7 +85,9 @@ class ProjectControllerIntegrationTest {
                         new FormAuthConfig("/bugtracker/users/login",
                                 "email", "password"));
         RestAssured.port = port;
-        RestAssured.basePath = contextPath + PATH + "/" + userEntity.getPublicId() + "/projects";
+        RestAssured.basePath = contextPath +
+                "/users/" + userEntity.getPublicId() +
+                "/projects/";
     }
 
 
@@ -134,17 +137,17 @@ class ProjectControllerIntegrationTest {
                 });
 
         //@formatter:off
-                given()
-                    .log().all()
-                    .formParams(mappedObject)
-                .when()
-                    .contentType(ContentType.URLENC)
-                    .post()
-                .then()
-                    .log().all()
-                    .assertThat()
-                    .statusCode(HttpStatus.CREATED.value())
-                .extract().response();
+        given()
+            .log().all()
+            .formParams(mappedObject)
+        .when()
+            .contentType(ContentType.URLENC)
+            .post()
+        .then()
+            .log().all()
+            .assertThat()
+            .statusCode(HttpStatus.CREATED.value())
+        .extract().response();
         //@formatter:on
 
         List<ProjectEntity> projects = (List<ProjectEntity>) projectRepository.findAll();
@@ -186,7 +189,7 @@ class ProjectControllerIntegrationTest {
         assertEquals(expectedProject, actualProject);
     }
 
-    
+
     @Test
     void getProjects() {
         userEntity = userRepository.save(userEntity);
@@ -215,7 +218,7 @@ class ProjectControllerIntegrationTest {
 
         DataTablesOutput<?> result = response.as(DataTablesOutput.class);
         assertEquals(1, result.getRecordsTotal());
-        
+
         ProjectResponseModel actualProject =
                 objectMapper.convertValue(result.getData().get(0), ProjectResponseModel.class);
 
@@ -230,17 +233,13 @@ class ProjectControllerIntegrationTest {
         projectEntity = projectRepository.save(projectEntity);
 
 
-        ProjectRequestModel projectRequestModel = new ProjectRequestModel();
-        projectRequestModel.setName("new name");
-
-        Map<String, String> mappedProject =
-                objectMapper.convertValue(projectRequestModel, new TypeReference<>() {
-                });
+        HashMap<String, String> projectRequestModel = new HashMap<>();
+        projectRequestModel.put("name", "new name");
 
         //@formatter:off
         Response response =
                 given()
-                    .formParams(mappedProject)
+                    .formParams(projectRequestModel)
                     .log().all()
                 .when()
                     .contentType(ContentType.URLENC)
@@ -248,7 +247,7 @@ class ProjectControllerIntegrationTest {
                 .then()
                     .log().all()
                     .assertThat()
-                    .statusCode(HttpStatus.OK.value())
+                    .statusCode(HttpStatus.NO_CONTENT.value())
                 .extract().response();
         //@formatter:on
 
@@ -257,7 +256,7 @@ class ProjectControllerIntegrationTest {
         assertTrue(optionalProject.isPresent());
 
         ProjectEntity actualProject = optionalProject.get();
-        assertEquals(projectRequestModel.getName(), actualProject.getName());
+        assertEquals(projectRequestModel.get("name"), actualProject.getName());
 
     }
 

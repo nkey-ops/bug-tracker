@@ -4,7 +4,9 @@ import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
 import com.bluesky.bugtraker.view.controller.view.TicketViewController;
 import com.bluesky.bugtraker.view.controller.view.UserViewController;
+import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.TicketRecordResponseModel;
+import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.hateoas.CollectionModel;
@@ -12,22 +14,26 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class TicketRecordModelAssembler implements RepresentationModelAssembler<TicketRecordResponseModel, TicketRecordResponseModel> {
+public class TicketRecordModelAssembler implements RepresentationModelAssembler<TicketRecordDTO, TicketRecordResponseModel> {
 
     private final Utils utils;
-
-    public TicketRecordModelAssembler(Utils utils) {
+    private final ModelMapper modelMapper;
+    public TicketRecordModelAssembler(Utils utils, ModelMapper modelMapper) {
         this.utils = utils;
+        this.modelMapper = modelMapper;
     }
     
+    
     @Override
-    public TicketRecordResponseModel toModel(TicketRecordResponseModel ticketRecord) {
+    public TicketRecordResponseModel toModel(TicketRecordDTO ticketRecordDTO) {
+        TicketRecordResponseModel ticketRecord =
+                modelMapper.map(ticketRecordDTO, TicketRecordResponseModel.class);
+
         ticketRecord.add(
                 linkTo(methodOn(UserViewController.class).getUserPage(ticketRecord.getCreator().getPublicId()))
                         .withRel("creatorPage"),
@@ -48,12 +54,9 @@ public class TicketRecordModelAssembler implements RepresentationModelAssembler<
     }
 
     public DataTablesOutput<TicketRecordResponseModel> toDataTablesOutputModel(DataTablesOutput<TicketRecordDTO> input){
-        DataTablesOutput<TicketRecordResponseModel> output =
-                utils.map(input, new TypeToken<>() {});
-
         CollectionModel<TicketRecordResponseModel> withSelfRel =
-                RepresentationModelAssembler.super.toCollectionModel(output.getData());
-
+                RepresentationModelAssembler.super.toCollectionModel(input.getData());
+        DataTablesOutput<TicketRecordResponseModel> output = utils.map(input, new TypeToken<>(){});
         output.setData(new ArrayList<>(withSelfRel.getContent()));
 
         return output;

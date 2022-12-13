@@ -120,14 +120,14 @@
                     var form = $(this);
 
                     $.ajax({
-                        type: form.attr('method'),
+                        type: 'PATCH',
                         url: form.attr('action'),
                         data: form.serialize(),
 
                         beforeSend: function () {
                             $('#ticket-edit-error').html('');
                         },
-                        success: function () {
+                        success: function (updateTicket) {
                             window.location.replace(ticketPage);
                         },
                         error: function (jqXHR) {

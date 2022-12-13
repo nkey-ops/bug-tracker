@@ -14,11 +14,11 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends PagingAndSortingRepository<CommentEntity, Long> {
 
+    List<CommentEntity> findAllByTicket(TicketEntity ticketEntity);
     Page<CommentEntity> findAllByTicket(TicketEntity ticketEntity, Pageable pageable);
 
-    Page<CommentEntity> findAllByProject(ProjectEntity projectEntity, Pageable pageable);
-    
     List<CommentEntity> findAllByProject(ProjectEntity projectEntity);
+    Page<CommentEntity> findAllByProject(ProjectEntity projectEntity, Pageable pageable);
     
     
 }

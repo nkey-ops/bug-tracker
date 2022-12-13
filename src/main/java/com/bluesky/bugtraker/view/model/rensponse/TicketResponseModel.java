@@ -41,20 +41,4 @@ public class TicketResponseModel extends RepresentationModel<TicketResponseModel
     public int hashCode() {
         return Objects.hash(super.hashCode(), publicId, status, severity, priority, shortDescription, howToReproduce, erroneousProgramBehaviour, howToSolve, createdTime, lastUpdateTime);
     }
-
-    @Override
-    public String toString() {
-        return "TicketResponseModel{" +
-                "publicId='" + publicId + '\'' +
-                ", status=" + status +
-                ", severity=" + severity +
-                ", priority=" + priority +
-                ", shortDescription='" + shortDescription + '\'' +
-                ", howToReproduce='" + howToReproduce + '\'' +
-                ", erroneousProgramBehaviour='" + erroneousProgramBehaviour + '\'' +
-                ", howToSolve='" + howToSolve + '\'' +
-                ", createdTime=" + createdTime +
-                ", lastUpdateTime=" + lastUpdateTime +
-                '}';
-    }
 }

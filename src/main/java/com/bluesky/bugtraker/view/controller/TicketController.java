@@ -1,7 +1,6 @@
 package com.bluesky.bugtraker.view.controller;
 
 
-import com.bluesky.bugtraker.exceptions.serviceexception.ServiceException;
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.service.TicketService;
 import com.bluesky.bugtraker.shared.dto.CommentDTO;
@@ -32,10 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -55,7 +51,7 @@ public class TicketController {
     @Autowired
     public TicketController(TicketService ticketService,
                             TicketModelAssembler ticketModelAssembler,
-                            TicketRecordModelAssembler ticketRecordModelAssembler, 
+                            TicketRecordModelAssembler ticketRecordModelAssembler,
                             UserModelAssembler userModelAssembler,
                             ModelMapper modelMapper) {
 
@@ -66,22 +62,44 @@ public class TicketController {
         this.modelMapper = modelMapper;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id or " +
+            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<TicketResponseModel> createTicket(
+            @PathVariable String creatorId,
+            @PathVariable String projectId,
+            @AuthenticationPrincipal UserPrincipal reporter,
+            @Valid TicketRequestModel ticket) {
 
-    @PreAuthorize("#creatorId == principal.id or " +
-                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
-    @GetMapping("/{ticketId}")
-    public ResponseEntity<TicketResponseModel> getTicket(
-                                                        @PathVariable String creatorId,
-                                                        @PathVariable String projectId,
-                                                        @PathVariable String ticketId) {
+        TicketDTO requestTicketDTO = modelMapper.map(ticket, TicketDTO.class);
+        TicketDTO createdTicket =
+                ticketService.createTicket(projectId, requestTicketDTO, reporter.getId());
+        TicketResponseModel assembledTicket = ticketModelAssembler.toModel(createdTicket);
 
-        TicketDTO ticketDto = ticketService.getTicket(ticketId);
-
-        return ResponseEntity.ok(ticketModelAssembler.toModel(ticketDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(assembledTicket);
     }
 
-    @PreAuthorize("#creatorId == principal.id or " +
-                    "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id or " +
+            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @GetMapping("/{ticketId}")
+    @ResponseBody
+    public ResponseEntity<TicketResponseModel> getTicket(
+            @PathVariable String creatorId,
+            @PathVariable String projectId,
+            @PathVariable String ticketId) {
+
+        TicketDTO ticketDto = ticketService.getTicket(ticketId);
+        TicketResponseModel assembledTicket = ticketModelAssembler.toModel(ticketDto);
+
+        return ResponseEntity.ok(assembledTicket);
+    }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id or " +
+            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping
     @ResponseBody
     public ResponseEntity<DataTablesOutput<TicketResponseModel>> getTickets(
@@ -98,62 +116,27 @@ public class TicketController {
         return ResponseEntity.ok(pagedTickets);
     }
 
-
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
-    @PostMapping(
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id or " +
+            "@userServiceImp.isSubscribedToTicket(principal.id, #creatorId)")
+    @PatchMapping(value = "/{ticketId}",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> createTicket(@PathVariable String creatorId,
+    @ResponseBody
+    public ResponseEntity<?> updateTicket(@PathVariable String creatorId,
                                           @PathVariable String projectId,
+                                          @PathVariable String ticketId,
                                           @AuthenticationPrincipal UserPrincipal reporter,
-                                          @Valid @ModelAttribute("ticketRequestModel")
-                                          TicketRequestModel ticket) {
+                                          @Valid TicketRequestModel ticket) {
 
-
-        TicketDTO requestTicketDTO = modelMapper.map(ticket, TicketDTO.class);
-
-        ticketService.createTicket(projectId, requestTicketDTO, reporter.getId());
-
-        ticketModelAssembler.toModel(requestTicketDTO);
-        
-        String projectPageLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("/page")
-                .toUri().toString();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(projectPageLink);
-    }
-
-    @PreAuthorize("#creatorId == principal.id or " +
-                    "@userServiceImp.isSubscribedToTicket(principal.id, #creatorId)")
-    @RequestMapping(value = "/{ticketId}",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String updateTicket(@PathVariable String creatorId,
-                               @PathVariable String projectId,
-                               @PathVariable String ticketId,
-                               @ModelAttribute("ticketForm") TicketRequestModel ticket,
-                               BindingResult bindingResult,
-                               RedirectAttributes attr,
-                               @AuthenticationPrincipal UserPrincipal reporter) {
         TicketDTO ticketDto = modelMapper.map(ticket, TicketDTO.class);
+        ticketService.updateTicket(ticketId, ticketDto, reporter.getId());
 
-        try {
-            ticketService.updateTicket(ticketId, ticketDto, reporter.getId());
-        } catch (ServiceException e) {
-            bindingResult.addError(
-                    new ObjectError("error", e.getErrorType().getText()));
-            attr.addFlashAttribute("org.springframework.validation.BindingResult.ticketForm", bindingResult);
-            attr.addFlashAttribute("ticketForm", ticket);
-
-            return "redirect:/users/" + creatorId + "/projects/" + projectId + "/bugs/ticket-edit-form";
-        }
-
-        return "redirect:/users/" + creatorId + "/projects/" + projectId + "/tickets/" + ticketId;
+        return ResponseEntity.noContent().build();
     }
 
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id")
     @DeleteMapping("/{ticketId}")
     public ResponseEntity<?> deleteTicket(@PathVariable String creatorId,
                                           @PathVariable String projectId,
@@ -166,13 +149,15 @@ public class TicketController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+            "#creatorId == principal.id or " +
+            "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/records")
     @ResponseBody
     public ResponseEntity<DataTablesOutput<TicketRecordResponseModel>> getTicketRecords(@PathVariable String creatorId,
                                                                                         @PathVariable String projectId,
                                                                                         @PathVariable String ticketId,
-                                                                                        DataTablesInput input) {
+                                                                                        @Valid DataTablesInput input) {
         DataTablesOutput<TicketRecordDTO> ticketRecordsDTOs =
                 ticketService.getTicketRecords(ticketId, input);
 
@@ -182,26 +167,28 @@ public class TicketController {
         return ResponseEntity.ok(ticketRecords);
     }
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/records/{recordId}")
-    public ResponseEntity<TicketRecordResponseModel> getTicketRecord(@PathVariable String creatorId,
-                                                                     @PathVariable String projectId,
-                                                                     @PathVariable String ticketId,
-                                                                     @PathVariable String recordId) {
+    public ResponseEntity<TicketRecordResponseModel> 
+                                    getTicketRecord(@PathVariable String creatorId,
+                                                    @PathVariable String projectId,
+                                                    @PathVariable String ticketId,
+                                                    @PathVariable String recordId) {
 
         TicketRecordDTO ticketRecord =
                 ticketService.getTicketRecord(recordId);
 
-        TicketRecordResponseModel ticketRecordResponseModel =
-                modelMapper.map(ticketRecord, TicketRecordResponseModel.class);
-
-        TicketRecordResponseModel assembledTicketRecord = 
-                ticketRecordModelAssembler.toModel(ticketRecordResponseModel);
+        TicketRecordResponseModel assembledTicketRecord =
+                ticketRecordModelAssembler.toModel(ticketRecord);
 
         return ResponseEntity.ok(assembledTicketRecord);
     }
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToTicket(principal.id, #ticketId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToTicket(principal.id, #ticketId)")
     @PostMapping(value = "/{ticketId}/comments",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
@@ -217,7 +204,8 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("@ticketAccessEvaluator.areCommentsAllowed(principal.id, #creatorId, #ticketId)")
+    @PreAuthorize(
+                "@ticketAccessEvaluator.areCommentsAllowed(principal.id, #creatorId, #ticketId)")
     @GetMapping("/{ticketId}/comments")
     public String getComments(@PathVariable String creatorId,
                               @PathVariable String projectId,
@@ -255,7 +243,8 @@ public class TicketController {
         return "fragments/comments/comments-content";
     }
 
-    @PreAuthorize("#creatorId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                "#creatorId == principal.id")
     @PostMapping(value = "/{ticketId}/subscribers",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> addSubscriber(
@@ -271,7 +260,9 @@ public class TicketController {
     }
 
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/subscribers")
     @ResponseBody
     public ResponseEntity<DataTablesOutput<UserResponseModel>> getSubscribers(
@@ -282,13 +273,15 @@ public class TicketController {
 
         DataTablesOutput<UserDTO> pagedSubscribersDto =
                 ticketService.getSubscribers(ticketId, input);
-        DataTablesOutput<UserResponseModel> assembledSubscribers = 
+        DataTablesOutput<UserResponseModel> assembledSubscribers =
                 userModelAssembler.toDataTablesOutputModel(pagedSubscribersDto);
-       
+
         return ResponseEntity.ok(assembledSubscribers);
     }
 
-    @PreAuthorize("#creatorId == principal.id or #subscriberId == principal.id")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
+                  "#creatorId == principal.id or " +
+                  "#subscriberId == principal.id")
     @DeleteMapping("/{ticketId}/subscribers/{subscriberId}")
     public ResponseEntity<?> removeSubscriber(@PathVariable String creatorId,
                                               @PathVariable String projectId,
@@ -297,6 +290,6 @@ public class TicketController {
 
         ticketService.removeSubscriber(ticketId, subscriberId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

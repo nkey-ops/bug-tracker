@@ -2,7 +2,6 @@ package com.bluesky.bugtraker.view.controller.view;
 
 import com.bluesky.bugtraker.security.UserPrincipal;
 import com.bluesky.bugtraker.security.accessevaluator.TicketAccessEvaluator;
-import com.bluesky.bugtraker.service.TicketService;
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
@@ -12,7 +11,6 @@ import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
 import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import com.bluesky.bugtraker.view.model.request.TicketRequestModel;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +33,7 @@ public class TicketViewController {
     private final UserController userController;
     private final TicketAccessEvaluator ticketAccessEvaluator;
 
-    public TicketViewController(UserController userController, 
+    public TicketViewController(UserController userController,
                                 TicketAccessEvaluator ticketAccessEvaluator) {
         this.userController = userController;
         this.ticketAccessEvaluator = ticketAccessEvaluator;
@@ -124,8 +122,8 @@ public class TicketViewController {
 
     @GetMapping("/{ticketId}/details")
     public ModelAndView getTicketDetails(@PathVariable String creatorId,
-                                   @PathVariable String projectId,
-                                   @PathVariable String ticketId) {
+                                         @PathVariable String projectId,
+                                         @PathVariable String ticketId) {
 
         String ticketLink = linkTo(methodOn(TicketController.class)
                 .getTicket(creatorId, projectId, ticketId)).toString();
@@ -203,8 +201,9 @@ public class TicketViewController {
                                     @PathVariable String projectId,
                                     @PathVariable String ticketId,
                                     Model model) {
-        String ticketLink = linkTo(methodOn(TicketController.class)
-                .getTicket(creatorId, projectId, ticketId)).toString();
+        String ticketLink =
+                linkTo(methodOn(TicketController.class)
+                        .getTicket(creatorId, projectId, ticketId)).toString();
 
         model.addAttribute("ticketLink", ticketLink);
         model.addAttribute("postRequestLink", ticketLink);
@@ -219,10 +218,10 @@ public class TicketViewController {
 
     @GetMapping("/{ticketId}/records/{recordId}/details")
     public ModelAndView getTicketRecordDetails(@PathVariable String creatorId,
-                                         @PathVariable String projectId,
-                                         @PathVariable String ticketId,
-                                         @PathVariable String recordId) {
-        String ticketRecordLink = 
+                                               @PathVariable String projectId,
+                                               @PathVariable String ticketId,
+                                               @PathVariable String recordId) {
+        String ticketRecordLink =
                 linkTo(methodOn(TicketController.class)
                         .getTicketRecord(creatorId, projectId, ticketId, recordId)).toString();
 
@@ -348,7 +347,6 @@ public class TicketViewController {
                                   @PathVariable String projectId,
                                   @PathVariable String ticketId,
                                   Model model) {
-
         String baseLink = linkTo(UserController.class)
                 .slash(creatorId)
                 .slash("projects")

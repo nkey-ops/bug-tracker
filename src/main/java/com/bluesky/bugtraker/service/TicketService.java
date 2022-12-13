@@ -14,7 +14,7 @@ public interface TicketService {
 
     TicketDTO getTicket(String bugId);
 
-    void createTicket(String projectName, TicketDTO ticketDto, String reporterId);
+    TicketDTO createTicket(String projectName, TicketDTO ticketDto, String reporterId);
 
     DataTablesOutput<TicketDTO> getTickets(String projectId, DataTablesInput input);
 

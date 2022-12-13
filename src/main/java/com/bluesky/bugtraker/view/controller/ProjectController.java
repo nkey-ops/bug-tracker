@@ -72,6 +72,7 @@ public class ProjectController {
                   "#creatorId == principal.id or  " +
                   "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{projectId}")
+    @ResponseBody
     public ResponseEntity<ProjectResponseModel> getProject(
                                         @PathVariable String creatorId,
                                         @PathVariable String projectId) {
@@ -85,8 +86,8 @@ public class ProjectController {
 
     @PreAuthorize("hasRole('SUPER_ADMIN') or" +
                   "#creatorId == principal.id")
-    @ResponseBody
     @GetMapping
+    @ResponseBody
     public ResponseEntity<DataTablesOutput<ProjectResponseModel>>
                                     getProjects(
                                             @PathVariable String creatorId,
@@ -113,7 +114,7 @@ public class ProjectController {
         ProjectDTO projectDTO = modelMapper.map(projectRequestModel, ProjectDTO.class);
         projectService.updateProject(projectId, projectDTO);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('SUPER_ADMIN') or" +

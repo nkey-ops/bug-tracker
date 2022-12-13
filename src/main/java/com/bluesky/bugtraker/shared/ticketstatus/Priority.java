@@ -43,10 +43,11 @@ public enum Priority {
     }
 
     @JsonCreator
-    public static Priority forValues(@JsonProperty("text") String text,
+    public static Priority forValues(
+                                @JsonProperty("text") String text,
                                  @JsonProperty("name") String name) {
         for (Priority priority : Priority.values()) {
-            if (priority.getText().equals(text) && priority.getName().equals(name))
+            if (priority.getName().equals(name) || priority.getText().equals(text))
                 return priority;
         }
 
