@@ -12,9 +12,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -22,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping("/users/{creatorId}/projects")
+@SessionAttributes("user")
 public class ProjectViewController {
     private final UserController userController;
 
@@ -47,6 +46,7 @@ public class ProjectViewController {
     @GetMapping("/{projectId}/body")
     public String getProjectBody(@PathVariable String creatorId,
                                  @PathVariable String projectId,
+                                 @ModelAttribute("user") UserResponseModel currentUser,
                                  Model model) {
 
         WebMvcLinkBuilder baseLink = linkTo(methodOn(ProjectController.class)
@@ -70,7 +70,6 @@ public class ProjectViewController {
         String editFormLink = baseLink.slash("edit").toString();
         model.addAttribute("projectEditFormLink", editFormLink);
 
-        UserResponseModel currentUser = userController.getCurrentUser();
         model.addAttribute("user", currentUser);
         model.addAttribute("isCreator", currentUser.getPublicId().equals(creatorId));
         
