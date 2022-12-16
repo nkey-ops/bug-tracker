@@ -27,6 +27,7 @@ public enum  Status {
         return name();
     }
 
+    @JsonKey
     @Override
     public String toString() {
         return text;

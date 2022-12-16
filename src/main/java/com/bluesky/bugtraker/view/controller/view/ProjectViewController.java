@@ -24,13 +24,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/users/{creatorId}/projects")
 public class ProjectViewController {
     private final UserController userController;
+
     public ProjectViewController(UserController userController) {
         this.userController = userController;
     }
 
     @GetMapping("/{projectId}/page")
     public ModelAndView getProjectPage(@PathVariable String creatorId,
-                                 @PathVariable String projectId) {
+                                       @PathVariable String projectId) {
 
         WebMvcLinkBuilder baseLink = linkTo(methodOn(ProjectController.class).getProject(creatorId, projectId));
         String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(creatorId)).toString();
@@ -46,7 +47,7 @@ public class ProjectViewController {
     @GetMapping("/{projectId}/body")
     public String getProjectBody(@PathVariable String creatorId,
                                  @PathVariable String projectId,
-                                 Model model ) {
+                                 Model model) {
 
         WebMvcLinkBuilder baseLink = linkTo(methodOn(ProjectController.class)
                 .getProject(creatorId, projectId));
@@ -78,11 +79,12 @@ public class ProjectViewController {
 
     @GetMapping("/body")
     public ModelAndView getProjectsBody(@PathVariable String creatorId) {
-
-        String projectFormLink = 
-                linkTo(UserController.class).slash(creatorId).slash("projects").slash("form").toString();
-        String projectsContentLink = 
-                linkTo(methodOn(ProjectViewController.class).getProjectsContent(creatorId)).toString();
+        String projectFormLink = linkTo(methodOn(ProjectController.class)
+                .getProjects(creatorId, null)).slash("form")
+                .toString();
+        String projectsContentLink = linkTo(methodOn(ProjectViewController.class)
+                .getProjectsContent(creatorId))
+                .toString();
 
         ModelAndView model = new ModelAndView("fragments/list/body/projects-body");
         model.addObject("baseLink", projectFormLink);
@@ -95,7 +97,8 @@ public class ProjectViewController {
     @GetMapping("/content-block")
     public ModelAndView getProjectsContent(@PathVariable String creatorId) {
         String dataSource = linkTo(methodOn(ProjectController.class)
-                .getProjects(creatorId, new DataTablesInput())).toString();
+                .getProjects(creatorId, new DataTablesInput()))
+                .toString();
 
         ModelAndView model = new ModelAndView("fragments/list/content/projects-content");
         model.addObject("dataSource", dataSource);
@@ -124,8 +127,10 @@ public class ProjectViewController {
                                      @PathVariable String projectId,
                                      Model model) {
 
-        String baseLink = linkTo(methodOn(ProjectController.class).getProject(creatorId, projectId)).toString();
-        
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .getProject(creatorId, projectId))
+                .toString();
+
         model.addAttribute("projectRequestModel", new ProjectRequestModel());
         model.addAttribute("postRequestLink", baseLink);
 
@@ -137,11 +142,10 @@ public class ProjectViewController {
                                      @PathVariable String projectId,
                                      @AuthenticationPrincipal UserPrincipal principal,
                                      Model model) {
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("subscribers").toString();
+
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .getSubscribers(creatorId, projectId, null))
+                .toString();
 
         model.addAttribute("subscribersContentBlockLink", baseLink + "/content-block");
         model.addAttribute("subscriberFormBlockLink", baseLink + "/form");
@@ -182,17 +186,14 @@ public class ProjectViewController {
 
         return "forms/subscriber-form";
     }
+
     @GetMapping("/{projectId}/comments/body")
     public String getCommentsBody(@PathVariable String creatorId,
                                   @PathVariable String projectId,
                                   Model model) {
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("comments")
-                .toString();
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .createComment(creatorId, projectId, null, null)).toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("commentFormLink", baseLink + "/form");
@@ -205,12 +206,8 @@ public class ProjectViewController {
                                  @PathVariable String projectId,
                                  Model model) {
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("comments")
-                .toString();
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .createComment(creatorId, projectId, null, null)).toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("postRequestLink", baseLink);

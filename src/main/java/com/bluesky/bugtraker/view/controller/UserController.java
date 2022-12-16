@@ -26,6 +26,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/users")
@@ -40,7 +41,13 @@ public class UserController {
     private final TicketModelAssembler ticketModelAssembler;
     private final UserModelAssembler userModelAssembler;
 
-    public UserController(UserService userService, TicketService ticketService, ProjectService projectService, ModelMapper modelMapper, ProjectModelAssembler projectModelAssembler, TicketModelAssembler ticketModelAssembler, UserModelAssembler userModelAssembler) {
+    public UserController(UserService userService, 
+                          TicketService ticketService, 
+                          ProjectService projectService, 
+                          ModelMapper modelMapper, 
+                          ProjectModelAssembler projectModelAssembler, 
+                          TicketModelAssembler ticketModelAssembler, 
+                          UserModelAssembler userModelAssembler) {
 
         this.userService = userService;
         this.ticketService = ticketService;
@@ -54,14 +61,13 @@ public class UserController {
     @ModelAttribute("user")
     public UserResponseModel getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth.getPrincipal().toString().equals("anonymousUser")) return new UserResponseModel("Anonymous User");
-
+        
+        if (auth.getPrincipal().toString().equals("anonymousUser")) 
+            return new UserResponseModel("Anonymous User");
+            
         UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
-        UserResponseModel userResponseModel = getUser(userPrincipal.getId()).getBody();
-        assert userResponseModel != null;
 
-        return userModelAssembler.toModel(userResponseModel);
+        return getUser(userPrincipal.getId()).getBody();
     }
 
     
@@ -84,9 +90,9 @@ public class UserController {
     public ResponseEntity<UserResponseModel> getUser(@PathVariable String userId) {
 
         UserDTO userById = userService.getUserById(userId);
-        UserResponseModel userResponseModel = modelMapper.map(userById, UserResponseModel.class);
-
-        return ResponseEntity.ok(userResponseModel);
+        UserResponseModel assembledUser = userModelAssembler.toModel(userById);
+        
+        return ResponseEntity.ok(assembledUser);
     }
 
     @PreAuthorize("#userId == principal.id")

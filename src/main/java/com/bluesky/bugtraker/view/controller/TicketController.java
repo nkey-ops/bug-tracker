@@ -32,12 +32,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping("/users/{creatorId}/projects/{projectId}/tickets")
@@ -67,10 +69,10 @@ public class TicketController {
             "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<TicketResponseModel> createTicket(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @AuthenticationPrincipal UserPrincipal reporter,
-            @Valid TicketRequestModel ticket) {
+                                                @PathVariable String creatorId,
+                                                @PathVariable String projectId,
+                                                @AuthenticationPrincipal UserPrincipal reporter,
+                                                @Valid TicketRequestModel ticket) {
 
         TicketDTO requestTicketDTO = modelMapper.map(ticket, TicketDTO.class);
         TicketDTO createdTicket =
@@ -87,9 +89,9 @@ public class TicketController {
     @GetMapping("/{ticketId}")
     @ResponseBody
     public ResponseEntity<TicketResponseModel> getTicket(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @PathVariable String ticketId) {
+                                            @PathVariable String creatorId,
+                                            @PathVariable String projectId,
+                                            @PathVariable String ticketId) {
 
         TicketDTO ticketDto = ticketService.getTicket(ticketId);
         TicketResponseModel assembledTicket = ticketModelAssembler.toModel(ticketDto);
@@ -103,9 +105,9 @@ public class TicketController {
     @GetMapping
     @ResponseBody
     public ResponseEntity<DataTablesOutput<TicketResponseModel>> getTickets(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @Valid DataTablesInput input) {
+                                                        @PathVariable String creatorId,
+                                                        @PathVariable String projectId,
+                                                        @Valid DataTablesInput input) {
 
         DataTablesOutput<TicketDTO> pagedTicketsDTOs =
                 ticketService.getTickets(projectId, input);
@@ -148,16 +150,16 @@ public class TicketController {
 
     }
 
-
     @PreAuthorize("hasRole('SUPER_ADMIN') or" +
             "#creatorId == principal.id or " +
             "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/records")
     @ResponseBody
-    public ResponseEntity<DataTablesOutput<TicketRecordResponseModel>> getTicketRecords(@PathVariable String creatorId,
-                                                                                        @PathVariable String projectId,
-                                                                                        @PathVariable String ticketId,
-                                                                                        @Valid DataTablesInput input) {
+    public ResponseEntity<DataTablesOutput<TicketRecordResponseModel>> getTicketRecords(
+                                                                @PathVariable String creatorId,
+                                                                @PathVariable String projectId,
+                                                                @PathVariable String ticketId,
+                                                                @Valid DataTablesInput input) {
         DataTablesOutput<TicketRecordDTO> ticketRecordsDTOs =
                 ticketService.getTicketRecords(ticketId, input);
 
@@ -196,7 +198,7 @@ public class TicketController {
                                            @PathVariable String projectId,
                                            @PathVariable String ticketId,
                                            @AuthenticationPrincipal UserPrincipal creator,
-                                           @ModelAttribute("commentForm") CommentRequestModel comment) {
+                                           @Valid CommentRequestModel comment) {
 
         CommentDTO commentDto = modelMapper.map(comment, CommentDTO.class);
         ticketService.createComment(ticketId, creator.getId(), commentDto);
@@ -207,14 +209,13 @@ public class TicketController {
     @PreAuthorize(
                 "@ticketAccessEvaluator.areCommentsAllowed(principal.id, #creatorId, #ticketId)")
     @GetMapping("/{ticketId}/comments")
-    public String getComments(@PathVariable String creatorId,
-                              @PathVariable String projectId,
-                              @PathVariable String ticketId,
-                              @RequestParam(value = "page", defaultValue = "1") int page,
-                              @RequestParam(value = "limit", defaultValue = "5") int limit,
-                              @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
-                              @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir,
-                              Model model) {
+    public ModelAndView getComments(@PathVariable String creatorId,
+                                    @PathVariable String projectId,
+                                    @PathVariable String ticketId,
+                                    @RequestParam(value = "page", defaultValue = "1") int page,
+                                    @RequestParam(value = "limit", defaultValue = "5") int limit,
+                                    @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
+                                    @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir) {
 
         Page<CommentDTO> pagedCommentsDto =
                 ticketService.getComments(ticketId, page, limit, sortBy, dir);
@@ -223,24 +224,20 @@ public class TicketController {
                 modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentResponseModel>>() {
                 }.getType());
 
-        model.addAttribute("limit", limit);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", pagedCommentsDto.getTotalPages());
-        model.addAttribute("totalElements", pagedCommentsDto.getTotalElements());
-        model.addAttribute("commentsList", pagedCommentsResponseModel);
+        ModelAndView model = new ModelAndView("fragments/comments/comments-content");
+        model.addObject("limit", limit);
+        model.addObject("currentPage", page);
+        model.addObject("totalPages", pagedCommentsDto.getTotalPages());
+        model.addObject("totalElements", pagedCommentsDto.getTotalElements());
+        model.addObject("commentsList", pagedCommentsResponseModel);
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("comments")
-                .toUri().toString();
 
-        model.addAttribute("listRequestLink", baseLink);
+        String baseLink = linkTo(methodOn(TicketController.class)
+                .createComment(creatorId, projectId, ticketId , null, null)).toString();
 
-        return "fragments/comments/comments-content";
+        model.addObject("listRequestLink", baseLink);
+
+        return model;
     }
 
     @PreAuthorize("hasRole('SUPER_ADMIN') or" +
@@ -248,11 +245,10 @@ public class TicketController {
     @PostMapping(value = "/{ticketId}/subscribers",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> addSubscriber(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @PathVariable String ticketId,
-            @ModelAttribute("subscriberRequestModel")
-            SubscriberRequestModel subscriber) {
+                                        @PathVariable String creatorId,
+                                        @PathVariable String projectId,
+                                        @PathVariable String ticketId,
+                                        @Valid SubscriberRequestModel subscriber) {
 
         ticketService.addSubscriber(ticketId, subscriber.getPublicId());
 
@@ -266,10 +262,10 @@ public class TicketController {
     @GetMapping("/{ticketId}/subscribers")
     @ResponseBody
     public ResponseEntity<DataTablesOutput<UserResponseModel>> getSubscribers(
-            @PathVariable String creatorId,
-            @PathVariable String projectId,
-            @PathVariable String ticketId,
-            @Valid DataTablesInput input) {
+                                                            @PathVariable String creatorId,
+                                                            @PathVariable String projectId,
+                                                            @PathVariable String ticketId,
+                                                            @Valid DataTablesInput input) {
 
         DataTablesOutput<UserDTO> pagedSubscribersDto =
                 ticketService.getSubscribers(ticketId, input);

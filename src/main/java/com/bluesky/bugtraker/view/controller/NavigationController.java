@@ -48,8 +48,9 @@ public class NavigationController {
     }
 
     @GetMapping("/lists")
-    public  String getListsPage(Model model){
-        String userId = userController.getCurrentUser().getPublicId();
+    public String getListsPage(@ModelAttribute("user") UserResponseModel currentUser, 
+                               Model model){
+        String userId = currentUser.getPublicId();
 
         String userPageLink = 
                 linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
@@ -69,22 +70,23 @@ public class NavigationController {
     }
 
     @GetMapping("/users-management")
-    public String getUserManagementPage(Model model) {
-        String userId = userController.getCurrentUser().getPublicId();
+    public String getUserManagementPage(@ModelAttribute("user") UserResponseModel currentUser,
+                                        Model model) {
+        String userId = currentUser.getPublicId();
         
         String userContent = linkTo(methodOn(UserViewController.class).getUserContent()).toString();
         String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
         
         model.addAttribute("userContentLink", userContent);
-        model.addAttribute("user", userController.getCurrentUser());
+        model.addAttribute("user", currentUser);
         model.addAttribute("userPageLink", userPageLink);
         
         return "pages/users-management";
     }
 
     @GetMapping("/my-projects")
-    public String getMyProjectsPage(Model model) {
-        String userId = userController.getCurrentUser().getPublicId();
+    public String getMyProjectsPage(@ModelAttribute("user") UserResponseModel currentUser,  Model model) {
+        String userId = currentUser.getPublicId();
 
         String myProjectsContentLink = linkTo(methodOn(ProjectViewController.class).getProjectsBody(userId)).toString();
         String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
@@ -92,15 +94,16 @@ public class NavigationController {
         model.addAttribute("pageTitle", "My Projects");
         model.addAttribute("contentLink", myProjectsContentLink);
         
-        model.addAttribute("user", userController.getCurrentUser());
+        model.addAttribute("user", currentUser);
         model.addAttribute("userPageLink", userPageLink);
 
         return "pages/blank-page";
     }
 
     @GetMapping("/subscribed-to-projects")
-    public String getSubscribedToProjectsPage(Model model) {
-        String userId = userController.getCurrentUser().getPublicId();
+    public String getSubscribedToProjectsPage(@ModelAttribute("user") UserResponseModel currentUser, 
+                                              Model model) {
+        String userId = currentUser.getPublicId();
         
         String subscribedToProjectsContent =
                 linkTo(methodOn(UserViewController.class).getSubscribedToProjectsBody(userId)).toString();
@@ -109,24 +112,26 @@ public class NavigationController {
         model.addAttribute("pageTitle", "Project Subscriptions");
         model.addAttribute("contentLink", subscribedToProjectsContent);
         
-        model.addAttribute("user", userController.getCurrentUser());
+        model.addAttribute("user", currentUser);
         model.addAttribute("userPageLink", userPageLink);
 
         return "pages/blank-page";
     }
 
     @GetMapping("/subscribed-to-tickets")
-    public String getSubscribedToTicketsPage(Model model) {
-        String userId = userController.getCurrentUser().getPublicId();
+    public String getSubscribedToTicketsPage(@ModelAttribute("user") UserResponseModel currentUser, 
+                                             Model model) {
+        String userId = currentUser.getPublicId();
         
         String subscribedToTicketsContent =
                 linkTo(methodOn(UserViewController.class).getSubscribedToTicketsBody(userId)).toString();
-        String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
+        String userPageLink = 
+                linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
         
         model.addAttribute("pageTitle", "Ticket Subscriptions");
         model.addAttribute("contentLink", subscribedToTicketsContent);
         
-        model.addAttribute("user", userController.getCurrentUser());
+        model.addAttribute("user", currentUser);
         model.addAttribute("userPageLink", userPageLink);
         
         return "pages/blank-page";

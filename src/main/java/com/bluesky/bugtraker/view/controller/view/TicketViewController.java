@@ -39,7 +39,8 @@ public class TicketViewController {
         this.ticketAccessEvaluator = ticketAccessEvaluator;
     }
 
-    @PreAuthorize("#creatorId == principal.id or @userServiceImp.isSubscribedToProject(principal.id, #projectId)")
+    @PreAuthorize("#creatorId == principal.id or " +
+                  "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{ticketId}/page")
     public ModelAndView getTicketPage(@PathVariable String creatorId,
                                       @PathVariable String projectId,
@@ -130,8 +131,8 @@ public class TicketViewController {
         String ticketEditFormLink = linkTo(methodOn(TicketController.class)
                 .getTicket(creatorId, projectId, ticketId)).slash("/edit").toString();
 
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        boolean isEditionAllowed = ticketAccessEvaluator.isTicketEditionAllowed(principal.getId(), creatorId, ticketId);
+        UserResponseModel currentUser = userController.getCurrentUser();
+        boolean isEditionAllowed = ticketAccessEvaluator.isTicketEditionAllowed(currentUser.getPublicId(), creatorId, ticketId);
 
         ModelAndView modelAndView = new ModelAndView("details/ticket-details");
         modelAndView.addObject("ticketEditFormLink", ticketEditFormLink);
@@ -239,12 +240,12 @@ public class TicketViewController {
                                        @PathVariable String ticketId,
                                        Model model) {
 
-        String baseLink =
+        String contentBlockLink =
                 linkTo(methodOn(TicketController.class)
-                        .getTicketRecords(creatorId, projectId, ticketId, new DataTablesInput()))
-                        .toString();
+                        .getTicketRecords(creatorId, projectId, ticketId, null))
+                        .slash("content-block").toString();
 
-        model.addAttribute("ticketRecordsContentBlockLink", baseLink + "/content-block");
+        model.addAttribute("ticketRecordsContentBlockLink", contentBlockLink);
 
         return "fragments/list/body/ticket-records-body";
     }
@@ -323,14 +324,9 @@ public class TicketViewController {
                                  @PathVariable String ticketId,
                                  Model model) {
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("comments")
-                .toString();
+
+        String baseLink = linkTo(methodOn(TicketController.class)
+                .createComment(creatorId, projectId, ticketId , null, null)).toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("postRequestLink", baseLink);
@@ -347,14 +343,9 @@ public class TicketViewController {
                                   @PathVariable String projectId,
                                   @PathVariable String ticketId,
                                   Model model) {
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("tickets")
-                .slash(ticketId)
-                .slash("comments")
-                .toUri().toString();
+        
+        String baseLink = linkTo(methodOn(TicketController.class)
+                .createComment(creatorId, projectId, ticketId , null, null)).toString();
 
         model.addAttribute("commentsContentBlockLink", baseLink);
         model.addAttribute("commentFormLink", baseLink + "/form");

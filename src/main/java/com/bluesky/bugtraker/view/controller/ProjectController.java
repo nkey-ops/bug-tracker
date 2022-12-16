@@ -28,12 +28,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping("/users/{creatorId}/projects")
@@ -134,8 +136,7 @@ public class ProjectController {
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> addSubscriber(@PathVariable String creatorId,
                                             @PathVariable String projectId,
-                                            @ModelAttribute("subscriberRequestModel")
-                                            SubscriberRequestModel subscriber) {
+                                            @Valid SubscriberRequestModel subscriber) {
 
         projectService.addSubscriber(projectId, subscriber);
 
@@ -182,7 +183,7 @@ public class ProjectController {
     public ResponseEntity<?> createComment(@PathVariable String creatorId,
                                            @PathVariable String projectId,
                                            @AuthenticationPrincipal UserPrincipal creator,
-                                           @ModelAttribute("commentForm") CommentRequestModel comment) {
+                                           @Valid CommentRequestModel comment) {
 
         CommentDTO commentDto = modelMapper.map(comment, CommentDTO.class);
         projectService.createComment(projectId, creator.getId(), commentDto);
@@ -195,13 +196,12 @@ public class ProjectController {
                   "#creatorId == principal.id or " +
                   "@userServiceImp.isSubscribedToProject(principal.id, #projectId)")
     @GetMapping("/{projectId}/comments")
-    public String getComments(@PathVariable String creatorId,
-                              @PathVariable String projectId,
-                              @RequestParam(value = "page", defaultValue = "1") int page,
-                              @RequestParam(value = "limit", defaultValue = "5") int limit,
-                              @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
-                              @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir,
-                              Model model) {
+    public ModelAndView getComments(@PathVariable String creatorId,
+                                    @PathVariable String projectId,
+                                    @RequestParam(value = "page", defaultValue = "1") int page,
+                                    @RequestParam(value = "limit", defaultValue = "5") int limit,
+                                    @RequestParam(value = "sort", defaultValue = "uploadTime") String sortBy,
+                                    @RequestParam(value = "dir", defaultValue = "DESC") Sort.Direction dir) {
 
         Page<CommentDTO> pagedCommentsDto =
                 projectService.getComments(projectId, page, limit, sortBy, dir);
@@ -209,23 +209,22 @@ public class ProjectController {
         List<CommentDTO> pagedCommentsResponseModel = 
                 modelMapper.map(pagedCommentsDto.getContent(), new TypeToken<ArrayList<CommentDTO>>() {}.getType());
 
-        model.addAttribute("totalElements", pagedCommentsDto.getTotalElements());
-        model.addAttribute("limit", limit);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", pagedCommentsDto.getTotalPages());
 
-        model.addAttribute("commentsList", pagedCommentsResponseModel);
+        ModelAndView model = new ModelAndView("fragments/comments/comments-content");
+        model.addObject("totalElements", pagedCommentsDto.getTotalElements());
+        model.addObject("limit", limit);
+        model.addObject("currentPage", page);
+        model.addObject("totalPages", pagedCommentsDto.getTotalPages());
 
-        String baseLink = linkTo(UserController.class)
-                .slash(creatorId)
-                .slash("projects")
-                .slash(projectId)
-                .slash("comments")
-                .toUri().toString();
+        model.addObject("commentsList", pagedCommentsResponseModel);
 
-        model.addAttribute("listRequestLink", baseLink);
+        
+        String baseLink = linkTo(methodOn(ProjectController.class)
+                .createComment(creatorId, projectId, null, null)).toString();
+        
+        model.addObject("listRequestLink", baseLink);
 
-        return "fragments/comments/comments-content";
+        return model;
     }
 
 

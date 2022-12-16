@@ -3,6 +3,7 @@ package com.bluesky.bugtraker.shared.ticketstatus;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonKey;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -37,6 +38,7 @@ public enum Priority {
         return name();
     }
 
+    @JsonKey
     @Override   
     public String toString() {
         return text;
