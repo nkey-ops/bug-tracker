@@ -82,7 +82,7 @@ class ProjectControllerIntegrationTest {
 
         RestAssured.authentication =
                 form(email, password,
-                        new FormAuthConfig("/bugtracker/users/login",
+                        new FormAuthConfig(contextPath + "/users/login",
                                 "email", "password"));
         RestAssured.port = port;
         RestAssured.basePath = contextPath +

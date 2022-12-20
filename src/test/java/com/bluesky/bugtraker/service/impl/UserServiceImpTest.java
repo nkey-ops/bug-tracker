@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class UserServiceImpTest {
-
     private AutoCloseable closeable;
 
     @InjectMocks
@@ -160,14 +159,14 @@ class UserServiceImpTest {
 
         when(userRepo.findAll(any(DataTablesInput.class))).thenReturn(dataUserEntity);
         when(utils.map(
-                (DataTablesOutput<UserEntity>) any(DataTablesOutput.class),
+                (DataTablesOutput<?>) any(DataTablesOutput.class),
                 (TypeToken<List<UserDTO>>) any(TypeToken.class))).thenReturn(dataUserDTO);
 
 
         DataTablesOutput<UserDTO> actualDataTablesOutput = userServiceImp.getUsers(dataTablesInput);
         verify(userRepo).findAll(any(DataTablesInput.class));
         verify(utils).map(
-                (DataTablesOutput<UserEntity>) any(DataTablesOutput.class),
+                (DataTablesOutput<?>) any(DataTablesOutput.class),
                 (TypeToken<List<UserDTO>>) any(TypeToken.class));
 
         assertNotNull(actualDataTablesOutput);

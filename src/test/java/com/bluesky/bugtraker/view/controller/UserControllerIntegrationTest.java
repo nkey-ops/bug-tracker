@@ -18,12 +18,15 @@ import com.bluesky.bugtraker.view.model.rensponse.TicketResponseModel;
 import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import com.bluesky.bugtraker.view.model.request.UserRegisterModel;
 import com.bluesky.bugtraker.view.model.request.UserRequestModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.apache.catalina.User;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -49,13 +52,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({SpringExtension.class})
 @ContextConfiguration(classes = {BugTrackerApplication.class})
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = {"classpath:application-test.properties"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerIntegrationTest {
-    private final static String PATH = "/users";
     @LocalServerPort
     private Integer port;
+    private final static String PATH = "/users";
     @Value("${server.servlet.context-path}")
     private  String contextPath;
     
@@ -77,7 +80,6 @@ class UserControllerIntegrationTest {
     private ProjectEntity projectEntity;
     private TicketEntity ticketEntity;
     
-    
     private final ObjectMapper objectMapper = new ObjectMapper();
     private HashMap<String, String> dataTablesHashMap;
 
@@ -87,7 +89,7 @@ class UserControllerIntegrationTest {
         
         RestAssured.authentication =
                 form(email, password,
-                        new FormAuthConfig("/bugtracker/users/login",
+                        new FormAuthConfig(contextPath +"/users/login",
                                 "email", "password"));
         RestAssured.port = port;
         RestAssured.basePath = contextPath + PATH;
@@ -176,7 +178,7 @@ class UserControllerIntegrationTest {
 
     
     @Test
-    void getUser() {
+    void getUser() throws JsonProcessingException {
         UserEntity savedUser = userRepository.save(userEntity);
 
         //@formatter:off
@@ -189,17 +191,22 @@ class UserControllerIntegrationTest {
                     .statusCode(HttpStatus.OK.value())
                 .extract().response();
         //@formatter:on
-        
-        UserResponseModel actualUserResponse = response.as(UserResponseModel.class);
-        assertNotNull(actualUserResponse);
 
-        assertEquals(userEntity.getUsername(), actualUserResponse.getUsername());
-        assertEquals(userEntity.getPublicId(), actualUserResponse.getPublicId());
-        assertEquals(userEntity.getEmail(), actualUserResponse.getEmail());
-        assertEquals(userEntity.getAvatarURL(), actualUserResponse.getAvatarURL());
-        assertEquals(userEntity.getAddress(), actualUserResponse.getAddress());
-        assertEquals(userEntity.getPhoneNumber(), actualUserResponse.getPhoneNumber());
-        assertEquals(userEntity.getStatus(), actualUserResponse.getStatus());
+
+        UserResponseModel actualUser =
+                objectMapper
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        .readValue(response.asPrettyString(), UserResponseModel.class);
+
+        assertNotNull(actualUser);
+
+        assertEquals(userEntity.getUsername(), actualUser.getUsername());
+        assertEquals(userEntity.getPublicId(), actualUser.getPublicId());
+        assertEquals(userEntity.getEmail(), actualUser.getEmail());
+        assertEquals(userEntity.getAvatarURL(), actualUser.getAvatarURL());
+        assertEquals(userEntity.getAddress(), actualUser.getAddress());
+        assertEquals(userEntity.getPhoneNumber(), actualUser.getPhoneNumber());
+        assertEquals(userEntity.getStatus(), actualUser.getStatus());
     }
 
     
