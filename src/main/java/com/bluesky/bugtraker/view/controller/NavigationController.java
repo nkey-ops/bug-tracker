@@ -15,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Controller
-@SessionAttributes("user")
 public class NavigationController {
     private final UserController userController;
 
@@ -24,22 +23,20 @@ public class NavigationController {
         this.userController = userController;
     }
 
-    @ModelAttribute("user")
     public UserResponseModel getCurrentUser() {
         return userController.getCurrentUser();
     }
 
     @RequestMapping(value = {"/home", "/"})
-    public String home(@ModelAttribute("user") UserResponseModel user,
-                       Model model) {
-        
-        String userId = user.getPublicId();
+    public String home(Model model) {
+        UserResponseModel currentUser = getCurrentUser();
+        String userId = currentUser.getPublicId();
 
         String ticketsInfoLink = linkTo(methodOn(UserController.class).getTicketsInfo(userId)).toString();
         String userInfo = linkTo(methodOn(UserController.class).getUserInfo(userId)).toString();
         String userPageLink = linkTo(methodOn(UserViewController.class).getUserPage(userId)).toString();
 
-        model.addAttribute("user", user);
+        model.addAttribute("user", currentUser);
         model.addAttribute("ticketsInfoLink", ticketsInfoLink);
         model.addAttribute("userInfoLink", userInfo);
         model.addAttribute("userPageLink", userPageLink);
@@ -50,8 +47,9 @@ public class NavigationController {
     }
 
     @GetMapping("/lists")
-    public String getListsPage(@ModelAttribute("user") UserResponseModel currentUser, 
+    public String getListsPage( 
                                Model model){
+        UserResponseModel currentUser = getCurrentUser();
         String userId = currentUser.getPublicId();
 
         String userPageLink = 
@@ -72,8 +70,9 @@ public class NavigationController {
     }
 
     @GetMapping("/users-management")
-    public String getUserManagementPage(@ModelAttribute("user") UserResponseModel currentUser,
+    public String getUserManagementPage(
                                         Model model) {
+        UserResponseModel currentUser = getCurrentUser();
         String userId = currentUser.getPublicId();
         
         String userContent = linkTo(methodOn(UserViewController.class).getUserContent()).toString();
@@ -87,7 +86,8 @@ public class NavigationController {
     }
 
     @GetMapping("/my-projects")
-    public String getMyProjectsPage(@ModelAttribute("user") UserResponseModel currentUser,  Model model) {
+    public String getMyProjectsPage(  Model model) {
+        UserResponseModel currentUser = getCurrentUser();
         String userId = currentUser.getPublicId();
 
         String myProjectsContentLink = linkTo(methodOn(ProjectViewController.class).getProjectsBody(userId)).toString();
@@ -103,8 +103,9 @@ public class NavigationController {
     }
 
     @GetMapping("/subscribed-to-projects")
-    public String getSubscribedToProjectsPage(@ModelAttribute("user") UserResponseModel currentUser, 
+    public String getSubscribedToProjectsPage( 
                                               Model model) {
+        UserResponseModel currentUser = getCurrentUser();
         String userId = currentUser.getPublicId();
         
         String subscribedToProjectsContent =
@@ -121,8 +122,8 @@ public class NavigationController {
     }
 
     @GetMapping("/subscribed-to-tickets")
-    public String getSubscribedToTicketsPage(@ModelAttribute("user") UserResponseModel currentUser, 
-                                             Model model) {
+    public String getSubscribedToTicketsPage(Model model) {
+        UserResponseModel currentUser = getCurrentUser();
         String userId = currentUser.getPublicId();
         
         String subscribedToTicketsContent =
