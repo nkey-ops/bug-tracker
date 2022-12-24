@@ -47,16 +47,13 @@ public class TicketEntity implements Serializable {
     @Column(nullable = false)
     private Priority priority;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String howToReproduce;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5000)
     private String erroneousProgramBehaviour;
 
-    @Lob
-    @Column
+    @Column(length = 5000)
     private String howToSolve;
 
     @Column(nullable = false, updatable = false)

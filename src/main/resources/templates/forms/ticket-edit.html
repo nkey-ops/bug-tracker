@@ -62,7 +62,7 @@
                     </div>
                     <textarea id="how-to-reproduce" th:field="*{howToReproduce}" class="form-control"
                               required spellcheck="false" placeholder="Reproduction Steps..."
-                              maxlength="3000" rows="10" cols="40" style="resize: vertical"></textarea>
+                              maxlength="4500" rows="10" cols="40" style="resize: vertical"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -73,7 +73,7 @@
                     </div>
                     <textarea id="behaviour" th:field="*{erroneousProgramBehaviour}" class="form-control"
                               required spellcheck="false" placeholder="Program Behaviour..."
-                              maxlength="3000" rows="10" cols="40" style="resize: vertical"></textarea>
+                              maxlength="4500" rows="10" cols="40" style="resize: vertical"></textarea>
                 </div>
                 <div class="form-group">
                     <div class="row">
@@ -83,7 +83,7 @@
                     </div>
                     <textarea id="solution" th:field="*{howToSolve}" class="form-control"
                               required spellcheck="false" placeholder="How to Solve..."
-                              maxlength="3000" rows="10" cols="40"
+                              maxlength="4500" rows="10" cols="40"
                               style="resize: vertical"></textarea>
                 </div>
                 <div class="form-group text-center">
@@ -127,7 +127,7 @@
                         beforeSend: function () {
                             $('#ticket-edit-error').html('');
                         },
-                        success: function (updateTicket) {
+                        success: function () {
                             window.location.replace(ticketPage);
                         },
                         error: function (jqXHR) {

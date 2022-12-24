@@ -7,9 +7,7 @@ import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -43,7 +41,7 @@ public class NavigationController {
         model.addAttribute("ticketStatus", Status.values());
 
         
-        return "index";
+        return "pages/index";
     }
 
     @GetMapping("/lists")
