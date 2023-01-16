@@ -6,12 +6,8 @@
         <h3 id="project-name" class="page-title"></h3>
         <div class="card stretch-card">
             <div class="row">
-                <div class="col-3">
-                    <div class="d-flex align-items-center align-self-start">
-                        <h4 class="ms-2 mt-3 ">Creator:</h4>
-                    </div>
-                </div>
-                <div class="col-8">
+                <div class="d-flex align-items-center align-self-start">
+                    <h4 class="ms-2 mt-2 ">Creator:</h4>
                     <div id="project-creator" class="d-flex align-items-center align-self-start"></div>
                 </div>
             </div>
@@ -90,9 +86,9 @@
 
                     $('#project-name').html(projectHead);
                     $('#project-creator').html(
-                        '<img src="' + creator['avatarURL'] + '" class="ms-3 mt-2 mb-2 img-xs rounded-circle">\n' +
+                        '<img src="' + creator['avatarURL'] + '" alt="avatar" class="ms-2 mt-2 mb-2 img-xs rounded-circle">\n' +
                         '<a href="' + project['_links']['creatorPage']['href'] + '"> ' +
-                        '<h7 class="ms-2 font-weight-bold text-primary">' + creator['username'] + '</h7> ' +
+                        '<h7 class="ms-2 mr-2 font-weight-bold text-primary">' + creator['username'] + '</h7> ' +
                         '</a>'
                     );
                 },

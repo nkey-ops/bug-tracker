@@ -75,7 +75,7 @@ public class UserController {
                              UserRegisterModel userRegisterModel,
                              BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) return "/register";
+        if (bindingResult.hasErrors()) return "pages/register";
 
         UserDTO userDTO = modelMapper.map(userRegisterModel, UserDTO.class);
         userService.createUser(userDTO);

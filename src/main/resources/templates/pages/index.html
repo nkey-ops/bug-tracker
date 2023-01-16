@@ -4,7 +4,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Bug Tracker Admin</title>
+    <title>Bug Tracker Home</title>
 
     <!-- Js script -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -30,6 +30,7 @@
     <!-- Layout styles -->
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <!-- End layout styles -->
+    <link rel="icon" th:href="@{/assets/images/red-bug.svg}">
 </head>
 <body>
 <div class="container-scroller">
@@ -194,11 +195,11 @@
                     );
 
                 </script>
-               
+
                 <div class="page-header">
                     <h3 class="page-title">My Statistics </h3>
                 </div>
-                
+
                 <div class="row">
                     <div id="user-info-error"></div>
                     <div id="tickets-reported-by-user" class="col-sm-4 grid-margin"></div>
@@ -355,15 +356,13 @@
                     );
 
                 </script>
-
             </div>
+            <!-- content-wrapper ends -->
+            <!-- partial -->
         </div>
-        <!-- content-wrapper ends -->
-        <!-- partial -->
+        <!-- main-panel ends -->
     </div>
-    <!-- main-panel ends -->
-</div>
-<!-- page-body-wrapper ends -->
+    <!-- page-body-wrapper ends -->
 </div>
 <!-- container-scroller -->
 
