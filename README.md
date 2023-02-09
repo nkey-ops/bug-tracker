@@ -1,5 +1,4 @@
 A bug tracking web application that keeps track of reported software bugs in software development projects.
-<br/><a href="http://ec2-44-204-52-122.compute-1.amazonaws.com:8080/bugtracker">Link to the Bug Tracker</a>
 
 My Project Statistics: 
 ![image](https://user-images.githubusercontent.com/81760194/215413300-6bd64e3c-a7aa-447b-9792-bdf45da7bca5.png)
