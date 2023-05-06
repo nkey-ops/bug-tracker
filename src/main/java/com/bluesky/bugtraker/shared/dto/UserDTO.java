@@ -25,11 +25,15 @@ public class UserDTO implements Serializable {
     private String username;
     private String email;
     private String password;
+    
+    private boolean emailVerificationStatus;
 
     private String avatarURL;
     private String address;
     private String phoneNumber;
     private String status;
+    
+    
 
     private Set<ProjectDTO> projects;
     private Set<TicketDTO> reportedTickets;

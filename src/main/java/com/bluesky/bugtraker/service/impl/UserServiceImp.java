@@ -1,5 +1,35 @@
 package com.bluesky.bugtraker.service.impl;
 
+import static com.bluesky.bugtraker.exceptions.ErrorType.INTERNAL_SERVER_ERROR;
+import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_EXISTS;
+import static com.bluesky.bugtraker.service.specifications.Specs.byReporter;
+import static com.bluesky.bugtraker.service.specifications.Specs.bySubscriber;
+import static com.bluesky.bugtraker.service.specifications.Specs.reportedADayAgo;
+import static com.bluesky.bugtraker.service.specifications.Specs.reportedAMonthAgo;
+import static com.bluesky.bugtraker.service.specifications.Specs.statusIs;
+
+import java.time.Instant;
+import java.time.Period;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.bluesky.bugtraker.exceptions.ErrorType;
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.RoleServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
@@ -21,27 +51,6 @@ import com.bluesky.bugtraker.shared.dto.UserDTO;
 import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.time.Period;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.bluesky.bugtraker.exceptions.ErrorType.*;
-import static com.bluesky.bugtraker.service.specifications.Specs.*;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -59,14 +68,25 @@ public class UserServiceImp implements UserService {
     private final Utils utils;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public UserServiceImp(DataExtractionUtils dataExtractionUtils, UserRepository userRepo, RoleRepository roleRepo, TicketRepository ticketRepo, ProjectRepository projectRepo, UserServiceUtils userServiceUtils, Utils utils, ModelMapper modelMapper) {
+	private final EmailServiceImpl emailService;
+
+    public UserServiceImp(
+    					DataExtractionUtils dataExtractionUtils, 
+    					UserRepository userRepo, 
+    					RoleRepository roleRepo, 
+    					TicketRepository ticketRepo, 
+    					ProjectRepository projectRepo, 
+    					UserServiceUtils userServiceUtils, 
+    					EmailServiceImpl emailServiceImpl,
+    					Utils utils, ModelMapper modelMapper) {
+
         this.dataExtractionUtils = dataExtractionUtils;
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.ticketRepo = ticketRepo;
         this.projectRepo = projectRepo;
         this.userServiceUtils = userServiceUtils;
+		this.emailService = emailServiceImpl;
 
         this.utils = utils;
         this.modelMapper = modelMapper;
@@ -127,14 +147,26 @@ public class UserServiceImp implements UserService {
         userEntity.setPublicId(utils.generateUserId());
         userEntity.setEncryptedPassword(utils.encode(userDto.getPassword()));
         userEntity.setAvatarURL(avatarURL);
-        userEntity.setEmailVerificationToken("mock");
-        userEntity.setEmailVerificationStatus(true);   // TODO after testing change to false;
 
-        RoleEntity roleEntity = roleRepo.findByRole(userDto.getRole()).orElseThrow(() -> new RoleServiceException(NO_RECORD_FOUND, userDto.getRole().toString()));
+        RoleEntity roleEntity = roleRepo.findByRole(
+        		userDto.getRole())
+        		.orElseThrow(() -> 
+        			new RoleServiceException(NO_RECORD_FOUND, userDto.getRole().toString()));
+
         userEntity.setRoleEntity(roleEntity);
+
+        if(!userDto.isEmailVerificationStatus()) {
+        	userEntity.setEmailVerificationToken(
+        		utils.getEmailVerificationToken(userEntity.getPublicId()));
+
+        	emailService.verifyEmail(
+        		userEntity.getEmail(), userEntity.getEmailVerificationToken());
+        } 
+        
 
         UserEntity savedEntity = userRepo.save(userEntity);
 
+       
         return modelMapper.map(savedEntity, UserDTO.class);
     }
 
@@ -279,13 +311,33 @@ public class UserServiceImp implements UserService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(@NotNull String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepo.findByEmail(email)
                 .orElseThrow(() -> 
                         new UsernameNotFoundException(NO_RECORD_FOUND + " with : " + email));
 
         UserDTO userDto = modelMapper.map(userEntity, UserDTO.class);
 
+
+
         return new UserPrincipal(userDto);
     }
+
+
+	@Override
+	public void verifyEmailToken(@NotNull String token) {
+		UserEntity userEntity = userRepo.findByEmailVerificationToken(token)
+			.orElseThrow(() -> 
+					new UserServiceException(NO_RECORD_FOUND, 
+							"Cannot find the verification token"));
+		
+		if(utils.hasEmailTokenExpired(token))
+			throw new UserServiceException(
+					ErrorType.EMAIL_VERIFICATION_TOKEN_IS_EXPIRED);
+
+		userEntity.setEmailVerificationToken(null);;
+		userEntity.setEmailVerificationStatus(true);
+		
+		userRepo.save(userEntity);
+	}
 }

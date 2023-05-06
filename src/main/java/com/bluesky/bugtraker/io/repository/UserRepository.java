@@ -11,9 +11,12 @@ import java.util.Optional;
 public interface UserRepository extends DataTablesRepository<UserEntity, Long> {
     Optional<UserEntity> findByPublicId(String id);
     Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByEmailVerificationToken(String token);
+    
     void deleteAllDistinctByEmail(String email);
     void deleteByEmail(String email);
     boolean existsByEmail(String email);
     long countByRoleEntityRole(Role role);
     long deleteAllByEmailNotLike(String email);
+
 }

@@ -6,8 +6,17 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bluesky.bugtraker.security.SecurityConstants;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 import javax.validation.constraints.NotNull;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -56,4 +65,30 @@ public class Utils {
 
         return result;
     }
+
+	public boolean hasEmailTokenExpired(@NotNull String token) {
+		return  Jwts.parser()
+					.setSigningKey(SecurityConstants.getTokenSecret())
+					.parseClaimsJws(token)
+					.getBody()
+					.getExpiration().before(new Date());
+	}
+
+	public String getEmailVerificationToken(String publicId) {
+		return Jwts.builder()
+					.setSubject(publicId)
+					.setExpiration( Date.from(
+							Instant.now().plusMillis( SecurityConstants.EXPIRATION_TIME)))
+					.signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+					.compact();
+	}
 }
+
+
+
+
+
+
+
+
+

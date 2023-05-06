@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class UserPrincipal implements UserDetails {
@@ -16,7 +17,10 @@ public class UserPrincipal implements UserDetails {
     private final UserDTO user;
     private final String id;
 
+
     public UserPrincipal(UserDTO user) {
+    	Objects.requireNonNull(user);
+
         this.user = user;
         this.id = user.getPublicId();
     }
@@ -65,7 +69,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isEmailVerificationStatus();
     }
 
     public String getId() {

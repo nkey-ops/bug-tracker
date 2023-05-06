@@ -44,10 +44,10 @@ public class UserEntity implements Serializable {
     @Column(nullable = false, length = 60)
     private String encryptedPassword;
 
-    @Column(length = 60)
+    @Column(length = 180)
     private String emailVerificationToken;
 
-    @Column
+    @Column(nullable = false)
     private Boolean emailVerificationStatus;
 
     @ManyToOne( fetch = FetchType.EAGER)

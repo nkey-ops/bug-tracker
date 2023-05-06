@@ -16,6 +16,7 @@ import com.bluesky.bugtraker.view.model.request.UserRequestModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,162 +32,141 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @SessionAttributes("user")
 public class UserController {
-    private final UserService userService;
-    private final TicketService ticketService;
-    private final ProjectService projectService;
+	private final UserService userService;
+	private final TicketService ticketService;
+	private final ProjectService projectService;
 
-    private final ModelMapper modelMapper;
-    private final ProjectModelAssembler projectModelAssembler;
-    private final TicketModelAssembler ticketModelAssembler;
-    private final UserModelAssembler userModelAssembler;
+	private final ModelMapper modelMapper;
+	private final ProjectModelAssembler projectModelAssembler;
+	private final TicketModelAssembler ticketModelAssembler;
+	private final UserModelAssembler userModelAssembler;
 
-    public UserController(UserService userService, 
-                          TicketService ticketService, 
-                          ProjectService projectService, 
-                          ModelMapper modelMapper, 
-                          ProjectModelAssembler projectModelAssembler, 
-                          TicketModelAssembler ticketModelAssembler, 
-                          UserModelAssembler userModelAssembler) {
+	public UserController(UserService userService, TicketService ticketService, ProjectService projectService,
+			ModelMapper modelMapper, ProjectModelAssembler projectModelAssembler,
+			TicketModelAssembler ticketModelAssembler, UserModelAssembler userModelAssembler) {
 
-        this.userService = userService;
-        this.ticketService = ticketService;
-        this.projectService = projectService;
-        this.modelMapper = modelMapper;
-        this.projectModelAssembler = projectModelAssembler;
-        this.ticketModelAssembler = ticketModelAssembler;
-        this.userModelAssembler = userModelAssembler;
-    }
+		this.userService = userService;
+		this.ticketService = ticketService;
+		this.projectService = projectService;
+		this.modelMapper = modelMapper;
+		this.projectModelAssembler = projectModelAssembler;
+		this.ticketModelAssembler = ticketModelAssembler;
+		this.userModelAssembler = userModelAssembler;
+	}
 
-    @ModelAttribute("user")
-    public UserResponseModel getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (auth.getPrincipal().toString().equals("anonymousUser")) 
-            return new UserResponseModel("Anonymous User");
-            
-        UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
+	@ModelAttribute("user")
+	public UserResponseModel getCurrentUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        return getUser(userPrincipal.getId()).getBody();
-    }
+		if (auth.getPrincipal().toString().equals("anonymousUser"))
+			return new UserResponseModel("Anonymous User");
 
-    
-    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String createUser(@Valid @ModelAttribute("userRegisterModel")
-                             UserRegisterModel userRegisterModel,
-                             BindingResult bindingResult) {
+		UserPrincipal userPrincipal = ((UserPrincipal) auth.getPrincipal());
 
-        if (bindingResult.hasErrors()) return "pages/register";
+		return getUser(userPrincipal.getId()).getBody();
+	}
 
-        UserDTO userDTO = modelMapper.map(userRegisterModel, UserDTO.class);
-        userService.createUser(userDTO);
+	@PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public String createUser(@Valid @ModelAttribute("userRegisterModel") UserRegisterModel userRegisterModel,
+			BindingResult bindingResult) {
 
-        return "redirect:/home";
-    }
+		if (bindingResult.hasErrors())
+			return "pages/register";
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
-    @GetMapping(value = "/{userId}")
-    @ResponseBody
-    public ResponseEntity<UserResponseModel> getUser(@PathVariable String userId) {
+		UserDTO userDTO = modelMapper.map(userRegisterModel, UserDTO.class);
+		userService.createUser(userDTO);
 
-        UserDTO userById = userService.getUserById(userId);
-        UserResponseModel assembledUser = userModelAssembler.toModel(userById);
-        
-        return ResponseEntity.ok(assembledUser);
-    }
+		return "redirect:/home";
+	}
 
-    @PreAuthorize("#userId == principal.id")
-    @GetMapping("/{userId}/info")
-    public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable String userId) {
-        return ResponseEntity.ok(userService.getUserInfo(userId));
-    }
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
+	@GetMapping(value = "/{userId}")
+	@ResponseBody
+	public ResponseEntity<UserResponseModel> getUser(@PathVariable String userId) {
 
-    @PreAuthorize("#userId == principal.id")
-    @GetMapping("/{userId}/tickets-info")
-    public ResponseEntity<ProjectsInfoDTO> getTicketsInfo(@PathVariable String userId) {
-        return ResponseEntity.ok(userService.getProjectsInfo(userId));
-    }
+		UserDTO userById = userService.getUserById(userId);
+		UserResponseModel assembledUser = userModelAssembler.toModel(userById);
 
+		return ResponseEntity.ok(assembledUser);
+	}
 
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN') or" + 
-                    "(#userId == principal.id and #userRequestModel.getRole() == null)")
-    @PatchMapping(value = "/{userId}", 
-                 consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> updateUser(@PathVariable String userId, 
-                                        @Valid UserRequestModel userRequestModel) {
+	@PreAuthorize("#userId == principal.id")
+	@GetMapping("/{userId}/info")
+	public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable String userId) {
+		return ResponseEntity.ok(userService.getUserInfo(userId));
+	}
 
-        UserDTO userDto = modelMapper.map(userRequestModel, UserDTO.class);
-        userService.updateUser(userId, userDto);
+	@PreAuthorize("#userId == principal.id")
+	@GetMapping("/{userId}/tickets-info")
+	public ResponseEntity<ProjectsInfoDTO> getTicketsInfo(@PathVariable String userId) {
+		return ResponseEntity.ok(userService.getProjectsInfo(userId));
+	}
 
-        return ResponseEntity.ok().build();
-    }
+	@PreAuthorize("hasRole('ROLE_SUPER_ADMIN') or"
+			+ "(#userId == principal.id and #userRequestModel.getRole() == null)")
+	@PatchMapping(value = "/{userId}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public ResponseEntity<?> updateUser(@PathVariable String userId, @Valid UserRequestModel userRequestModel) {
 
+		UserDTO userDto = modelMapper.map(userRequestModel, UserDTO.class);
+		userService.updateUser(userId, userDto);
 
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
-    @GetMapping
-    public ResponseEntity<DataTablesOutput<UserResponseModel>> getUsers(@Valid DataTablesInput input) {
+		return ResponseEntity.ok().build();
+	}
 
-        DataTablesOutput<UserDTO> userDTOs = userService.getUsers(input);
-        DataTablesOutput<UserResponseModel> assembledUsers = userModelAssembler.toDataTablesOutputModel(userDTOs);
+	@PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+	@GetMapping
+	public ResponseEntity<DataTablesOutput<UserResponseModel>> getUsers(@Valid DataTablesInput input) {
 
-        return ResponseEntity.ok(assembledUsers);
-    }
+		DataTablesOutput<UserDTO> userDTOs = userService.getUsers(input);
+		DataTablesOutput<UserResponseModel> assembledUsers = userModelAssembler.toDataTablesOutputModel(userDTOs);
 
-    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
-            "(hasRole('ADMIN') and !@userServiceImp.isSuperAdmin(#userId)) or " +
-            "#userId == principal.id")
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
+		return ResponseEntity.ok(assembledUsers);
+	}
 
-        return ResponseEntity.ok().build();
-    }
+	@PreAuthorize("hasRole('SUPER_ADMIN') or" + "(hasRole('ADMIN') and !@userServiceImp.isSuperAdmin(#userId)) or "
+			+ "#userId == principal.id")
+	@DeleteMapping("/{userId}")
+	public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+		userService.deleteUser(userId);
 
+		return ResponseEntity.ok().build();
+	}
 
-    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
-                  "#userId == principal.id")
-    @GetMapping("/{userId}/project-subscriptions")
-    @ResponseBody
-    public ResponseEntity<DataTablesOutput<ProjectResponseModel>>
-                            getSubscribedToProjects(
-                                    @PathVariable String userId,
-                                    @Valid DataTablesInput input) {
+	@PreAuthorize("hasRole('SUPER_ADMIN') or" + "#userId == principal.id")
+	@GetMapping("/{userId}/project-subscriptions")
+	@ResponseBody
+	public ResponseEntity<DataTablesOutput<ProjectResponseModel>> getSubscribedToProjects(@PathVariable String userId,
+			@Valid DataTablesInput input) {
 
-        DataTablesOutput<ProjectDTO> subscribedOnProjects =
-                projectService.getSubscribedToProjects(userId, input);
+		DataTablesOutput<ProjectDTO> subscribedOnProjects = projectService.getSubscribedToProjects(userId, input);
 
-        DataTablesOutput<ProjectResponseModel> assembledProjects =
-                projectModelAssembler.toDataTablesOutputModel(subscribedOnProjects);
+		DataTablesOutput<ProjectResponseModel> assembledProjects = projectModelAssembler
+				.toDataTablesOutputModel(subscribedOnProjects);
 
-        return ResponseEntity.ok(assembledProjects);
-    }
+		return ResponseEntity.ok(assembledProjects);
+	}
 
-    @PreAuthorize("hasRole('SUPER_ADMIN') or" +
-                  "#userId == principal.id")
-    @GetMapping("/{userId}/ticket-subscriptions")
-    public ResponseEntity<DataTablesOutput<TicketResponseModel>>
-                            getSubscribedToTickets(
-                                     @PathVariable String userId,
-                                     @Valid DataTablesInput input) {
+	@PreAuthorize("hasRole('SUPER_ADMIN') or" + "#userId == principal.id")
+	@GetMapping("/{userId}/ticket-subscriptions")
+	public ResponseEntity<DataTablesOutput<TicketResponseModel>> getSubscribedToTickets(@PathVariable String userId,
+			@Valid DataTablesInput input) {
 
-        DataTablesOutput<TicketDTO> ticketSubscriptions =
-                ticketService.getTicketsUserSubscribedTo(userId, input);
+		DataTablesOutput<TicketDTO> ticketSubscriptions = ticketService.getTicketsUserSubscribedTo(userId, input);
 
-        DataTablesOutput<TicketResponseModel> assembledTickets =
-                ticketModelAssembler.toDataTablesOutputModel(ticketSubscriptions);
+		DataTablesOutput<TicketResponseModel> assembledTickets = ticketModelAssembler
+				.toDataTablesOutputModel(ticketSubscriptions);
 
-        return ResponseEntity.ok(assembledTickets);
-    }
+		return ResponseEntity.ok(assembledTickets);
+	}
+
+	@GetMapping("/email-verification")
+	@ResponseBody
+	public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+
+		userService.verifyEmailToken(token);
+
+		return ResponseEntity.ok("The Email was successfully verified");
+
+	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,5 +1,7 @@
 package com.bluesky.bugtraker.configurations;
 
+import java.util.Properties;
+
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationContext;
@@ -7,7 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
@@ -25,6 +28,32 @@ public class Configurations {
         this.applicationContext = applicationContext;
     }
     
+//     @Bean
+//     JavaMailSender getJavaMailSender() {
+//    	 return new JavaMailSenderImpl();
+//     }
+
+//    
+    
+//    @Bean
+//    JavaMailSender getJavaMailSender() {
+//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+//        mailSender.setHost("smtp.gmail.com");
+//        mailSender.setPort(587);
+//        
+//        mailSender.setUsername("my.gmail@gmail.com");
+//        mailSender.setPassword("password");
+//        
+//        Properties props = mailSender.getJavaMailProperties();
+//        props.put("mail.transport.protocol", "smtp");
+//        props.put("mail.smtp.auth", "true");
+//        props.put("mail.smtp.starttls.enable", "true");
+//        props.put("mail.debug", "true");
+//        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+//
+//        return mailSender;
+//    }
+
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
@@ -45,7 +74,7 @@ public class Configurations {
         templateResolver.setTemplateMode(TemplateMode.HTML);
         // Template cache is true by default. Set to false if you want
         // templates to be automatically updated when modified.
-        templateResolver.setCacheable(true);
+        templateResolver.setCacheable(false);
         templateResolver.setOrder(1);
         return templateResolver;
     }

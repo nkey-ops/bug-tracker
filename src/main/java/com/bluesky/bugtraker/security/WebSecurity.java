@@ -9,69 +9,50 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
 public class WebSecurity {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
 //      @formatter:off
         return http
-                .cors()
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/assets/**")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/login", "/signup", "/users/oath2")
-                .permitAll()
-                .antMatchers(HttpMethod.POST, "/users")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, SecurityConstants.VERIFICATION_EMAIL_URL)
-                .permitAll()
+                .cors(withDefaults())
+                .csrf( csrf -> csrf.disable())
+                .authorizeHttpRequests(requests -> requests
+                        .antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/assets/**")
+                        .permitAll()
+                        .antMatchers(HttpMethod.GET, "/login", "/signup", 
+                        		SecurityConstants.VERIFICATION_EMAIL_URL,
+                        		"/verification/email",
+                        		"/email-verification")
+                        
+                        .permitAll()
+                        .antMatchers(HttpMethod.POST, "/users")
+                        .permitAll()
 
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/home", true)
-                    .usernameParameter("email")
-                    .passwordParameter("password")
-                    .loginProcessingUrl("/users/login")
-                .permitAll()
-                .and()
-                .logout()
-                    .logoutUrl("/logout")
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID")
-                .and()
-                .rememberMe()
-                    .key(SecurityConstants.getTokenRememberMe())
-                    .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME)
-                .and()
+                        .anyRequest().authenticated())
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .loginProcessingUrl(SecurityConstants.VERIFICATION_LOGIN_URL)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"))
+                .rememberMe(me -> me
+                        .key(SecurityConstants.getTokenRememberMe())
+                        .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME))
                 .build();
                 
-//                .exceptionHandling(e -> e
-//                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-//                )
-//                      .defaultSuccessUrl("/home", true)
-//                    .loginProcessingUrl("/users/login")
-//                .and()
-//                .formLogin(e -> e
-//                        .defaultSuccessUrl("/home", true)
-//                    .usernameParameter("email")
-//                    .passwordParameter("password")
-//                    .loginProcessingUrl("/login/github/authorized")
-//                )
-//                .and()
-//                    .oauth2Login()
-//                        .loginPage("/login")
-//                    .redirectionEndpoint()
-//                        .baseUri("/home")
-//                .and()
-//                .build();
-        
 //      @formatter:on
     }
 

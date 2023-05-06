@@ -45,6 +45,8 @@ public class InitialUserSetup {
         userDTO.setUsername(superAdminUsername);
         userDTO.setPassword(superAdminPassword);
         userDTO.setEmail(superAdminEmail);
+        userDTO.setEmailVerificationStatus(true);
+
 
         if(!userService.existsUserByEmail(superAdminEmail))
                 userService.createUserWithRole(userDTO);

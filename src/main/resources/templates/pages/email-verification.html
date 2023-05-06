@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Email verification</title>
+
+    <!-- Js script -->
+	<script src="https://cdn.jsdelivr.net/webjars/jquery/3.6.0/jquery.min.js"></script>
+    <!-- end Js script -->
+
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" media="screen" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+    <!-- end inject -->
+
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+	<link rel="icon" th:href="@{/assets/images/red-bug.svg}">
+</head>
+<body>
+
+<div id="status" style="display:none"></div> 
+
+<script th:inline="javascript">
+
+	$(document).ready(function () {
+		var urlParams = new URLSearchParams(location.search);
+   		var url = /*[[@{/users/email-verification}]]*/ 'null';	 		
+	 	
+		if(urlParams.has("token")) 
+			verifyToken(urlParams.get("token"));
+		else 
+			alert("Verification Token wasn't found");
+			
+  		function verifyToken(token) {
+  			$.ajax({
+  				type: 'GET', 
+  				url: url,
+  				data: {token: token}, 
+  			success: function name() {
+                $('#status').html('<p class="alert alert-success"> Email was successfully verified </p>')
+				$("#status").attr("style", "display: block !important")
+			},
+			error: function name(jqXHR) {
+                $('#status').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
+				$("#status").attr("style", "display: block !important")
+			}})
+		}	
+	});
+
+</script>
+
+</body>
+</html>

@@ -39,4 +39,6 @@ public interface UserService extends UserDetailsService {
 
     boolean isSubscribedToTicket(String userId, String ticketId);
 
+	void verifyEmailToken(String token);
+
 }

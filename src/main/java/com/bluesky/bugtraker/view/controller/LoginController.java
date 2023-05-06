@@ -26,4 +26,19 @@ public class LoginController {
         return "pages/login";
     }
 
+    @GetMapping("/verification/email")
+    public String emailVerificaton(){
+        return  "pages/email-verification";
+    }
+
+    @GetMapping("/email-verification")
+    public String blas(Model model){
+
+    	model.addAttribute("token", "secretToken");
+    	model.addAttribute("baseURL", "http://smth:/");
+    	
+
+        return  "pages/verification-email";
+    }
+
 }
