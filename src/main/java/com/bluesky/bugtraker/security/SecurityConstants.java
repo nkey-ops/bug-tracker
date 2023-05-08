@@ -12,7 +12,7 @@ public class SecurityConstants {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
     public static final String SING_UP_URL = "/signup";
-    public static final String VERIFICATION_EMAIL_URL = "/users/email-verification";
+	public static final String EMAIL_VERIFICATION_PROCESSING_URL = "/users/email-verification";
     public static final String VERIFICATION_LOGIN_URL = "/users/login";
     public static final int REMEMBER_ME_EXPIRATION_TIME = 604_800; // 1 week
 

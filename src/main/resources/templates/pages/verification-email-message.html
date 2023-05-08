@@ -107,33 +107,7 @@ img {
 	<!-- start body -->
 	<table border="0" cellpadding="0" cellspacing="0" width="100%">
 
-		<!-- start logo 
-		<tr>
-			<td align="center" bgcolor="#e9ecef">
-				<!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-				<table border="0" cellpadding="0" cellspacing="0" width="100%"
-					style="max-width: 600px;">
-					<tr>
-						<td align="center" valign="top" style="padding: 36px 24px;">
-							<a href="/" target="_blank"
-							style="display: inline-block;"> <img
-								th:src="@{/assets/images/logo.svg}"
-								alt="Logo" border="0" width="48"
-								style="display: block; width: 48px; max-width: 48px; min-width: 48px;">
-						</a>
-						</td>
-					</tr>
-				</table> <!--[if (gte mso 9)|(IE)]>
-        </td>
-        </tr>
-        </table>
-			</td>
-		</tr>
-		end logo -->
-
+		
 		<!-- start hero -->
 		<tr>
 			<td align="center" bgcolor="#e9ecef">
@@ -196,8 +170,8 @@ img {
 												<td align="center" bgcolor="#1a82e2"
 													style="border-radius: 6px;"><a
 													th:href="${baseURL} + '/' +@{verification/email(token=${token})}" target="_blank"
-													style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">Do
-														Something Sweet</a></td>
+													style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">
+													Verify</a></td>
 											</tr>
 										</table>
 									</td>
@@ -207,22 +181,19 @@ img {
 					</tr>
 					<!-- end button -->
 					
-					
-					
-
-					 <!-- start copy 
+					 <!-- start copy -->
 					<tr>
 						<td align="left" bgcolor="#ffffff"
 							style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
 							<p style="margin: 0;">If that doesn't work, copy and paste
 								the following link in your browser:</p>
-							<p style="margin: 0;" th:value="@{emailVerification(token=${token})}">
-								<a th:href="${#context.getContextPath}{emailVerification(token=${token})}" target="_blank"
-								style="content: attr(href)"></a>
+							<p style="margin: 0;" >
+								<a th:href="${baseURL} + '/' +@{verification/email(token=${token})}" target="_blank"
+								th:text="${baseURL} + '/' +@{verification/email(token=${token})}"></a>
 							</p>
 						</td>
 					</tr>
-					end copy -->
+					<!--  end copy -->
 					
 					<!-- start copy -->
 					<tr>

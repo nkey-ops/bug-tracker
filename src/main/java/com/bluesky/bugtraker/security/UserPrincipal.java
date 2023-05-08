@@ -17,7 +17,6 @@ public class UserPrincipal implements UserDetails {
     private final UserDTO user;
     private final String id;
 
-
     public UserPrincipal(UserDTO user) {
     	Objects.requireNonNull(user);
 

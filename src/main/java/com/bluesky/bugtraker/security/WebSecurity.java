@@ -1,17 +1,14 @@
 package com.bluesky.bugtraker.security;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @EnableWebSecurity
@@ -27,11 +24,9 @@ public class WebSecurity {
                 .authorizeHttpRequests(requests -> requests
                         .antMatchers("/webjars/**", "/css/**", "/js/**", "/images/**", "/assets/**")
                         .permitAll()
-                        .antMatchers(HttpMethod.GET, "/login", "/signup", 
-                        		SecurityConstants.VERIFICATION_EMAIL_URL,
-                        		"/verification/email",
-                        		"/email-verification")
-                        
+                        .antMatchers(HttpMethod.GET, 
+                        		"/login", "/signup", "/verification/email",
+                        		SecurityConstants.EMAIL_VERIFICATION_PROCESSING_URL)
                         .permitAll()
                         .antMatchers(HttpMethod.POST, "/users")
                         .permitAll()

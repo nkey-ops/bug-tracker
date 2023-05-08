@@ -20,7 +20,6 @@ import javax.validation.constraints.NotNull;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -61,7 +60,6 @@ public class UserServiceImp implements UserService {
     private final RoleRepository roleRepo;
     private final TicketRepository ticketRepo;
     private final ProjectRepository projectRepo;
-
 
     private final DataExtractionUtils dataExtractionUtils;
     private final UserServiceUtils userServiceUtils;
@@ -166,7 +164,6 @@ public class UserServiceImp implements UserService {
 
         UserEntity savedEntity = userRepo.save(userEntity);
 
-       
         return modelMapper.map(savedEntity, UserDTO.class);
     }
 
@@ -317,8 +314,6 @@ public class UserServiceImp implements UserService {
                         new UsernameNotFoundException(NO_RECORD_FOUND + " with : " + email));
 
         UserDTO userDto = modelMapper.map(userEntity, UserDTO.class);
-
-
 
         return new UserPrincipal(userDto);
     }

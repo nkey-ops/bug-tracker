@@ -48,7 +48,7 @@ public class UserEntity implements Serializable {
     private String emailVerificationToken;
 
     @Column(nullable = false)
-    private Boolean emailVerificationStatus;
+    private boolean emailVerificationStatus;
 
     @ManyToOne( fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",

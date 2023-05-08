@@ -24,10 +24,12 @@ public class InitialUserSetup {
     @Value("${super-admin-user.password}")
     private String superAdminPassword;
 
+    @Value("${is-super-admin-email-verified}")
+    private boolean isSuperAdminVerified;	
+    		
     private final RoleRepository roleRepo;
     private final UserService userService;
 
-    @Autowired
     public InitialUserSetup(RoleRepository roleRepo, UserService userService) {
         this.roleRepo = roleRepo;
         this.userService = userService;
@@ -45,8 +47,7 @@ public class InitialUserSetup {
         userDTO.setUsername(superAdminUsername);
         userDTO.setPassword(superAdminPassword);
         userDTO.setEmail(superAdminEmail);
-        userDTO.setEmailVerificationStatus(true);
-
+        userDTO.setEmailVerificationStatus(isSuperAdminVerified);
 
         if(!userService.existsUserByEmail(superAdminEmail))
                 userService.createUserWithRole(userDTO);

@@ -31,7 +31,7 @@ public class TestUtils {
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getEncryptedPassword(), actual.getEncryptedPassword());
         assertEquals(expected.getEmailVerificationToken(), actual.getEmailVerificationToken());
-        assertEquals(expected.getEmailVerificationStatus(), actual.getEmailVerificationStatus());
+        assertEquals(expected.isEmailVerificationStatus(), actual.isEmailVerificationStatus());
         assertEquals(expected.getRoleEntity(), actual.getRoleEntity());
 
         assertIterableEquals(expected.getProjects(), actual.getProjects());

@@ -1,36 +1,62 @@
 package com.bluesky.bugtraker.service.impl;
 
-import com.bluesky.bugtraker.io.entity.*;
-import com.bluesky.bugtraker.io.repository.CommentRepository;
-import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
-import com.bluesky.bugtraker.io.repository.TicketRepository;
-import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.utils.Utils;
-import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
-import com.bluesky.bugtraker.shared.dto.*;
-import com.bluesky.bugtraker.shared.ticketstatus.Priority;
-import com.bluesky.bugtraker.shared.ticketstatus.Severity;
-import com.bluesky.bugtraker.shared.ticketstatus.Status;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.data.jpa.domain.Specification;
+import static com.bluesky.bugtraker.service.TestUtils.assertEqualsTicket;
+import static com.bluesky.bugtraker.service.TestUtils.assertEqualsTicketRecord;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
 
-import static com.bluesky.bugtraker.service.TestUtils.assertEqualsTicket;
-import static com.bluesky.bugtraker.service.TestUtils.assertEqualsTicketRecord;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.domain.Specification;
+
+import com.bluesky.bugtraker.io.entity.CommentEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.TicketEntity;
+import com.bluesky.bugtraker.io.entity.TicketRecordEntity;
+import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.io.repository.CommentRepository;
+import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
+import com.bluesky.bugtraker.io.repository.TicketRepository;
+import com.bluesky.bugtraker.io.repository.UserRepository;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
+import com.bluesky.bugtraker.service.utils.Utils;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.ProjectDTO;
+import com.bluesky.bugtraker.shared.dto.TicketDTO;
+import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.shared.ticketstatus.Priority;
+import com.bluesky.bugtraker.shared.ticketstatus.Severity;
+import com.bluesky.bugtraker.shared.ticketstatus.Status;
 
 @ExtendWith(MockitoExtension.class)
 class TicketServiceImpTest {
@@ -186,7 +212,7 @@ class TicketServiceImpTest {
 
         TicketEntity actualTicketEntity = ticketCaptor.getValue();
 
-        assertEqualsTicket(ticketEntity, actualTicketEntity);
+     	assertEqualsTicket(ticketEntity, actualTicketEntity);
     }
     
     @Test

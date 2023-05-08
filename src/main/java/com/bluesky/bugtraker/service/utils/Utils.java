@@ -1,5 +1,13 @@
 package com.bluesky.bugtraker.service.utils;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+import javax.validation.constraints.NotNull;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -8,17 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.bluesky.bugtraker.security.SecurityConstants;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
-import javax.validation.constraints.NotNull;
-import java.security.SecureRandom;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
 
 @Service
 public class Utils {
@@ -74,7 +73,7 @@ public class Utils {
 					.getExpiration().before(new Date());
 	}
 
-	public String getEmailVerificationToken(String publicId) {
+	public String getEmailVerificationToken(@NotNull String publicId) {
 		return Jwts.builder()
 					.setSubject(publicId)
 					.setExpiration( Date.from(

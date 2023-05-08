@@ -32,27 +32,31 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @SessionAttributes("user")
 public class UserController {
-	private final UserService userService;
-	private final TicketService ticketService;
-	private final ProjectService projectService;
+    private final UserService userService;
+    private final TicketService ticketService;
+    private final ProjectService projectService;
 
-	private final ModelMapper modelMapper;
-	private final ProjectModelAssembler projectModelAssembler;
-	private final TicketModelAssembler ticketModelAssembler;
-	private final UserModelAssembler userModelAssembler;
+    private final ModelMapper modelMapper;
+    private final ProjectModelAssembler projectModelAssembler;
+    private final TicketModelAssembler ticketModelAssembler;
+    private final UserModelAssembler userModelAssembler;
 
-	public UserController(UserService userService, TicketService ticketService, ProjectService projectService,
-			ModelMapper modelMapper, ProjectModelAssembler projectModelAssembler,
-			TicketModelAssembler ticketModelAssembler, UserModelAssembler userModelAssembler) {
+    public UserController(UserService userService, 
+                          TicketService ticketService, 
+                          ProjectService projectService, 
+                          ModelMapper modelMapper, 
+                          ProjectModelAssembler projectModelAssembler, 
+                          TicketModelAssembler ticketModelAssembler, 
+                          UserModelAssembler userModelAssembler) {
 
-		this.userService = userService;
-		this.ticketService = ticketService;
-		this.projectService = projectService;
-		this.modelMapper = modelMapper;
-		this.projectModelAssembler = projectModelAssembler;
-		this.ticketModelAssembler = ticketModelAssembler;
-		this.userModelAssembler = userModelAssembler;
-	}
+        this.userService = userService;
+        this.ticketService = ticketService;
+        this.projectService = projectService;
+        this.modelMapper = modelMapper;
+        this.projectModelAssembler = projectModelAssembler;
+        this.ticketModelAssembler = ticketModelAssembler;
+        this.userModelAssembler = userModelAssembler;
+    }
 
 	@ModelAttribute("user")
 	public UserResponseModel getCurrentUser() {
@@ -67,11 +71,11 @@ public class UserController {
 	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-	public String createUser(@Valid @ModelAttribute("userRegisterModel") UserRegisterModel userRegisterModel,
-			BindingResult bindingResult) {
+	public String createUser(@Valid @ModelAttribute("userRegisterModel") 
+							UserRegisterModel userRegisterModel,
+							BindingResult bindingResult) {
 
-		if (bindingResult.hasErrors())
-			return "pages/register";
+		if (bindingResult.hasErrors()) return "pages/register";
 
 		UserDTO userDTO = modelMapper.map(userRegisterModel, UserDTO.class);
 		userService.createUser(userDTO);
@@ -135,7 +139,8 @@ public class UserController {
 	@PreAuthorize("hasRole('SUPER_ADMIN') or" + "#userId == principal.id")
 	@GetMapping("/{userId}/project-subscriptions")
 	@ResponseBody
-	public ResponseEntity<DataTablesOutput<ProjectResponseModel>> getSubscribedToProjects(@PathVariable String userId,
+	public ResponseEntity<DataTablesOutput<ProjectResponseModel>> 
+								getSubscribedToProjects(@PathVariable String userId,
 			@Valid DataTablesInput input) {
 
 		DataTablesOutput<ProjectDTO> subscribedOnProjects = projectService.getSubscribedToProjects(userId, input);

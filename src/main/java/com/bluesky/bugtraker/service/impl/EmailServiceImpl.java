@@ -4,16 +4,13 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.ServletContext;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IWebContext;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -22,20 +19,26 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class EmailServiceImpl {
 	
-	@Autowired
-	private SpringTemplateEngine templateEngine;
-	
-	@Autowired
-	private ServletContext sContext;
+	private final ITemplateEngine templateEngine;
+	private final JavaMailSender emailSender;
 
-	@Autowired
-	private JavaMailSender emailSender;
+	public EmailServiceImpl(ITemplateEngine templateEngine, 
+							JavaMailSender emailSender) {
+
+		this.templateEngine = templateEngine;
+		this.emailSender = emailSender;
+	}
 
 
-
-	public void verifyEmail(String email, String token) {
+	/**
+	 * Verifies an email address by sending to it 
+	 * a verification mail with a unique verification link 
+	 * 
+	 * @param email an email address to be verified
+	 * @param token used to generate a unique link to verify email address
+	 */
+	public void verifyEmail(@NotNull String email, @NotNull String token) {
 		MimeMessage message = emailSender.createMimeMessage();
-		
 		
 		try {
 			message.setFrom("noreply@bugtracker.com");
@@ -44,15 +47,23 @@ public class EmailServiceImpl {
 			message.setContent(getHTMLText(token), "text/html; charset=utf-8");
 			emailSender.send(message);
 
-		log.info(String.format("Sent an verificaton email to %s with token %s", email, token));
+			log.debug(String.format("Sent a verificaton email to %s", email));
 
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
 
 	}
+
 	
-	public String getHTMLText(String token) {
+	/**
+	 * @param token to be used as a parameter for an email verification link
+	 * @return HTML page with email verification link that is built from 
+	 *  current context path and token as a parameter  
+	 * 
+	 */
+	@NotNull	
+	private String getHTMLText(@NotNull String token) {
 		final String baseUrl = 
 				ServletUriComponentsBuilder.fromCurrentContextPath()
 				.build().toUriString();
@@ -62,6 +73,6 @@ public class EmailServiceImpl {
 		context.setVariable("token", token);
 		context.setVariable("baseURL", baseUrl);
 		
-		return templateEngine.process("pages/verification-email", context);
+		return templateEngine.process("pages/verification-email-message", context);
 	}
 }
