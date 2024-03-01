@@ -1,13 +1,14 @@
 package com.bluesky.bugtraker.io.repository;
 
 
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.UserEntity;
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.Set;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.UserEntity;
 
 @Repository
 public interface ProjectRepository extends DataTablesRepository<ProjectEntity, Long> {

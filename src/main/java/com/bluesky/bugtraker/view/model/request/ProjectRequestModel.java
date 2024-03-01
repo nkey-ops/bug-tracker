@@ -1,11 +1,10 @@
 package com.bluesky.bugtraker.view.model.request;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 
 @Getter @Setter
 public class ProjectRequestModel {

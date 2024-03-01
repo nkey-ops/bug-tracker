@@ -1,9 +1,10 @@
 package com.bluesky.bugtraker.security.accessevaluator;
 
-import com.bluesky.bugtraker.service.impl.UserServiceImp;
 import org.springframework.stereotype.Controller;
 
-import javax.validation.constraints.NotNull;
+import com.bluesky.bugtraker.service.impl.UserServiceImp;
+
+import jakarta.validation.constraints.NotNull;
 
 @Controller
 public class TicketAccessEvaluator {

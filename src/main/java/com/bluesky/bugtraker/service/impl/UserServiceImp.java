@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +48,8 @@ import com.bluesky.bugtraker.shared.dto.UserDTO;
 import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
+
+import jakarta.validation.constraints.NotNull;
 
 @Service
 public class UserServiceImp implements UserService {

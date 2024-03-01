@@ -1,19 +1,21 @@
 package com.bluesky.bugtraker.service.specifications;
 
+import java.time.Instant;
+import java.time.Period;
+import java.util.Collection;
+import java.util.Date;
+
+import org.springframework.data.jpa.domain.Specification;
+
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.TicketRecordEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
-import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Root;
-import java.time.Instant;
-import java.time.Period;
-import java.util.Collection;
-import java.util.Date;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
 
 public class Specs {
     public static Specification<UserEntity> allProjectSubscribersByProject(final ProjectEntity projectEntity) {

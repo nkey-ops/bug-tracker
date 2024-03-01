@@ -1,16 +1,30 @@
 package com.bluesky.bugtraker.io.entity;
 
-import com.bluesky.bugtraker.shared.ticketstatus.Priority;
-import com.bluesky.bugtraker.shared.ticketstatus.Severity;
-import com.bluesky.bugtraker.shared.ticketstatus.Status;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+
+import com.bluesky.bugtraker.shared.ticketstatus.Priority;
+import com.bluesky.bugtraker.shared.ticketstatus.Severity;
+import com.bluesky.bugtraker.shared.ticketstatus.Status;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity(name = "Ticket_Record")
 @Table(name = "ticket_records")

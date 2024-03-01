@@ -1,18 +1,11 @@
 package com.bluesky.bugtraker.view.controller;
 
-import com.bluesky.bugtraker.security.UserPrincipal;
-import com.bluesky.bugtraker.service.ProjectService;
-import com.bluesky.bugtraker.service.UserService;
-import com.bluesky.bugtraker.shared.dto.CommentDTO;
-import com.bluesky.bugtraker.shared.dto.ProjectDTO;
-import com.bluesky.bugtraker.shared.dto.UserDTO;
-import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
-import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
-import com.bluesky.bugtraker.view.model.rensponse.assambler.ProjectModelAssembler;
-import com.bluesky.bugtraker.view.model.rensponse.assambler.UserModelAssembler;
-import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
-import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
-import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +19,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
+import com.bluesky.bugtraker.security.UserPrincipal;
+import com.bluesky.bugtraker.service.ProjectService;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.ProjectDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.view.model.rensponse.ProjectResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.UserResponseModel;
+import com.bluesky.bugtraker.view.model.rensponse.assambler.ProjectModelAssembler;
+import com.bluesky.bugtraker.view.model.rensponse.assambler.UserModelAssembler;
+import com.bluesky.bugtraker.view.model.request.CommentRequestModel;
+import com.bluesky.bugtraker.view.model.request.ProjectRequestModel;
+import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/users/{creatorId}/projects")

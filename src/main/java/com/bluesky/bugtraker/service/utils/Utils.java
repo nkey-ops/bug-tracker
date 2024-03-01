@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import javax.validation.constraints.NotNull;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -18,6 +16,7 @@ import com.bluesky.bugtraker.security.SecurityConstants;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.validation.constraints.NotNull;
 
 @Service
 public class Utils {
@@ -65,29 +64,20 @@ public class Utils {
         return result;
     }
 
-	public boolean hasEmailTokenExpired(@NotNull String token) {
-		return  Jwts.parser()
-					.setSigningKey(SecurityConstants.getTokenSecret())
-					.parseClaimsJws(token)
-					.getBody()
-					.getExpiration().before(new Date());
-	}
+    public boolean hasEmailTokenExpired(@NotNull String token) {
+      return  Jwts.parser()
+            .setSigningKey(SecurityConstants.getTokenSecret())
+            .parseClaimsJws(token)
+            .getBody()
+            .getExpiration().before(new Date());
+    }
 
-	public String getEmailVerificationToken(@NotNull String publicId) {
-		return Jwts.builder()
-					.setSubject(publicId)
-					.setExpiration( Date.from(
-							Instant.now().plusMillis( SecurityConstants.EXPIRATION_TIME)))
-					.signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
-					.compact();
-	}
+    public String getEmailVerificationToken(@NotNull String publicId) {
+      return Jwts.builder()
+            .setSubject(publicId)
+            .setExpiration( Date.from(
+                Instant.now().plusMillis( SecurityConstants.EXPIRATION_TIME)))
+            .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+            .compact();
+    }
 }
-
-
-
-
-
-
-
-
-

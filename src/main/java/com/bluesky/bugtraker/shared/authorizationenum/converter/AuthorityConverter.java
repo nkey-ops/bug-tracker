@@ -1,10 +1,11 @@
 package com.bluesky.bugtraker.shared.authorizationenum.converter;
 
+import java.util.stream.Stream;
+
 import com.bluesky.bugtraker.shared.authorizationenum.Authority;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-import java.util.stream.Stream;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
     @Converter(autoApply = true)
     public class  AuthorityConverter implements AttributeConverter<Authority, String> {

@@ -1,6 +1,10 @@
 package com.bluesky.bugtraker.security.accessevaluator;
 
-import javax.validation.constraints.NotNull;
+import org.springframework.stereotype.Controller;
+
+import com.bluesky.bugtraker.service.impl.UserServiceImp;
+
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 

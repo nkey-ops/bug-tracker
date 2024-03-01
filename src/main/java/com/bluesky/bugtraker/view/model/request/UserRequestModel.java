@@ -1,13 +1,13 @@
 package com.bluesky.bugtraker.view.model.request;
 
-import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import com.bluesky.bugtraker.shared.authorizationenum.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)

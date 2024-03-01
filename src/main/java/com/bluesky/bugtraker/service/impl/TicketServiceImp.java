@@ -1,8 +1,32 @@
 package com.bluesky.bugtraker.service.impl;
 
+import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
+import static com.bluesky.bugtraker.service.specifications.Specs.allTicketRecordsByTicket;
+import static com.bluesky.bugtraker.service.specifications.Specs.ticketByProject;
+import static com.bluesky.bugtraker.service.specifications.Specs.ticketSubscribersByTicket;
+import static com.bluesky.bugtraker.service.specifications.Specs.ticketsUserSubscribedTo;
+
+import java.time.Instant;
+import java.util.Date;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.stereotype.Service;
+
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
-import com.bluesky.bugtraker.io.entity.*;
+import com.bluesky.bugtraker.io.entity.CommentEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.TicketEntity;
+import com.bluesky.bugtraker.io.entity.TicketRecordEntity;
+import com.bluesky.bugtraker.io.entity.UserEntity;
 import com.bluesky.bugtraker.io.repository.CommentRepository;
 import com.bluesky.bugtraker.io.repository.TicketRecordsRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
@@ -14,23 +38,8 @@ import com.bluesky.bugtraker.shared.dto.CommentDTO;
 import com.bluesky.bugtraker.shared.dto.TicketDTO;
 import com.bluesky.bugtraker.shared.dto.TicketRecordDTO;
 import com.bluesky.bugtraker.shared.dto.UserDTO;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.util.Date;
-
-import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
-import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
-import static com.bluesky.bugtraker.service.specifications.Specs.*;
+import jakarta.validation.constraints.NotNull;
 
 @Service
 public class TicketServiceImp implements TicketService {

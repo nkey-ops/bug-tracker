@@ -1,14 +1,15 @@
 package com.bluesky.bugtraker.service;
 
 
-import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
-import com.bluesky.bugtraker.shared.dto.UserDTO;
-import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import javax.validation.constraints.NotNull;
+import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
+
+import jakarta.validation.constraints.NotNull;
 
 public interface UserService extends UserDetailsService {
     UserDTO createUserWithRole(UserDTO userDto);

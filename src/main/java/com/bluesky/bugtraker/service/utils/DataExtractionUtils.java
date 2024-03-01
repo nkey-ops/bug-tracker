@@ -1,5 +1,11 @@
 package com.bluesky.bugtraker.service.utils;
 
+import static com.bluesky.bugtraker.exceptions.ErrorType.INTERNAL_SERVER_ERROR;
+import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.RoleServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
@@ -13,13 +19,8 @@ import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotNull;
-
-import static com.bluesky.bugtraker.exceptions.ErrorType.INTERNAL_SERVER_ERROR;
-import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
+import jakarta.validation.constraints.NotNull;
 
 @Component
 public class DataExtractionUtils {

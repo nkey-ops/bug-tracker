@@ -1,17 +1,16 @@
 package com.bluesky.bugtraker.service.impl;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
 
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.log4j.Log4j2;
 
 

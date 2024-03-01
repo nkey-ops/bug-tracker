@@ -1,10 +1,11 @@
 package com.bluesky.bugtraker.validation;
 
-import com.bluesky.bugtraker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import com.bluesky.bugtraker.service.UserService;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class EmailValidator
         implements ConstraintValidator<ValidEmail, String> {
