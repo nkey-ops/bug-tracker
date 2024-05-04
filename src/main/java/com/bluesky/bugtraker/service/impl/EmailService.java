@@ -1,7 +1,6 @@
 package com.bluesky.bugtraker.service.impl;
 
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
@@ -15,13 +14,12 @@ import lombok.extern.log4j.Log4j2;
 
 
 @Log4j2
-@Component
-public class EmailServiceImpl {
+public class EmailService {
 	
 	private final ITemplateEngine templateEngine;
 	private final JavaMailSender emailSender;
 
-	public EmailServiceImpl(ITemplateEngine templateEngine, 
+	public EmailService(ITemplateEngine templateEngine, 
 							JavaMailSender emailSender) {
 
 		this.templateEngine = templateEngine;

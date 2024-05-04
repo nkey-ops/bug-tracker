@@ -66,7 +66,7 @@ public class UserServiceImp implements UserService {
     private final Utils utils;
     private final ModelMapper modelMapper;
 
-	private final EmailServiceImpl emailService;
+	private final EmailService emailService;
 
     public UserServiceImp(
     					DataExtractionUtils dataExtractionUtils, 
@@ -75,7 +75,7 @@ public class UserServiceImp implements UserService {
     					TicketRepository ticketRepo, 
     					ProjectRepository projectRepo, 
     					UserServiceUtils userServiceUtils, 
-    					EmailServiceImpl emailServiceImpl,
+    					EmailService emailServiceImpl,
     					Utils utils, ModelMapper modelMapper) {
 
         this.dataExtractionUtils = dataExtractionUtils;
