@@ -49,7 +49,7 @@
                     url: [[${selfLink}]],
                     success: function () {
                         alert(projectName + ' has been deleted')
-                        window.location.href = [[${#request.contextPath}]] + '/home'
+                        window.location.href = '/home'
                     }
                 })
             }
@@ -61,7 +61,7 @@
                     url: [[${subscriberSourceLink}]] + '/' + [[${user.publicId}]],
                     success: function () {
                         alert("You have unsubscribed from " + projectName)
-                        window.location.href = [[${#request.contextPath}]] + '/home'
+                        window.location.href = '/home'
                     },
                     error: function (jqXHR) {
                         $('#project-error').html('<p class="alert alert-danger">' + jqXHR.responseText + '</p>')
