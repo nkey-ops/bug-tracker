@@ -28,7 +28,7 @@ import jakarta.mail.internet.MimeMessage;
 class EmailServiceImpTest {
 	
 	@InjectMocks
-	EmailServiceImpl emailServiceImpl;
+	EmailService emailService;
 	
 	@Mock
 	ITemplateEngine engine;
@@ -43,17 +43,14 @@ class EmailServiceImpTest {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));	
-
-		ArgumentCaptor<MimeMessage> captor = 
-				ArgumentCaptor.forClass(MimeMessage.class);
-		
+		ArgumentCaptor<MimeMessage> captor = ArgumentCaptor.forClass(MimeMessage.class);
 		when(emailSender.createMimeMessage())
 				.thenReturn(new MimeMessage((Session) null));
 		
 		when(engine.process(anyString(), any()))
 				.thenReturn("asda");
 		
-		emailServiceImpl.verifyEmail(email, token);
+		emailService.verifyEmail(email, token);
 
 		verify(emailSender).send(captor.capture());
 		

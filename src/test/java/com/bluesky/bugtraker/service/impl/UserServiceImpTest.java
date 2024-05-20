@@ -63,7 +63,7 @@ class UserServiceImpTest {
     private ProjectRepository projectRepo;
 
     @Mock
-    private EmailServiceImpl emailService;
+    private EmailService emailService;
 
     @Mock
     private Utils utils;

@@ -1,18 +1,20 @@
 package com.bluesky.bugtraker.service.impl;
 
-import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
-import com.bluesky.bugtraker.io.entity.CommentEntity;
-import com.bluesky.bugtraker.io.entity.ProjectEntity;
-import com.bluesky.bugtraker.io.entity.UserEntity;
-import com.bluesky.bugtraker.io.repository.CommentRepository;
-import com.bluesky.bugtraker.io.repository.ProjectRepository;
-import com.bluesky.bugtraker.io.repository.UserRepository;
-import com.bluesky.bugtraker.service.utils.Utils;
-import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
-import com.bluesky.bugtraker.shared.dto.CommentDTO;
-import com.bluesky.bugtraker.shared.dto.ProjectDTO;
-import com.bluesky.bugtraker.shared.dto.UserDTO;
-import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,17 +25,28 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
+import com.bluesky.bugtraker.io.entity.CommentEntity;
+import com.bluesky.bugtraker.io.entity.ProjectEntity;
+import com.bluesky.bugtraker.io.entity.UserEntity;
+import com.bluesky.bugtraker.io.repository.CommentRepository;
+import com.bluesky.bugtraker.io.repository.ProjectRepository;
+import com.bluesky.bugtraker.io.repository.UserRepository;
+import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
+import com.bluesky.bugtraker.service.utils.Utils;
+import com.bluesky.bugtraker.shared.dto.CommentDTO;
+import com.bluesky.bugtraker.shared.dto.ProjectDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 
 
 @ExtendWith(MockitoExtension.class)

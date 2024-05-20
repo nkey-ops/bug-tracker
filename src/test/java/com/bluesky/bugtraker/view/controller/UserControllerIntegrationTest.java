@@ -57,16 +57,11 @@ import io.restassured.response.Response;
 
 @SpringBootTest(classes = { BugTrackerApplication.class, TestConfigurations.class},
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT )
-
-@TestPropertySource(locations = {"classpath:application-test.properties"})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerIntegrationTest {
     @LocalServerPort
     private Integer port;
     private final static String PATH = "/users";
-    @Value("${server.servlet.context-path}")
-    private  String contextPath;
     
     @Value("${super-admin-user.email}")
     private String email;
@@ -95,10 +90,10 @@ class UserControllerIntegrationTest {
         
         RestAssured.authentication =
                 form(email, password,
-                        new FormAuthConfig(contextPath +"/users/login",
+                        new FormAuthConfig("/users/login",
                                 "email", "password"));
         RestAssured.port = port;
-        RestAssured.basePath = contextPath + PATH;
+        RestAssured.basePath = PATH;
     }
     void initEntities(){
         RoleEntity role = new RoleEntity(Role.ROLE_USER);
