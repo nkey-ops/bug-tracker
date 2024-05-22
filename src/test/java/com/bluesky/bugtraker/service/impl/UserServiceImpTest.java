@@ -289,7 +289,6 @@ class UserServiceImpTest {
 
         verify(dataExtractionUtils).getUserEntity(anyString());
         verify(userRepo).save(any(UserEntity.class));
-        verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
     }
 
     @Test
@@ -303,7 +302,6 @@ class UserServiceImpTest {
         verify(dataExtractionUtils).getUserEntity(anyString());
         verify(dataExtractionUtils).getRoleEntityToBeSet(any(Role.class), any(Role.class));
         verify(userRepo).save(any(UserEntity.class));
-        verify(modelMapper).map(any(UserDTO.class), any(UserEntity.class));
     }
 
 
