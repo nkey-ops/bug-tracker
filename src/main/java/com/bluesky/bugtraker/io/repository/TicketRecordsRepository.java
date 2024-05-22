@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TicketRecordsRepository extends DataTablesRepository<TicketRecordEntity, Long> {
 
-    TicketRecordEntity findByPublicId(String recordId);
+  TicketRecordEntity findByPublicId(String recordId);
 }

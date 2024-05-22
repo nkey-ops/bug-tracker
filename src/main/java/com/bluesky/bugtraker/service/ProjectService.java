@@ -10,24 +10,26 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 public interface ProjectService {
-    void createProject(String creatorId, ProjectDTO projectDto);
+  void createProject(String creatorId, ProjectDTO projectDto);
 
-    ProjectDTO updateProject(String projectId, ProjectDTO projectDto);
+  ProjectDTO updateProject(String projectId, ProjectDTO projectDto);
 
-    ProjectDTO getProject(String projectId);
+  ProjectDTO getProject(String projectId);
 
-    void deleteProject(String projectId);
+  void deleteProject(String projectId);
 
-    void addSubscriber(String projectId, SubscriberRequestModel subscriber);
+  void addSubscriber(String projectId, SubscriberRequestModel subscriber);
 
-    DataTablesOutput<UserDTO> getSubscribers(String projectId, DataTablesInput input);
+  DataTablesOutput<UserDTO> getSubscribers(String projectId, DataTablesInput input);
 
-    void removeSubscriber(String projectId, String subscriberId);
+  void removeSubscriber(String projectId, String subscriberId);
 
-    void createComment( String projectId, String commentCreatorId, CommentDTO map);
+  void createComment(String projectId, String commentCreatorId, CommentDTO map);
 
-    Page<CommentDTO> getComments(String projectId, int page, int limit, String sortBy, Sort.Direction direction);
-    DataTablesOutput<ProjectDTO> getProjects(String creatorId, DataTablesInput input);
+  Page<CommentDTO> getComments(
+      String projectId, int page, int limit, String sortBy, Sort.Direction direction);
 
-    DataTablesOutput<ProjectDTO> getSubscribedToProjects(String userId, DataTablesInput input);
+  DataTablesOutput<ProjectDTO> getProjects(String creatorId, DataTablesInput input);
+
+  DataTablesOutput<ProjectDTO> getSubscribedToProjects(String userId, DataTablesInput input);
 }

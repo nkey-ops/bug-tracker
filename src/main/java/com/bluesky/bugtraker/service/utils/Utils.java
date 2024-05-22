@@ -1,24 +1,20 @@
 package com.bluesky.bugtraker.service.utils;
 
+import com.bluesky.bugtraker.security.SecurityConstants;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.NotNull;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-
 import javax.crypto.spec.SecretKeySpec;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.bluesky.bugtraker.security.SecurityConstants;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import jakarta.validation.constraints.NotNull;
 
 @Service
 public class Utils {
@@ -67,7 +63,9 @@ public class Utils {
 
   public boolean hasEmailTokenExpired(@NotNull String token) {
     return Jwts.parser()
-        .verifyWith(new SecretKeySpec(SecurityConstants.getTokenSecret().getBytes(), Jwts.SIG.HS512.getId()))
+        .verifyWith(
+            new SecretKeySpec(
+                SecurityConstants.getTokenSecret().getBytes(), Jwts.SIG.HS512.getId()))
         .build()
         .isSigned(token);
   }

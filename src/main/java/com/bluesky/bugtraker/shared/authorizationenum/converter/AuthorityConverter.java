@@ -1,32 +1,30 @@
 package com.bluesky.bugtraker.shared.authorizationenum.converter;
 
-import java.util.stream.Stream;
-
 import com.bluesky.bugtraker.shared.authorizationenum.Authority;
-
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import java.util.stream.Stream;
 
-    @Converter(autoApply = true)
-    public class  AuthorityConverter implements AttributeConverter<Authority, String> {
+@Converter(autoApply = true)
+public class AuthorityConverter implements AttributeConverter<Authority, String> {
 
-        @Override
-        public String convertToDatabaseColumn(Authority authority) {
-            if (authority == null) {
-                return null;
-            }
-            return authority.name();
-        }
-
-        @Override
-        public Authority convertToEntityAttribute(String code) {
-            if (code == null) {
-                return null;
-            }
-
-            return Stream.of(Authority.values())
-                    .filter(c -> c.name().equals(code))
-                    .findFirst()
-                    .orElseThrow(IllegalArgumentException::new);
-        }
+  @Override
+  public String convertToDatabaseColumn(Authority authority) {
+    if (authority == null) {
+      return null;
     }
+    return authority.name();
+  }
+
+  @Override
+  public Authority convertToEntityAttribute(String code) {
+    if (code == null) {
+      return null;
+    }
+
+    return Stream.of(Authority.values())
+        .filter(c -> c.name().equals(code))
+        .findFirst()
+        .orElseThrow(IllegalArgumentException::new);
+  }
+}

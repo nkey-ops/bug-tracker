@@ -1,17 +1,8 @@
 package com.bluesky.bugtraker.io.entity;
 
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import com.bluesky.bugtraker.shared.ticketstatus.Priority;
 import com.bluesky.bugtraker.shared.ticketstatus.Severity;
 import com.bluesky.bugtraker.shared.ticketstatus.Status;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +20,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,113 +36,107 @@ import lombok.Setter;
 @Setter
 public class TicketEntity implements Serializable {
 
-    @Serial
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = -2462587657644552577L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false, length = 30, unique = true)
-    private String publicId;
+  @Serial
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private static final long serialVersionUID = -2462587657644552577L;
 
-    @Column(nullable = false)
-    private String shortDescription;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
+  @Column(nullable = false, length = 30, unique = true)
+  private String publicId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Severity severity;
+  @Column(nullable = false)
+  private String shortDescription;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Priority priority;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Status status;
 
-    @Column(nullable = false, length = 5000)
-    private String howToReproduce;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Severity severity;
 
-    @Column(nullable = false, length = 5000)
-    private String erroneousProgramBehaviour;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Priority priority;
 
-    @Column(length = 5000)
-    private String howToSolve;
+  @Column(nullable = false, length = 5000)
+  private String howToReproduce;
 
-    @Column(nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdTime;
+  @Column(nullable = false, length = 5000)
+  private String erroneousProgramBehaviour;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdateTime;
+  @Column(length = 5000)
+  private String howToSolve;
 
-    @OneToMany(mappedBy = "mainTicket",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true)
-    private Set<TicketRecordEntity> ticketRecords = new HashSet<>();
+  @Column(nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdTime;
 
-    @ManyToOne(optional = false,
-            fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
-    private UserEntity reporter;
-    @ManyToOne
-    @JoinColumn(name="project_id", 
-                referencedColumnName = "id",
-                nullable = false, updatable = false)
-    private ProjectEntity project;
-    
-    @OneToMany(mappedBy = "ticket",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private Set<CommentEntity> comments = new HashSet<>();
-    @ManyToMany
-    @JoinTable(name = "tickets_users",
-            joinColumns = {@JoinColumn(name = "ticket_id")},
-            inverseJoinColumns = {@JoinColumn(name = "user_id")})
-    private Set<UserEntity> subscribers = new HashSet<>();
-  
-    
-    
-    public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
-        boolean isTicketRecordEntityAdded =
-                ticketRecords.add(ticketRecordEntity);
-                
-        ticketRecordEntity.setMainTicket(this);
-        
-        return isTicketRecordEntityAdded;
-    }
-    
-    public boolean addSubscriber(UserEntity subscriber) {
-        boolean isAddedSubscriber =
-                subscribers.add(subscriber);
-        boolean isAddedTicket =
-                subscriber.getSubscribedToTickets().add(this);
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date lastUpdateTime;
 
-        return isAddedSubscriber && isAddedTicket;
-    }
+  @OneToMany(
+      mappedBy = "mainTicket",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
+      orphanRemoval = true)
+  private Set<TicketRecordEntity> ticketRecords = new HashSet<>();
 
-    public boolean removeSubscriber(UserEntity subscriber) {
-        boolean isRemovedSubscriber =
-                subscribers.remove(subscriber);
-        boolean isRemovedTicket =
-                subscriber.getSubscribedToTickets().remove(this);
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "reporter_id", nullable = false, updatable = false)
+  private UserEntity reporter;
 
-        return isRemovedSubscriber && isRemovedTicket;
-    }
+  @ManyToOne
+  @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false, updatable = false)
+  private ProjectEntity project;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TicketEntity that = (TicketEntity) o;
-        return id.equals(that.id);
-    }
+  @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<CommentEntity> comments = new HashSet<>();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+  @ManyToMany
+  @JoinTable(
+      name = "tickets_users",
+      joinColumns = {@JoinColumn(name = "ticket_id")},
+      inverseJoinColumns = {@JoinColumn(name = "user_id")})
+  private Set<UserEntity> subscribers = new HashSet<>();
+
+  public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
+    boolean isTicketRecordEntityAdded = ticketRecords.add(ticketRecordEntity);
+
+    ticketRecordEntity.setMainTicket(this);
+
+    return isTicketRecordEntityAdded;
+  }
+
+  public boolean addSubscriber(UserEntity subscriber) {
+    boolean isAddedSubscriber = subscribers.add(subscriber);
+    boolean isAddedTicket = subscriber.getSubscribedToTickets().add(this);
+
+    return isAddedSubscriber && isAddedTicket;
+  }
+
+  public boolean removeSubscriber(UserEntity subscriber) {
+    boolean isRemovedSubscriber = subscribers.remove(subscriber);
+    boolean isRemovedTicket = subscriber.getSubscribedToTickets().remove(this);
+
+    return isRemovedSubscriber && isRemovedTicket;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    TicketEntity that = (TicketEntity) o;
+    return id.equals(that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }

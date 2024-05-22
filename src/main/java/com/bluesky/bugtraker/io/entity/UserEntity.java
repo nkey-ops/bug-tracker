@@ -1,11 +1,5 @@
 package com.bluesky.bugtraker.io.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,6 +13,11 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,85 +28,93 @@ import lombok.Setter;
 @Setter
 public class UserEntity implements Serializable {
 
-    @Serial
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = -3976585091175144574L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false, length = 30, unique = true)
-    private String publicId;
+  @Serial
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private static final long serialVersionUID = -3976585091175144574L;
 
-    @Column(nullable = false, length = 20)
-    private String username;
-    @Column(nullable = false, length = 320)
-    private String email;
-    
-    @Column(length = 200)
-    private String avatarURL;
-    @Column(length = 60)
-    private String address;
-    @Column(length = 12)
-    private String phoneNumber;
-    @Column(length = 80)
-    private String status;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, length = 60)
-    private String encryptedPassword;
+  @Column(nullable = false, length = 30, unique = true)
+  private String publicId;
 
-    @Column(length = 180)
-    private String emailVerificationToken;
+  @Column(nullable = false, length = 20)
+  private String username;
 
-    @Column(nullable = false)
-    private boolean emailVerificationStatus;
+  @Column(nullable = false, length = 320)
+  private String email;
 
-    @ManyToOne( fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles",
-            joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
-    private RoleEntity roleEntity;
+  @Column(length = 200)
+  private String avatarURL;
 
+  @Column(length = 60)
+  private String address;
 
-    @OneToMany(mappedBy = "creator", 
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true)
-    private Set<ProjectEntity> projects = new HashSet<>();
-    
-    @ManyToMany(mappedBy = "subscribers",
-            fetch = FetchType.LAZY)
-    private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
+  @Column(length = 12)
+  private String phoneNumber;
 
-    @OneToMany(
-            cascade = CascadeType.ALL)
-    private Set<TicketEntity> reportedTickets = new HashSet<>();
+  @Column(length = 80)
+  private String status;
 
-    @ManyToMany(mappedBy = "subscribers",
-            fetch = FetchType.LAZY)
-    private Set<TicketEntity> subscribedToTickets = new HashSet<>();
+  @Column(nullable = false, length = 60)
+  private String encryptedPassword;
 
-    @OneToMany(mappedBy = "creator",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true)
-    private Set<CommentEntity> comments = new HashSet<>();
+  @Column(length = 180)
+  private String emailVerificationToken;
 
-    public boolean setRoleEntity(RoleEntity roleEntity) {
-        this.roleEntity = roleEntity;
-        return roleEntity.getUsers().add(this);
-    }
+  @Column(nullable = false)
+  private boolean emailVerificationStatus;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserEntity that = (UserEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(publicId, that.publicId) && Objects.equals(username, that.username) && Objects.equals(email, that.email);
-    }
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "users_roles",
+      joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
+      inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+  private RoleEntity roleEntity;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, publicId, username, email);
-    }
+  @OneToMany(
+      mappedBy = "creator",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
+      orphanRemoval = true)
+  private Set<ProjectEntity> projects = new HashSet<>();
+
+  @ManyToMany(mappedBy = "subscribers", fetch = FetchType.LAZY)
+  private Set<ProjectEntity> subscribedToProjects = new HashSet<>();
+
+  @OneToMany(cascade = CascadeType.ALL)
+  private Set<TicketEntity> reportedTickets = new HashSet<>();
+
+  @ManyToMany(mappedBy = "subscribers", fetch = FetchType.LAZY)
+  private Set<TicketEntity> subscribedToTickets = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "creator",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
+      orphanRemoval = true)
+  private Set<CommentEntity> comments = new HashSet<>();
+
+  public boolean setRoleEntity(RoleEntity roleEntity) {
+    this.roleEntity = roleEntity;
+    return roleEntity.getUsers().add(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    UserEntity that = (UserEntity) o;
+    return Objects.equals(id, that.id)
+        && Objects.equals(publicId, that.publicId)
+        && Objects.equals(username, that.username)
+        && Objects.equals(email, that.email);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, publicId, username, email);
+  }
 }

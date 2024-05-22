@@ -1,23 +1,20 @@
 package com.bluesky.bugtraker.io.repository;
 
-
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
-import org.springframework.stereotype.Repository;
-
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
+import java.util.Optional;
+import java.util.Set;
+import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectRepository extends DataTablesRepository<ProjectEntity, Long> {
 
-    boolean existsByCreatorAndName(UserEntity creator, String name);
+  boolean existsByCreatorAndName(UserEntity creator, String name);
 
-    boolean existsByPublicIdAndSubscribersIn(String publicId, Set<UserEntity> subscribers);
+  boolean existsByPublicIdAndSubscribersIn(String publicId, Set<UserEntity> subscribers);
 
-    Optional<ProjectEntity> findByPublicId(String projectId);
+  Optional<ProjectEntity> findByPublicId(String projectId);
 
-    boolean existsByPublicId(String publicId);
+  boolean existsByPublicId(String publicId);
 }

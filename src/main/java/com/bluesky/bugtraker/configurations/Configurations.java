@@ -1,5 +1,9 @@
 package com.bluesky.bugtraker.configurations;
 
+import com.bluesky.bugtraker.service.impl.EmailService;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository;
@@ -15,15 +19,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.thymeleaf.ITemplateEngine;
 
-import com.bluesky.bugtraker.service.impl.EmailService;
-
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.validation.constraints.NotNull;
-import lombok.extern.slf4j.Slf4j;
-
 @Configuration(proxyBeanMethods = false)
 @Slf4j
-@EnableJpaRepositories(repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class, basePackages = "com.bluesky.bugtraker.io.repository")
+@EnableJpaRepositories(
+    repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class,
+    basePackages = "com.bluesky.bugtraker.io.repository")
 public class Configurations {
   @Bean
   ModelMapper modelMapper() {
@@ -62,8 +62,7 @@ public class Configurations {
 
     @Order(value = Ordered.HIGHEST_PRECEDENCE)
     @WebFilter(filterName = "RequestCachingFilter", urlPatterns = "/*")
-    class RFilter extends CommonsRequestLoggingFilter {
-    }
+    class RFilter extends CommonsRequestLoggingFilter {}
 
     var filter = new RFilter();
     filter.setIncludeQueryString(true);

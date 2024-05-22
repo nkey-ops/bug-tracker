@@ -1,7 +1,6 @@
 package com.bluesky.bugtraker.view.model.request;
 
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;

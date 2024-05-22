@@ -7,6 +7,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubscriberRequestModel {
-    @NotEmpty
-    String publicId;
+  @NotEmpty String publicId;
 }

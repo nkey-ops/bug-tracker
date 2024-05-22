@@ -1,45 +1,39 @@
 package com.bluesky.bugtraker.service;
 
-
+import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
+import com.bluesky.bugtraker.shared.dto.UserDTO;
+import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.bluesky.bugtraker.shared.dto.ProjectsInfoDTO;
-import com.bluesky.bugtraker.shared.dto.UserDTO;
-import com.bluesky.bugtraker.shared.dto.UserInfoDTO;
-
-import jakarta.validation.constraints.NotNull;
-
 public interface UserService extends UserDetailsService {
-    UserDTO createUserWithRole(UserDTO userDto);
+  UserDTO createUserWithRole(UserDTO userDto);
 
-    UserDTO createUser(UserDTO userDto);
+  UserDTO createUser(UserDTO userDto);
 
-    boolean existsUserByEmail(@NotNull String email);
+  boolean existsUserByEmail(@NotNull String email);
 
-    UserDTO getUserById(String id);
+  UserDTO getUserById(String id);
 
-    UserDTO getUserByEmail(String userName);
+  UserDTO getUserByEmail(String userName);
 
-    DataTablesOutput<UserDTO> getUsers(DataTablesInput input);
+  DataTablesOutput<UserDTO> getUsers(DataTablesInput input);
 
-    boolean isUserExistsByEmail(String email);
+  boolean isUserExistsByEmail(String email);
 
+  void updateUser(String id, UserDTO userDto);
 
-    void updateUser(String id, UserDTO userDto);
+  void deleteUser(String id);
 
-    void deleteUser(String id);
+  ProjectsInfoDTO getProjectsInfo(String userId);
 
+  UserInfoDTO getUserInfo(String userId);
 
-    ProjectsInfoDTO getProjectsInfo(String userId);
+  boolean isSubscribedToProject(String userId, String projectId);
 
-    UserInfoDTO getUserInfo(String userId);
+  boolean isSubscribedToTicket(String userId, String ticketId);
 
-    boolean isSubscribedToProject(String userId, String projectId);
-
-    boolean isSubscribedToTicket(String userId, String ticketId);
-
-	void verifyEmailToken(String token);
-
+  void verifyEmailToken(String token);
 }

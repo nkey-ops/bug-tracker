@@ -59,7 +59,6 @@ public class WebSecurity {
     return new BCryptPasswordEncoder();
   }
 
-
   @Bean
   @Profile("dev")
   @Order(0)
