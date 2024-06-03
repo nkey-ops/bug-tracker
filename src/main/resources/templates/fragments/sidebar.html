@@ -1,61 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <body>
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
-    <div  class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-        <a class="sidebar-brand brand-logo" th:href="@{/home}">
-            <img sec:authorize="hasRole('USER')" th:src="@{/assets/images/logo.svg}" alt="logo"/>
-            <img sec:authorize="hasAnyRole('SUPER_ADMIN','ADMIN')" th:src="@{/assets/images/logo-admin.svg}" alt="logo"/>
-        </a>
-        <a class="sidebar-brand brand-logo-mini" th:href="@{/home}"><img th:src="@{/assets/images/red-bug.svg}"
-                                                                         alt="logo"/></a>
-    </div>
+    <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+            <a class="sidebar-brand brand-logo" th:href="@{/home}">
+                <img th:if="${#strings.equals(user.role.getName(), 'ROLE_USER')}" th:src="@{/assets/images/logo.svg}" alt="logo" />
+                <img th:unless="${#strings.equals(user.role.getName(), 'ROLE_USER')}" th:src="@{/assets/images/logo-admin.svg}" alt="logo"/>
+            </a>
+            <a class="sidebar-brand brand-logo-mini" th:href="@{/home}">
+                <img th:src="@{/assets/images/red-bug.svg}" alt="logo" /></a>
+        </div>
 
-    <ul class="nav">
-       <li class="nav-item nav-category">
-            <span class="nav-link">Navigation</span>
-        </li>
-        <li class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/home}">
-              <span class="menu-icon">
-                <i class="mdi mdi-speedometer"></i>
-              </span>
-                <span class="menu-title">Dashboard</span>
-            </a>
-        </li>
-        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')" class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/users-management}">
-              <span class="menu-icon">
-                <i class="mdi mdi-account-multiple"></i>
-              </span>
-                <span class="menu-title">Users Management</span>
-            </a>
-        </li>
+        <ul class="nav">
+            <li class="nav-item nav-category">
+                <span class="nav-link">Navigation</span>
+            </li>
+            <li class="nav-item menu-items">
+                <a class="nav-link" th:href="@{/home}">
+                    <span class="menu-icon">
+                        <i class="mdi mdi-speedometer"></i>
+                    </span>
+                    <span class="menu-title">Dashboard</span>
+                </a>
+            </li>
+            <li th:unless="${#strings.equals(user.role.getName(), 'ROLE_USER')}" class="nav-item menu-items">
+                <a class="nav-link" th:href="@{/users-management}">
+                    <span class="menu-icon">
+                        <i class="mdi mdi-account-multiple"></i>
+                    </span>
+                    <span class="menu-title">Users Management</span>
+                </a>
+            </li>
 
-        <li class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/my-projects}">
-              <span class="menu-icon">
-                <i class="mdi mdi-format-list-bulleted-type"></i>
-              </span>
-                <span class="menu-title">My Projects</span>
-            </a>
-        </li>
+            <li class="nav-item menu-items">
+                <a class="nav-link" th:href="@{/my-projects}">
+                    <span class="menu-icon">
+                        <i class="mdi mdi-format-list-bulleted-type"></i>
+                    </span>
+                    <span class="menu-title">My Projects</span>
+                </a>
+            </li>
 
-        <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="#subscriptions" aria-expanded="false" aria-controls="list">
-              <span class="menu-icon">
-                <i class="mdi mdi-format-list-bulleted-type"></i>
-              </span>
-                <span class="menu-title">Subscriptions</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="subscriptions">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-projects}">Projects</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-tickets}">Tickets</a></li>
-                </ul>
-            </div>
-        </li>
-    </ul>
-</nav>
+            <li class="nav-item menu-items">
+                <a class="nav-link" data-toggle="collapse" href="#subscriptions" aria-expanded="false"
+                    aria-controls="list">
+                    <span class="menu-icon">
+                        <i class="mdi mdi-format-list-bulleted-type"></i>
+                    </span>
+                    <span class="menu-title">Subscriptions</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="subscriptions">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-projects}">Projects</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/subscribed-to-tickets}">Tickets</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </nav>
 </body>

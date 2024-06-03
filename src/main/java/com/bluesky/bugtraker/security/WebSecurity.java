@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+@EnableMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class WebSecurity {
@@ -19,7 +21,6 @@ public class WebSecurity {
   @Bean
   @Order(1)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    //      @formatter:off
     return http.csrf(c -> c.disable())
         .cors(c -> c.disable())
         .authorizeHttpRequests(
@@ -51,7 +52,6 @@ public class WebSecurity {
                 r.key(SecurityConstants.getTokenRememberMe())
                     .tokenValiditySeconds(SecurityConstants.REMEMBER_ME_EXPIRATION_TIME))
         .build();
-    //      @formatter:on
   }
 
   @Bean
@@ -68,13 +68,11 @@ public class WebSecurity {
 
     if (isConsoleEnabled) {
       http.csrf(c -> c.disable())
-          .cors(c -> c.disable())
           .securityMatcher(AntPathRequestMatcher.antMatcher("/h2-console/**"))
           .authorizeHttpRequests(a -> a.anyRequest().permitAll())
           .headers(h -> h.frameOptions(f -> f.disable()));
     }
 
     return http.build();
-    // return http.authorizeHttpRequests(a -> a.anyRequest().authenticated()).build();
   }
 }
