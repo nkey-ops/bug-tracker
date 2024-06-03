@@ -50,8 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImp implements UserService {
-  @Value("${user-avatar-url}")
   private String defaultUserAvatarUrl;
+  private boolean isEmailVerificationOn;
 
   private final UserRepository userRepo;
   private final RoleRepository roleRepo;
@@ -66,15 +66,17 @@ public class UserServiceImp implements UserService {
   private final EmailService emailService;
 
   public UserServiceImp(
-      DataExtractionUtils dataExtractionUtils,
-      UserRepository userRepo,
-      RoleRepository roleRepo,
-      TicketRepository ticketRepo,
-      ProjectRepository projectRepo,
-      UserServiceUtils userServiceUtils,
-      EmailService emailServiceImpl,
-      Utils utils,
-      ModelMapper modelMapper) {
+      @NotNull DataExtractionUtils dataExtractionUtils,
+      @NotNull UserRepository userRepo,
+      @NotNull RoleRepository roleRepo,
+      @NotNull TicketRepository ticketRepo,
+      @NotNull ProjectRepository projectRepo,
+      @NotNull UserServiceUtils userServiceUtils,
+      @NotNull EmailService emailServiceImpl,
+      @NotNull Utils utils,
+      @NotNull ModelMapper modelMapper,
+      @NotNull @Value("${user-avatar-url}") String defaultUserAvatarUrl,
+      @NotNull @Value("${is-email-verification-on}") boolean isEmailVerificationOn) {
 
     this.dataExtractionUtils = dataExtractionUtils;
     this.userRepo = userRepo;
@@ -86,6 +88,9 @@ public class UserServiceImp implements UserService {
 
     this.utils = utils;
     this.modelMapper = modelMapper;
+
+    this.defaultUserAvatarUrl = defaultUserAvatarUrl;
+    this.isEmailVerificationOn = isEmailVerificationOn;
   }
 
   @Override
@@ -150,6 +155,10 @@ public class UserServiceImp implements UserService {
                 () -> new RoleServiceException(NO_RECORD_FOUND, userDto.getRole().toString()));
 
     userEntity.setRoleEntity(roleEntity);
+
+    if (!isEmailVerificationOn) {
+      userEntity.setEmailVerificationStatus(true);
+    }
 
     if (!userDto.isEmailVerificationStatus()) {
       userEntity.setEmailVerificationToken(
@@ -361,10 +370,6 @@ public class UserServiceImp implements UserService {
 
     if (utils.hasEmailTokenExpired(token))
       throw new UserServiceException(ErrorType.EMAIL_VERIFICATION_TOKEN_IS_EXPIRED);
-
-    userEntity.setEmailVerificationToken(null);
-    ;
-    userEntity.setEmailVerificationStatus(true);
 
     userRepo.save(userEntity);
   }
