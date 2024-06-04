@@ -45,4 +45,25 @@ public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     return Objects.hash(
         super.hashCode(), publicId, username, email, avatarURL, address, phoneNumber, status, role);
   }
+
+  @Override
+  public String toString() {
+    return "UserResponseModel [publicId="
+        + publicId
+        + ", username="
+        + username
+        + ", email="
+        + email
+        + ", avatarURL="
+        + avatarURL
+        + ", address="
+        + address
+        + ", phoneNumber="
+        + phoneNumber
+        + ", status="
+        + status
+        + ", role="
+        + role
+        + "]";
+  }
 }
