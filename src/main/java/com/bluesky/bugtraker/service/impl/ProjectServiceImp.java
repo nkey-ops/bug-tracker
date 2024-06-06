@@ -3,9 +3,9 @@ package com.bluesky.bugtraker.service.impl;
 import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
 import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
 import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_EXISTS;
-import static com.bluesky.bugtraker.service.specifications.Specs.allProjectSubscribersByProject;
-import static com.bluesky.bugtraker.service.specifications.Specs.projectByCreator;
-import static com.bluesky.bugtraker.service.specifications.Specs.projectBySubscriber;
+import static com.bluesky.bugtraker.io.specification.Specs.allProjectSubscribersByProject;
+import static com.bluesky.bugtraker.io.specification.Specs.projectByCreator;
+import static com.bluesky.bugtraker.io.specification.Specs.projectBySubscriber;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;

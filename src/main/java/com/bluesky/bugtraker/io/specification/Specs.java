@@ -1,4 +1,4 @@
-package com.bluesky.bugtraker.service.specifications;
+package com.bluesky.bugtraker.io.specification;
 
 import com.bluesky.bugtraker.io.entity.ProjectEntity;
 import com.bluesky.bugtraker.io.entity.TicketEntity;

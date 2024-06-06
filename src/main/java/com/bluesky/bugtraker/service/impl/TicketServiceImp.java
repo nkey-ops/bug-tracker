@@ -2,10 +2,10 @@ package com.bluesky.bugtraker.service.impl;
 
 import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
 import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
-import static com.bluesky.bugtraker.service.specifications.Specs.allTicketRecordsByTicket;
-import static com.bluesky.bugtraker.service.specifications.Specs.ticketByProject;
-import static com.bluesky.bugtraker.service.specifications.Specs.ticketSubscribersByTicket;
-import static com.bluesky.bugtraker.service.specifications.Specs.ticketsUserSubscribedTo;
+import static com.bluesky.bugtraker.io.specification.Specs.allTicketRecordsByTicket;
+import static com.bluesky.bugtraker.io.specification.Specs.ticketByProject;
+import static com.bluesky.bugtraker.io.specification.Specs.ticketSubscribersByTicket;
+import static com.bluesky.bugtraker.io.specification.Specs.ticketsUserSubscribedTo;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;

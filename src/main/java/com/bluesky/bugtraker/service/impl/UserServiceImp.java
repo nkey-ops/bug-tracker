@@ -3,11 +3,11 @@ package com.bluesky.bugtraker.service.impl;
 import static com.bluesky.bugtraker.exceptions.ErrorType.INTERNAL_SERVER_ERROR;
 import static com.bluesky.bugtraker.exceptions.ErrorType.NO_RECORD_FOUND;
 import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_EXISTS;
-import static com.bluesky.bugtraker.service.specifications.Specs.byReporter;
-import static com.bluesky.bugtraker.service.specifications.Specs.bySubscriber;
-import static com.bluesky.bugtraker.service.specifications.Specs.reportedADayAgo;
-import static com.bluesky.bugtraker.service.specifications.Specs.reportedAMonthAgo;
-import static com.bluesky.bugtraker.service.specifications.Specs.statusIs;
+import static com.bluesky.bugtraker.io.specification.Specs.byReporter;
+import static com.bluesky.bugtraker.io.specification.Specs.bySubscriber;
+import static com.bluesky.bugtraker.io.specification.Specs.reportedADayAgo;
+import static com.bluesky.bugtraker.io.specification.Specs.reportedAMonthAgo;
+import static com.bluesky.bugtraker.io.specification.Specs.statusIs;
 
 import com.bluesky.bugtraker.exceptions.ErrorType;
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;

@@ -1,6 +1,6 @@
 package com.bluesky.bugtraker.service.utils;
 
-import static com.bluesky.bugtraker.service.specifications.Specs.*;
+import static com.bluesky.bugtraker.io.specification.Specs.*;
 
 import com.bluesky.bugtraker.io.entity.TicketEntity;
 import com.bluesky.bugtraker.io.entity.UserEntity;
