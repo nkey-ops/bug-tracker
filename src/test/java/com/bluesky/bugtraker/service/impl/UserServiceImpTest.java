@@ -23,6 +23,7 @@ import com.bluesky.bugtraker.io.repository.RoleRepository;
 import com.bluesky.bugtraker.io.repository.TicketRepository;
 import com.bluesky.bugtraker.io.repository.UserRepository;
 import com.bluesky.bugtraker.service.utils.DataExtractionUtils;
+import com.bluesky.bugtraker.service.utils.UserServiceUtils;
 import com.bluesky.bugtraker.service.utils.Utils;
 import com.bluesky.bugtraker.shared.authorizationenum.Role;
 import com.bluesky.bugtraker.shared.dto.UserDTO;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -41,11 +41,13 @@ import org.springframework.context.annotation.Description;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.context.TestPropertySource;
 
+@TestPropertySource(properties = {"user-avatar-url=avatarURL", "is-email-verification-on=false"})
 class UserServiceImpTest {
   private AutoCloseable closeable;
 
-  @InjectMocks private UserServiceImp userService;
+  private UserServiceImp userService;
 
   @Mock private DataExtractionUtils dataExtractionUtils;
 
@@ -53,6 +55,7 @@ class UserServiceImpTest {
   @Mock private RoleRepository roleRepository;
   @Mock private TicketRepository ticketRepo;
   @Mock private ProjectRepository projectRepo;
+  @Mock private UserServiceUtils userServiceUtils;
 
   @Mock private EmailService emailService;
 
@@ -65,6 +68,19 @@ class UserServiceImpTest {
   @BeforeEach
   public void setUp() {
     closeable = MockitoAnnotations.openMocks(this);
+    userService =
+        new UserServiceImp(
+            dataExtractionUtils,
+            userRepo,
+            roleRepository,
+            ticketRepo,
+            projectRepo,
+            userServiceUtils,
+            emailService,
+            utils,
+            modelMapper,
+            "",
+            true);
 
     userDTO = new UserDTO();
     userDTO.setPublicId("1");
@@ -285,6 +301,19 @@ class UserServiceImpTest {
 
   @Test
   void isSubscribedToProject() {
+    when(projectRepo.existsByPublicId(anyString())).thenReturn(true);
+    when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
+    when(projectRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
+
+    boolean isSubscribedToTicket =
+        userService.isSubscribedToProject(userDTO.getPublicId(), "projectId");
+
+    assertTrue(isSubscribedToTicket);
+  }
+
+  @Test
+  void isSubscribedToProjectReturnsOnly() {
+
     when(projectRepo.existsByPublicId(anyString())).thenReturn(true);
     when(dataExtractionUtils.getUserEntity(anyString())).thenReturn(userEntity);
     when(projectRepo.existsByPublicIdAndSubscribersIn(anyString(), anySet())).thenReturn(true);
