@@ -269,7 +269,7 @@ class TicketServiceImpTest {
     TicketEntity expectedTicketEntity = new TicketEntity();
     new ModelMapper().map(ticketEntity, expectedTicketEntity);
 
-    projectEntity.addTicket(ticketEntity);
+    projectEntity.addTicketEntity(ticketEntity);
 
     ArgumentCaptor<TicketEntity> ticketCaptor = ArgumentCaptor.forClass(TicketEntity.class);
     when(dataExtractionUtils.getTicketEntity(anyString())).thenReturn(ticketEntity);

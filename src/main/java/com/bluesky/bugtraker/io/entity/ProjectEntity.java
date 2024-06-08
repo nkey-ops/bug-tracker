@@ -81,18 +81,17 @@ public class ProjectEntity implements Serializable {
     return isRemoved;
   }
 
-  public boolean addTicket(TicketEntity ticketEntity) {
+  public boolean addTicketEntity(TicketEntity ticketEntity) {
+    Objects.requireNonNull(ticketEntity);
     boolean isAdded = tickets.add(ticketEntity);
-
-    if (isAdded) ticketEntity.setProject(this);
+    ticketEntity.setProject(this);
 
     return isAdded;
   }
 
-  public boolean removeTicket(TicketEntity ticketEntity) {
+  public boolean removeTicketEntity(TicketEntity ticketEntity) {
     boolean isRemoved = tickets.remove(ticketEntity);
-
-    if (isRemoved) ticketEntity.setProject(null);
+    ticketEntity.setProject(null);
 
     return isRemoved;
   }

@@ -105,6 +105,27 @@ public class TicketEntity implements Serializable {
       inverseJoinColumns = {@JoinColumn(name = "user_id")})
   private Set<UserEntity> subscribers = new HashSet<>();
 
+  public boolean setReporterEntity(UserEntity reporter) {
+    Objects.requireNonNull(reporter);
+    this.reporter = reporter;
+    return reporter.getReportedTickets().add(this);
+  }
+
+  public boolean setProjectEntity(ProjectEntity project) {
+    Objects.requireNonNull(project);
+    boolean isAdded = project.getTickets().add(this); 
+    this.project = project;
+
+    return isAdded;
+  }
+
+  public boolean removeProjectEntity() {
+    boolean isRemoved = project.getTickets().remove(this);
+    this.project = null;
+
+    return isRemoved;
+  }
+
   public boolean addTicketRecord(TicketRecordEntity ticketRecordEntity) {
     boolean isTicketRecordEntityAdded = ticketRecords.add(ticketRecordEntity);
 

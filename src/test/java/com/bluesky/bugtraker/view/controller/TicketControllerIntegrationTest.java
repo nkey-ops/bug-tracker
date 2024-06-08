@@ -194,8 +194,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void getTicket() throws JsonProcessingException {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     TicketResponseModel expectedTicket = new TicketResponseModel();
@@ -235,8 +235,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void getTickets() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     TicketResponseModel expectedTicket = new TicketResponseModel();
@@ -271,8 +271,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void updateTicket() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     HashMap<String, String> ticketRequest = new HashMap<>();
@@ -322,8 +322,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void deleteTicket() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     // @formatter:off
@@ -345,8 +345,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void getTicketRecords() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     ticketRecordEntity.setMainTicket(ticketEntity);
@@ -385,8 +385,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void getTicketRecord() throws JsonProcessingException {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     ticketRecordEntity.setMainTicket(ticketEntity);
@@ -428,8 +428,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void createComment() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     String expectedContent = "expected content";
@@ -463,8 +463,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void addSubscriber() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
     // @formatter:off
@@ -492,8 +492,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void getSubscribers() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity.addSubscriber(userEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 
@@ -528,8 +528,8 @@ public class TicketControllerIntegrationTest {
 
   @Test
   void removeSubscriber() {
-    ticketEntity.setReporter(userEntity);
-    ticketEntity.setProject(projectEntity);
+    ticketEntity.setReporterEntity(userEntity);
+    ticketEntity.setProjectEntity(projectEntity);
     ticketEntity.addSubscriber(userEntity);
     ticketEntity = ticketRepository.save(ticketEntity);
 

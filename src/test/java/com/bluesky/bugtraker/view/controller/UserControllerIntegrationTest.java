@@ -415,8 +415,8 @@ class UserControllerIntegrationTest {
     projectEntity.addSubscriber(savedUser);
     ProjectEntity savedProject = projectRepository.save(projectEntity);
 
-    ticketEntity.setProject(savedProject);
-    ticketEntity.setReporter(savedUser);
+    ticketEntity.setProjectEntity(savedProject);
+    ticketEntity.setReporterEntity(savedUser);
     ticketEntity.addSubscriber(savedUser);
     TicketEntity savedTicket = ticketRepository.save(ticketEntity);
 

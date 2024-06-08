@@ -114,7 +114,7 @@ class ProjectControllerIntegrationTest {
   }
 
   @Test
-  void createtroject() {
+  void createProject() {
     userEntity = userRepository.save(userEntity);
 
     ProjectRequestModel projectRequestModel = new ProjectRequestModel();

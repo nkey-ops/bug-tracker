@@ -5,7 +5,7 @@ import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
 import static com.bluesky.bugtraker.io.specification.Specs.allTicketRecordsByTicket;
 import static com.bluesky.bugtraker.io.specification.Specs.ticketByProject;
 import static com.bluesky.bugtraker.io.specification.Specs.ticketSubscribersByTicket;
-import static com.bluesky.bugtraker.io.specification.Specs.ticketsUserSubscribedTo;
+import static com.bluesky.bugtraker.io.specification.Specs.ticketsBySubscriber;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
@@ -97,9 +97,9 @@ public class TicketServiceImp implements TicketService {
     ticketEntity.setLastUpdateTime(Date.from(Instant.now()));
     ticketEntity.setHowToSolve("Solution is not found");
 
-    ticketEntity.setReporter(dataExtractionUtils.getUserEntity(reporterId));
+    ticketEntity.setReporterEntity(dataExtractionUtils.getUserEntity(reporterId));
 
-    boolean isAdded = projectEntity.addTicket(ticketEntity);
+    boolean isAdded = projectEntity.addTicketEntity(ticketEntity);
     if (!isAdded)
       throw new TicketServiceException(RECORD_ALREADY_ADDED, projectEntity.getPublicId());
 
@@ -129,7 +129,7 @@ public class TicketServiceImp implements TicketService {
   public void deleteTicket(@NotNull String ticketId) {
     TicketEntity ticketEntity = dataExtractionUtils.getTicketEntity(ticketId);
 
-    boolean isRemoved = ticketEntity.getProject().removeTicket(ticketEntity);
+    boolean isRemoved = ticketEntity.getProject().removeTicketEntity(ticketEntity);
 
     if (!isRemoved) throw new ProjectServiceException(NO_RECORD_FOUND, ticketId);
 
@@ -241,7 +241,7 @@ public class TicketServiceImp implements TicketService {
     UserEntity userEntity = dataExtractionUtils.getUserEntity(userId);
 
     DataTablesOutput<TicketEntity> subscribedToTickets =
-        ticketRepo.findAll(input, ticketsUserSubscribedTo(userEntity));
+        ticketRepo.findAll(input, ticketsBySubscriber(userEntity));
     return utils.map(subscribedToTickets, new TypeToken<>() {});
   }
 }

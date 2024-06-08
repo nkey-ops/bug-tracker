@@ -5,7 +5,7 @@ import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_ADDED;
 import static com.bluesky.bugtraker.exceptions.ErrorType.RECORD_ALREADY_EXISTS;
 import static com.bluesky.bugtraker.io.specification.Specs.allProjectSubscribersByProject;
 import static com.bluesky.bugtraker.io.specification.Specs.projectByCreator;
-import static com.bluesky.bugtraker.io.specification.Specs.projectBySubscriber;
+import static com.bluesky.bugtraker.io.specification.Specs.projectsBySubscriber;
 
 import com.bluesky.bugtraker.exceptions.serviceexception.ProjectServiceException;
 import com.bluesky.bugtraker.exceptions.serviceexception.TicketServiceException;
@@ -25,6 +25,8 @@ import com.bluesky.bugtraker.view.model.request.SubscriberRequestModel;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +85,6 @@ public class ProjectServiceImp implements ProjectService {
 
     if (projectRepo.existsByCreatorAndName(creator, projectDto.getName()))
       throw new ProjectServiceException(RECORD_ALREADY_EXISTS, projectDto.getName());
-
     ProjectEntity projectEntity = modelMapper.map(projectDto, ProjectEntity.class);
     projectEntity.setPublicId(utils.generateProjectId());
 
@@ -184,7 +185,7 @@ public class ProjectServiceImp implements ProjectService {
     UserEntity userEntity = dataExtractionUtils.getUserEntity(userId);
 
     DataTablesOutput<ProjectEntity> subscribedToProjects =
-        projectRepo.findAll(input, projectBySubscriber(userEntity));
+        projectRepo.findAll(input, projectsBySubscriber(userEntity));
 
     return utils.map(subscribedToProjects, new TypeToken<>() {});
   }

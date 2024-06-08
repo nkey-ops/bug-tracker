@@ -42,13 +42,10 @@ public class Specs {
     };
   }
 
-  public static Specification<ProjectEntity> projectBySubscriber(UserEntity userEntity) {
+  public static Specification<ProjectEntity> projectsBySubscriber(UserEntity userEntity) {
     return (root, query, cb) -> {
-      query.distinct(true);
-      Root<ProjectEntity> project = query.from(ProjectEntity.class);
-      Expression<Collection<UserEntity>> subscribers = project.get("subscribers");
-
-      return cb.isMember(userEntity, subscribers);
+      var subscribers = root.join("subscribers");
+      return cb.equal(subscribers.get("id"), userEntity.getId());
     };
   }
 
@@ -60,13 +57,11 @@ public class Specs {
     return (root, query, cb) -> cb.equal(root.get("project").get("creator"), creator);
   }
 
-  public static Specification<TicketEntity> ticketsUserSubscribedTo(UserEntity subscriber) {
+  public static Specification<TicketEntity> ticketsBySubscriber(UserEntity subscriber) {
     return (root, query, cb) -> {
-      query.distinct(true);
-      Root<TicketEntity> ticket = query.from(TicketEntity.class);
-      Expression<Collection<UserEntity>> subscribers = ticket.get("subscribers");
+      var subscribers = root.join("subscribers");
 
-      return cb.isMember(subscriber, subscribers);
+      return cb.equal(subscribers.get("id"), subscriber.getId());
     };
   }
 
