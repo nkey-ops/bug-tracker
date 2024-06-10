@@ -100,8 +100,7 @@ img {
 	<!-- start preheader -->
 	<div class="preheader"
 		style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;">
-		A preheader is the short summary text that follows the subject line
-		when an email is viewed in the inbox.</div>
+		Confirm Your Email Address.</div>
 	<!-- end preheader -->
 
 	<!-- start body -->
@@ -169,7 +168,7 @@ img {
 											<tr>
 												<td align="center" bgcolor="#1a82e2"
 													style="border-radius: 6px;"><a
-													th:href="${baseURL} + '/' +@{verification/email(token=${token})}" target="_blank"
+													th:href="${baseURL} + '/' +@{users/email-verification(token=${token})}" target="_blank"
 													style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">
 													Verify</a></td>
 											</tr>
@@ -188,8 +187,8 @@ img {
 							<p style="margin: 0;">If that doesn't work, copy and paste
 								the following link in your browser:</p>
 							<p style="margin: 0;" >
-								<a th:href="${baseURL} + '/' +@{verification/email(token=${token})}" target="_blank"
-								th:text="${baseURL} + '/' +@{verification/email(token=${token})}"></a>
+								<a th:href="${baseURL} + '/' +@{users/email-verification(token=${token})}" target="_blank"
+								th:text="${baseURL} + '/' +@{users/email-verification(token=${token})}"></a>
 							</p>
 						</td>
 					</tr>
