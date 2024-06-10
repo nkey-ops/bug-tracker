@@ -34,7 +34,7 @@ public class Configurations {
   }
 
   @Bean
-  @Profile("prod")
+  @Profile("default")
   EmailService prodEmailService(ITemplateEngine templateEngine, JavaMailSender emailSender) {
     return new EmailService(templateEngine, emailSender);
   }

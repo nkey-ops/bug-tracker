@@ -160,7 +160,7 @@ public class UserServiceImp implements UserService {
       userEntity.setEmailVerificationStatus(true);
     }
 
-    if (!userDto.isEmailVerificationStatus()) {
+    if (!userEntity.isEmailVerificationStatus()) {
       userEntity.setEmailVerificationToken(
           utils.getEmailVerificationToken(userEntity.getPublicId()));
 
@@ -369,7 +369,8 @@ public class UserServiceImp implements UserService {
                         NO_RECORD_FOUND, "Cannot find the verification token"));
 
     if (utils.hasEmailTokenExpired(token))
-      throw new UserServiceException(ErrorType.EMAIL_VERIFICATION_TOKEN_IS_EXPIRED);
+      throw new UserServiceException(ErrorType.EMAIL_VERIFICATION_TOKEN_IS_EXPIRED, token);
+    userEntity.setEmailVerificationStatus(true);
 
     userRepo.save(userEntity);
   }

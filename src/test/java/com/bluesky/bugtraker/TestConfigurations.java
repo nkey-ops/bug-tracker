@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -21,6 +22,7 @@ public class TestConfigurations {
   }
 
   @Bean
+  @Primary
   EmailService testEmailService(JavaMailSender jMailSenderl) {
 
     return new EmailService(new SpringTemplateEngine(), jMailSenderl) {
